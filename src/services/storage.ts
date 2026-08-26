@@ -1,0 +1,146 @@
+import type { Board, Task, User } from '../types';
+import { INITIAL_BOARDS, INITIAL_TASKS, INITIAL_USERS } from '../data/initialData';
+
+const STORAGE_KEYS = {
+  TASKS: 'tarefus_tasks_v1',
+  BOARDS: 'tarefus_boards_v1',
+  USERS: 'tarefus_users_v1',
+  CURRENT_USER_ID: 'tarefus_current_user_id_v1',
+  THEME: 'tarefus_theme_v1',
+};
+
+export const loadTasks = (): Task[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.TASKS);
+    if (!raw) {
+      saveTasks(INITIAL_TASKS);
+      return INITIAL_TASKS;
+    }
+    const parsed: Task[] = JSON.parse(raw);
+    return parsed.map((t) => ({
+      ...t,
+      assigneeIds: Array.isArray(t.assigneeIds)
+        ? t.assigneeIds
+        : t.assigneeId
+        ? [t.assigneeId]
+        : [],
+    }));
+  } catch (error) {
+    console.error('Erro ao carregar tarefas do LocalStorage', error);
+    return INITIAL_TASKS;
+  }
+};
+
+export const saveTasks = (tasks: Task[]): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+  } catch (error) {
+    console.error('Erro ao salvar tarefas no LocalStorage', error);
+  }
+};
+
+export const loadBoards = (): Board[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.BOARDS);
+    if (!raw) {
+      saveBoards(INITIAL_BOARDS);
+      return INITIAL_BOARDS;
+    }
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error('Erro ao carregar quadros do LocalStorage', error);
+    return INITIAL_BOARDS;
+  }
+};
+
+export const saveBoards = (boards: Board[]): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.BOARDS, JSON.stringify(boards));
+  } catch (error) {
+    console.error('Erro ao salvar quadros no LocalStorage', error);
+  }
+};
+
+export const loadUsers = (): User[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.USERS);
+    if (!raw) {
+      saveUsers(INITIAL_USERS);
+      return INITIAL_USERS;
+    }
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error('Erro ao carregar usuários do LocalStorage', error);
+    return INITIAL_USERS;
+  }
+};
+
+export const saveUsers = (users: User[]): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+  } catch (error) {
+    console.error('Erro ao salvar usuários no LocalStorage', error);
+  }
+};
+
+export const loadCurrentUserId = (): string => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
+    if (!raw) {
+      const defaultId = INITIAL_USERS[0].id;
+      saveCurrentUserId(defaultId);
+      return defaultId;
+    }
+    return raw;
+  } catch {
+    return INITIAL_USERS[0].id;
+  }
+};
+
+export const saveCurrentUserId = (userId: string): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, userId);
+  } catch (error) {
+    console.error('Erro ao salvar usuário atual no LocalStorage', error);
+  }
+};
+
+export const loadTheme = (): 'light' | 'dark' => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.THEME);
+    if (raw === 'light' || raw === 'dark') {
+      return raw;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  } catch {
+    return 'light';
+  }
+};
+
+export const saveTheme = (theme: 'light' | 'dark'): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.THEME, theme);
+  } catch (error) {
+    console.error('Erro ao salvar tema no LocalStorage', error);
+  }
+};
+
+export const resetAllData = (): { tasks: Task[]; boards: Board[]; users: User[]; currentUserId: string } => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.TASKS);
+    localStorage.removeItem(STORAGE_KEYS.BOARDS);
+    localStorage.removeItem(STORAGE_KEYS.USERS);
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+  } catch (error) {
+    console.error('Erro ao limpar LocalStorage', error);
+  }
+  return {
+    tasks: INITIAL_TASKS,
+    boards: INITIAL_BOARDS,
+    users: INITIAL_USERS,
+    currentUserId: INITIAL_USERS[0].id,
+  };
+};
