@@ -121,7 +121,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const currentUser = users.find((u) => u.id === currentUserId) || users[0] || null;
 
   const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
-    const id = Math.random().toString(36).substring(2, 9);
+    const id = `toast-${Date.now()}-${performance.now().toString(36)}`;
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       removeToast(id);
