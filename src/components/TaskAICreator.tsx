@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { formatDueDate, getBoardColorStyles } from '../utils/helpers';
+import { getBoardColorStyles } from '../utils/helpers';
 import type { ChecklistItem, Task, TaskStatus } from '../types';
 import {
   Sparkles,
@@ -16,7 +16,6 @@ import {
   Users,
   CheckSquare,
   AlertCircle,
-  Lightbulb,
   Info,
 } from 'lucide-react';
 
@@ -38,11 +37,14 @@ interface TaskAICreatorProps {
   onSwitchToManual: () => void;
 }
 
-const EXAMPLE_PROMPTS = [
-  'Ligar para a transportadora e cotar frete para filial de Curitiba com urgência até sexta-feira',
-  'Criar 3 posts para o Instagram sobre o lançamento do novo plano semestral até amanhã com a Beatriz',
-  'Enviar proposta comercial atualizada com 10% de desconto para o Cliente Beta hoje com a Ana',
-  'Emitir e validar notas fiscais pendentes dos pedidos faturados com o Rodrigo até amanhã',
+const TYPEWRITER_EXAMPLES = [
+  'Ligar para o cliente João da Silva amanhã para alinhar a proposta comercial de 50k...',
+  'Cotar frete com a transportadora para a filial de Curitiba com urgência até sexta...',
+  'Criar 3 posts para o Instagram sobre o lançamento do novo plano com a Beatriz...',
+  'Emitir e validar notas fiscais pendentes dos pedidos faturados com o Rodrigo...',
+  'Agendar reunião de alinhamento com a equipe de operações amanhã às 14h...',
+  'Enviar proposta comercial atualizada com 10% de desconto para o Cliente Beta...',
+  'Revisar contrato de prestação de serviços com o departamento financeiro até hoje...',
 ];
 
 export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
@@ -55,29 +57,79 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   const { boards, users, showToast } = useTaskContext();
 
   const [promptText, setPromptText] = useState('');
-  const [selectedBoardPreference, setSelectedBoardPreference] = useState<string>(
-    defaultBoardId || ''
-  );
+  const [selectedBoardPreference, setSelectedBoardPreference] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState<TaskDraft | null>(null);
-  const [generationSource, setGenerationSource] = useState<string>('');
+  const [includeChecklist, setIncludeChecklist] = useState(false);
+  const [placeholderText, setPlaceholderText] = useState('');
 
-  const handleTranscript = useCallback((text: string) => {
-    setPromptText(text);
-  }, []);
-
-  // Speech recognition
+  // Voice Hook
   const {
+    text: transcript,
     isListening,
-    isSupported: isSpeechSupported,
-    error: speechError,
     startListening,
     stopListening,
     resetTranscript,
-  } = useSpeechRecognition({
-    onTranscriptChange: handleTranscript,
-  });
+    isSupported: isSpeechSupported,
+    error: speechError,
+  } = useSpeechRecognition();
+
+  // Typewriter effect in background looping through realistic task examples
+  useEffect(() => {
+    if (promptText || isListening) {
+      return;
+    }
+
+    let promptIdx = 0;
+    let charIdx = 0;
+    let isDeleting = false;
+    let timeoutId: any;
+
+    const tick = () => {
+      const currentExample = TYPEWRITER_EXAMPLES[promptIdx];
+
+      if (!isDeleting) {
+        // Typing character by character
+        charIdx++;
+        setPlaceholderText(currentExample.slice(0, charIdx));
+
+        if (charIdx >= currentExample.length) {
+          // Finished typing full phrase, hold for a moment
+          isDeleting = true;
+          timeoutId = setTimeout(tick, 2200);
+          return;
+        }
+        timeoutId = setTimeout(tick, 35);
+      } else {
+        // Deleting character by character as if rethinking
+        charIdx--;
+        setPlaceholderText(currentExample.slice(0, charIdx));
+
+        if (charIdx <= 0) {
+          // Finished deleting, switch to next example
+          isDeleting = false;
+          promptIdx = (promptIdx + 1) % TYPEWRITER_EXAMPLES.length;
+          timeoutId = setTimeout(tick, 450);
+          return;
+        }
+        timeoutId = setTimeout(tick, 20);
+      }
+    };
+
+    timeoutId = setTimeout(tick, 400);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [promptText, isListening]);
+
+  // Keep prompt in sync with transcript while recording
+  useEffect(() => {
+    if (isListening && transcript) {
+      setPromptText(transcript);
+    }
+  }, [transcript, isListening]);
 
   const handleToggleVoice = () => {
     if (isListening) {
@@ -91,7 +143,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   const handleGenerateDraft = async (customPrompt?: string) => {
     const textToUse = (customPrompt || promptText).trim();
     if (!textToUse) {
-      setError('Por favor, digite ou dite o que precisa ser feito na tarefa.');
+      setError('Por favor, descreva ou dite os detalhes da tarefa antes de gerar.');
       return;
     }
 
@@ -101,6 +153,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
     setIsLoading(true);
     setError(null);
+    setIncludeChecklist(false);
 
     try {
       const response = await fetch('/api/generate-task-draft', {
@@ -136,7 +189,6 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
         };
 
         setDraft(finalDraft);
-        setGenerationSource(data.source || 'gemini');
         showToast('✨ Rascunho inteligente gerado!', 'success');
       } else {
         throw new Error(data.error || 'Não foi possível estruturar a tarefa.');
@@ -158,7 +210,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
       status: draft.status,
       assigneeIds: draft.assigneeIds,
       dueDate: draft.dueDate || undefined,
-      checklist: draft.checklist,
+      checklist: includeChecklist ? draft.checklist : [],
     });
   };
 
@@ -166,41 +218,16 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
     setDraft(null);
   };
 
-  const handleApplyExample = (example: string) => {
-    setPromptText(example);
-    setError(null);
-    handleGenerateDraft(example);
-  };
-
   // Find board details for draft
   const currentDraftBoard = boards.find((b) => b.id === draft?.boardId) || boards[0];
   const draftBoardStyle = currentDraftBoard ? getBoardColorStyles(currentDraftBoard.color) : null;
   const draftAssignedUsers = users.filter((u) => draft?.assigneeIds.includes(u.id));
-  const dueInfo = draft?.dueDate ? formatDueDate(draft.dueDate) : null;
 
   return (
     <div className="p-6 space-y-6">
       {/* If No Draft has been generated yet, show input & dictation view */}
       {!draft ? (
         <div className="space-y-5">
-          {/* Header banner */}
-          <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent dark:from-indigo-500/20 dark:via-purple-500/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-500/20 flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                Criar Tarefa com Inteligência Artificial
-                <span className="text-[10px] font-extrabold uppercase tracking-wider bg-indigo-100 dark:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
-                  Voz & Texto
-                </span>
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                Fale pelo microfone ou descreva em linguagem natural. A IA definirá o título ideal, quadro/área, responsáveis, prazo e checklist passo a passo.
-              </p>
-            </div>
-          </div>
-
           {/* Voice status banner if recording */}
           {isListening && (
             <div className="bg-rose-500/10 border border-rose-500/30 dark:border-rose-500/40 p-3.5 rounded-2xl flex items-center justify-between animate-pulse">
@@ -271,20 +298,20 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
             <div className="relative">
               <textarea
-                rows={4}
+                rows={5}
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
-                placeholder="Exemplo: Preciso que o Carlos e a Ana cotem o frete urgente para Curitiba até sexta-feira, conferindo o peso das 3 caixas e comparando 2 transportadoras..."
+                placeholder={isListening ? 'Ouvindo sua voz...' : (placeholderText || 'Descreva o que precisa ser feito...')}
                 className={`w-full p-4 bg-slate-50 dark:bg-[#0D121E] border rounded-2xl text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-[#111728] transition-all resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500 leading-relaxed ${
                   isListening
                     ? 'border-rose-400 ring-2 ring-rose-500/20 dark:border-rose-500'
                     : 'border-slate-200 dark:border-white/[0.08]'
                 }`}
-                disabled={isLoading}
+                disabled={isLoading || isListening}
                 autoFocus
               />
 
-              {promptText && (
+              {promptText && !isListening && !isLoading && (
                 <button
                   type="button"
                   onClick={() => {
@@ -302,7 +329,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
           {/* Optional Board selector hint */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Quadro preferido:</span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Quadro:</span>
               <select
                 value={selectedBoardPreference}
                 onChange={(e) => setSelectedBoardPreference(e.target.value)}
@@ -315,27 +342,6 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                   </option>
                 ))}
               </select>
-            </div>
-          </div>
-
-          {/* Quick Examples */}
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400">
-              <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-              <span>Sugestões rápidas para testar:</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {EXAMPLE_PROMPTS.map((ex, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleApplyExample(ex)}
-                  className="text-left p-2.5 rounded-xl bg-slate-100/70 hover:bg-indigo-50/80 dark:bg-white/[0.03] dark:hover:bg-indigo-500/10 border border-slate-200/70 dark:border-white/[0.06] hover:border-indigo-200 dark:hover:border-indigo-500/20 text-xs text-slate-700 dark:text-slate-300 transition-all flex items-start gap-2 group cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0 opacity-70 group-hover:opacity-100" />
-                  <span className="line-clamp-2 leading-relaxed">{ex}</span>
-                </button>
-              ))}
             </div>
           </div>
 
@@ -380,28 +386,6 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
       ) : (
         /* DRAFT REVIEW STATE (Aprovar, Editar, Recriar) */
         <div className="space-y-5 animate-fade-in">
-          {/* Header Banner */}
-          <div className="bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 p-4 rounded-2xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-emerald-800 dark:text-emerald-300">
-                  Rascunho Inteligente Gerado com Sucesso!
-                </h4>
-                <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80">
-                  Revise a sugestão abaixo. Você pode aprovar imediatamente, editar detalhes ou recriar.
-                </p>
-              </div>
-            </div>
-            {generationSource === 'gemini' && (
-              <span className="hidden sm:inline-flex text-[10px] font-bold uppercase tracking-wider bg-emerald-600/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                Gemini AI
-              </span>
-            )}
-          </div>
-
           {/* Draft Preview Card */}
           <div className="bg-slate-50 dark:bg-[#0D121E] p-5 rounded-2xl border border-slate-200 dark:border-white/[0.08] space-y-4 shadow-xs">
             {/* Title */}
@@ -452,11 +436,16 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
               {/* Due Date */}
               <div className="p-2.5 rounded-xl bg-white dark:bg-[#161F32] border border-slate-200/70 dark:border-white/[0.06]">
-                <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
-                  <Calendar className="w-3 h-3" /> Prazo
+                <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Prazo</span>
                 </div>
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  {dueInfo ? `${dueInfo.label} (${draft.dueDate})` : 'Sem prazo definido'}
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">
+                  <input
+                    type="date"
+                    value={draft.dueDate || ''}
+                    onChange={(e) => setDraft({ ...draft, dueDate: e.target.value })}
+                    className="bg-transparent border-none outline-none w-full cursor-pointer dark:[color-scheme:dark]"
+                  />
                 </div>
               </div>
             </div>
@@ -508,20 +497,74 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
             {/* Checklist */}
             {draft.checklist && draft.checklist.length > 0 && (
-              <div className="pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2 flex items-center gap-1">
-                  <CheckSquare className="w-3 h-3" /> Subtarefas Geradas ({draft.checklist.length}):
-                </span>
-                <div className="space-y-1.5">
+              <div className="pt-2 border-t border-slate-200/60 dark:border-white/[0.06] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <CheckSquare
+                      className={`w-3.5 h-3.5 transition-colors ${
+                        includeChecklist
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-slate-400 dark:text-slate-500'
+                      }`}
+                    />
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                        includeChecklist
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      Subtarefas Geradas ({draft.checklist.length})
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIncludeChecklist(!includeChecklist)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      includeChecklist
+                        ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30'
+                        : 'bg-slate-200/80 hover:bg-slate-300 dark:bg-white/[0.08] dark:hover:bg-white/[0.12] text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        includeChecklist ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500'
+                      }`}
+                    />
+                    {includeChecklist ? 'Incluídas na tarefa' : 'Incluir subtarefas'}
+                  </button>
+                </div>
+
+                {/* Subtask list always visible with dim vs vibrant styling */}
+                <div
+                  onClick={() => !includeChecklist && setIncludeChecklist(true)}
+                  className={`space-y-1.5 transition-all duration-300 ${
+                    includeChecklist
+                      ? 'opacity-100'
+                      : 'opacity-40 hover:opacity-60 cursor-pointer'
+                  }`}
+                  title={!includeChecklist ? 'Clique para incluir as subtarefas na tarefa' : undefined}
+                >
                   {draft.checklist.map((item, idx) => (
                     <div
                       key={item.id || idx}
-                      className="flex items-center gap-2 p-2 bg-white dark:bg-[#161F32] rounded-xl border border-slate-200/60 dark:border-white/[0.06] text-xs font-medium text-slate-800 dark:text-slate-200"
+                      className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs transition-all ${
+                        includeChecklist
+                          ? 'bg-white dark:bg-[#161F32] border-indigo-200/80 dark:border-indigo-500/30 font-semibold text-slate-800 dark:text-slate-100 shadow-2xs'
+                          : 'bg-slate-100/60 dark:bg-white/[0.02] border-dashed border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400'
+                      }`}
                     >
-                      <div className="w-4 h-4 rounded border border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0">
-                        <span className="text-[10px] text-slate-400 font-bold">{idx + 1}</span>
+                      <div
+                        className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                          includeChecklist
+                            ? 'bg-indigo-600 text-white text-[10px] font-bold shadow-xs'
+                            : 'bg-slate-200/70 dark:bg-white/[0.06] text-slate-400 dark:text-slate-500 text-[10px] font-semibold'
+                        }`}
+                      >
+                        {idx + 1}
                       </div>
-                      <span>{item.text}</span>
+                      <span className="leading-snug">{item.text}</span>
                     </div>
                   ))}
                 </div>
@@ -529,7 +572,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
             )}
           </div>
 
-          {/* Action Bar with the 3 required options: Aprovar, Editar Sugestão, Recriar */}
+          {/* Action Bar with the 3 required options: Aprovar, Editar Sugestão, Ajustar */}
           <div className="pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <button
               type="button"
@@ -537,7 +580,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
               className="px-4 py-2.5 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer order-3 sm:order-1"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>Recriar / Ajustar</span>
+              <span>Ajustar</span>
             </button>
 
             <div className="flex items-center gap-2.5 order-1 sm:order-2">

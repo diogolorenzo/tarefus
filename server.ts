@@ -81,15 +81,33 @@ Diretrizes para o JSON de saída:
 
 Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
 
-          const response = await client.models.generateContent({
-            model: 'gemini-3.6-flash',
-            contents: `Descrição do usuário: "${prompt.trim()}"`,
-            config: {
-              systemInstruction,
-              responseMimeType: 'application/json',
-              temperature: 0.3,
-            },
-          });
+          const candidateModels = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+          let response: any = null;
+          let lastErr: any = null;
+
+          for (const model of candidateModels) {
+            try {
+              response = await client.models.generateContent({
+                model,
+                contents: `Descrição do usuário: "${prompt.trim()}"`,
+                config: {
+                  systemInstruction,
+                  responseMimeType: 'application/json',
+                  temperature: 0.3,
+                },
+              });
+              if (response && response.text) {
+                break;
+              }
+            } catch (err: any) {
+              lastErr = err;
+              console.warn(`Tentativa com ${model} falhou, tentando próximo modelo...`, err?.message || err);
+            }
+          }
+
+          if (!response || !response.text) {
+            throw lastErr || new Error('Nenhum modelo Gemini respondeu com sucesso.');
+          }
 
           const rawText = response.text || '{}';
           const parsed = JSON.parse(rawText);
