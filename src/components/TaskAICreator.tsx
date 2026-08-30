@@ -57,7 +57,9 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   const { boards, users, showToast } = useTaskContext();
 
   const [promptText, setPromptText] = useState('');
-  const [selectedBoardPreference, setSelectedBoardPreference] = useState<string>('');
+  const [selectedBoardPreference, setSelectedBoardPreference] = useState<string>(
+    defaultBoardId || ''
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState<TaskDraft | null>(null);
@@ -66,14 +68,17 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
   // Voice Hook
   const {
-    text: transcript,
     isListening,
     startListening,
     stopListening,
     resetTranscript,
     isSupported: isSpeechSupported,
     error: speechError,
-  } = useSpeechRecognition();
+  } = useSpeechRecognition({
+    onTranscriptChange: (text) => {
+      setPromptText(text);
+    },
+  });
 
   // Typewriter effect in background looping through realistic task examples
   useEffect(() => {
@@ -123,13 +128,6 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
       clearTimeout(timeoutId);
     };
   }, [promptText, isListening]);
-
-  // Keep prompt in sync with transcript while recording
-  useEffect(() => {
-    if (isListening && transcript) {
-      setPromptText(transcript);
-    }
-  }, [transcript, isListening]);
 
   const handleToggleVoice = () => {
     if (isListening) {
