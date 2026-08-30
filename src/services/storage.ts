@@ -1,5 +1,5 @@
-import type { Board, Task, User } from '../types';
-import { INITIAL_BOARDS, INITIAL_TASKS, INITIAL_USERS } from '../data/initialData';
+import type { Board, CompanyInfo, Task, User } from '../types';
+import { INITIAL_BOARDS, INITIAL_COMPANY, INITIAL_TASKS, INITIAL_USERS } from '../data/initialData';
 
 const STORAGE_KEYS = {
   TASKS: 'tarefus_tasks_v1',
@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   USERS: 'tarefus_users_v1',
   CURRENT_USER_ID: 'tarefus_current_user_id_v1',
   THEME: 'tarefus_theme_v1',
+  COMPANY: 'tarefus_company_v1',
 };
 
 export const loadTasks = (): Task[] => {
@@ -61,6 +62,32 @@ export const saveBoards = (boards: Board[]): void => {
   }
 };
 
+export const loadCompany = (): CompanyInfo => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.COMPANY);
+    if (!raw) {
+      saveCompany(INITIAL_COMPANY);
+      return INITIAL_COMPANY;
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      ...INITIAL_COMPANY,
+      ...parsed,
+    };
+  } catch (error) {
+    console.error('Erro ao carregar dados da empresa do LocalStorage', error);
+    return INITIAL_COMPANY;
+  }
+};
+
+export const saveCompany = (company: CompanyInfo): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(company));
+  } catch (error) {
+    console.error('Erro ao salvar dados da empresa no LocalStorage', error);
+  }
+};
+
 export const loadUsers = (): User[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.USERS);
@@ -68,7 +95,35 @@ export const loadUsers = (): User[] => {
       saveUsers(INITIAL_USERS);
       return INITIAL_USERS;
     }
-    return JSON.parse(raw);
+    const parsed: User[] = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      saveUsers(INITIAL_USERS);
+      return INITIAL_USERS;
+    }
+
+    let needsSave = false;
+    const migratedUsers: User[] = parsed.map((u, index) => {
+      if (u.isAdmin === undefined) {
+        needsSave = true;
+        return {
+          ...u,
+          isAdmin: u.id === 'user-1' || u.id === 'user-4' || index === 0,
+        };
+      }
+      return u;
+    });
+
+    // Ensure at least one admin exists
+    if (!migratedUsers.some((u) => u.isAdmin === true)) {
+      migratedUsers[0].isAdmin = true;
+      needsSave = true;
+    }
+
+    if (needsSave) {
+      saveUsers(migratedUsers);
+    }
+
+    return migratedUsers;
   } catch (error) {
     console.error('Erro ao carregar usuários do LocalStorage', error);
     return INITIAL_USERS;
@@ -128,12 +183,19 @@ export const saveTheme = (theme: 'light' | 'dark'): void => {
   }
 };
 
-export const resetAllData = (): { tasks: Task[]; boards: Board[]; users: User[]; currentUserId: string } => {
+export const resetAllData = (): {
+  tasks: Task[];
+  boards: Board[];
+  users: User[];
+  currentUserId: string;
+  company: CompanyInfo;
+} => {
   try {
     localStorage.removeItem(STORAGE_KEYS.TASKS);
     localStorage.removeItem(STORAGE_KEYS.BOARDS);
     localStorage.removeItem(STORAGE_KEYS.USERS);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+    localStorage.removeItem(STORAGE_KEYS.COMPANY);
   } catch (error) {
     console.error('Erro ao limpar LocalStorage', error);
   }
@@ -142,5 +204,6 @@ export const resetAllData = (): { tasks: Task[]; boards: Board[]; users: User[];
     boards: INITIAL_BOARDS,
     users: INITIAL_USERS,
     currentUserId: INITIAL_USERS[0].id,
+    company: INITIAL_COMPANY,
   };
 };

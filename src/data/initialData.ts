@@ -1,4 +1,14 @@
-import type { Board, Task, User } from '../types';
+import type { Board, CompanyInfo, Task, User } from '../types';
+
+export const INITIAL_COMPANY: CompanyInfo = {
+  name: 'Tarefus Organização Ltda',
+  cnpj: '12.345.678/0001-90',
+  email: 'contato@empresa.com',
+  phone: '(11) 98765-4321',
+  segment: 'Serviços & Tecnologia',
+  description: 'Ambiente central de gestão de tarefas e produtividade da equipe.',
+  updatedAt: new Date().toISOString(),
+};
 
 export const INITIAL_USERS: User[] = [
   {
@@ -8,6 +18,7 @@ export const INITIAL_USERS: User[] = [
     role: 'Vendas & Comercial',
     initials: 'AS',
     avatarColor: 'bg-emerald-500',
+    isAdmin: true,
   },
   {
     id: 'user-2',
@@ -16,6 +27,7 @@ export const INITIAL_USERS: User[] = [
     role: 'Operações & Logística',
     initials: 'CM',
     avatarColor: 'bg-blue-600',
+    isAdmin: false,
   },
   {
     id: 'user-3',
@@ -24,6 +36,7 @@ export const INITIAL_USERS: User[] = [
     role: 'Marketing & Conteúdo',
     initials: 'BL',
     avatarColor: 'bg-violet-600',
+    isAdmin: false,
   },
   {
     id: 'user-4',
@@ -32,6 +45,7 @@ export const INITIAL_USERS: User[] = [
     role: 'Administrativo & Financeiro',
     initials: 'RS',
     avatarColor: 'bg-amber-600',
+    isAdmin: true,
   },
   {
     id: 'user-5',
@@ -40,6 +54,7 @@ export const INITIAL_USERS: User[] = [
     role: 'Atendimento & Suporte',
     initials: 'JC',
     avatarColor: 'bg-rose-500',
+    isAdmin: false,
   },
 ];
 

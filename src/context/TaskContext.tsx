@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Board, Task, TaskStatus, User } from '../types';
+import type { ActiveTab, Board, CompanyInfo, Task, TaskStatus, User } from '../types';
 import {
   loadBoards,
+  loadCompany,
   loadCurrentUserId,
   loadTasks,
   loadTheme,
   loadUsers,
   resetAllData,
   saveBoards,
+  saveCompany,
   saveCurrentUserId,
   saveTasks,
   saveTheme,
@@ -27,13 +29,15 @@ interface TaskModalState {
   defaultBoardId?: string;
 }
 
-interface TaskContextType {
+export interface TaskContextType {
   tasks: Task[];
   boards: Board[];
   users: User[];
   currentUser: User | null;
-  activeTab: 'board' | 'my-tasks';
-  setActiveTab: (tab: 'board' | 'my-tasks') => void;
+  company: CompanyInfo;
+  updateCompany: (updates: Partial<CompanyInfo>) => void;
+  activeTab: ActiveTab;
+  setActiveTab: (tab: ActiveTab) => void;
   selectedBoardId: string; // 'all' or specific board id
   setSelectedBoardId: (id: string) => void;
   searchQuery: string;
@@ -67,11 +71,15 @@ interface TaskContextType {
 
   // Boards
   addBoard: (name: string, color: string, icon?: string, description?: string) => Board;
+  updateBoard: (boardId: string, updates: Partial<Board>) => void;
   deleteBoard: (boardId: string) => void;
 
   // Users
   setCurrentUserById: (userId: string) => void;
-  addUser: (name: string, role: string, email: string) => User;
+  updateUser: (userId: string, updates: Partial<User>) => void;
+  deleteUser: (userId: string) => void;
+  toggleUserAdmin: (userId: string) => void;
+  addUser: (name: string, role: string, email: string, isAdmin?: boolean) => User;
 
   // System
   resetDemoData: () => void;
@@ -86,8 +94,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tasks, setTasks] = useState<Task[]>(() => loadTasks());
   const [boards, setBoards] = useState<Board[]>(() => loadBoards());
   const [users, setUsers] = useState<User[]>(() => loadUsers());
+  const [company, setCompany] = useState<CompanyInfo>(() => loadCompany());
   const [currentUserId, setCurrentUserId] = useState<string>(() => loadCurrentUserId());
-  const [activeTab, setActiveTab] = useState<'board' | 'my-tasks'>('board');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('board');
   const [selectedBoardId, setSelectedBoardId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterAssignee, setFilterAssignee] = useState<string>('all');
@@ -253,6 +262,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateTask(taskId, { checklist: updatedChecklist });
   };
 
+  const updateCompany = (updates: Partial<CompanyInfo>) => {
+    const updated: CompanyInfo = {
+      ...company,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    setCompany(updated);
+    saveCompany(updated);
+    showToast('Informações da empresa atualizadas!', 'success');
+  };
+
   const addBoard = (name: string, color: string, icon = 'Folder', description = ''): Board => {
     const newBoard: Board = {
       id: `board-${Date.now()}`,
@@ -267,6 +287,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveBoards(updatedBoards);
     showToast(`Quadro "${name}" criado com sucesso!`, 'success');
     return newBoard;
+  };
+
+  const updateBoard = (boardId: string, updates: Partial<Board>) => {
+    const updatedBoards = boards.map((b) =>
+      b.id === boardId ? { ...b, ...updates } : b
+    );
+    setBoards(updatedBoards);
+    saveBoards(updatedBoards);
+    showToast('Quadro atualizado com sucesso!', 'info');
   };
 
   const deleteBoard = (boardId: string) => {
@@ -302,13 +331,119 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addUser = (name: string, role: string, email: string): User => {
+  const updateUser = (userId: string, updates: Partial<User>) => {
+    let updatedInitials = updates.initials;
+    if (updates.name && !updates.initials) {
+      updatedInitials = updates.name
+        .trim()
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase();
+    }
+
+    const updatedUsers = users.map((u) => {
+      if (u.id === userId) {
+        return {
+          ...u,
+          ...updates,
+          ...(updatedInitials ? { initials: updatedInitials } : {}),
+        };
+      }
+      return u;
+    });
+
+    setUsers(updatedUsers);
+    saveUsers(updatedUsers);
+    showToast('Perfil de usuário atualizado!', 'success');
+  };
+
+  const deleteUser = (userId: string) => {
+    const userToDelete = users.find((u) => u.id === userId);
+    if (!userToDelete) return;
+
+    if (userToDelete.isAdmin) {
+      const adminCount = users.filter((u) => u.isAdmin).length;
+      if (adminCount <= 1) {
+        showToast('A empresa precisa ter pelo menos um administrador ativo.', 'error');
+        return;
+      }
+    }
+
+    if (users.length <= 1) {
+      showToast('Não é possível remover o único usuário cadastrado.', 'error');
+      return;
+    }
+
+    const updatedUsers = users.filter((u) => u.id !== userId);
+
+    // Clean assigneeIds and assigneeId from tasks
+    const updatedTasks = tasks.map((t) => {
+      const hasInList = t.assigneeIds?.includes(userId);
+      const isSingle = t.assigneeId === userId;
+      if (!hasInList && !isSingle) return t;
+
+      const newAssigneeIds = (t.assigneeIds || []).filter((id) => id !== userId);
+      return {
+        ...t,
+        assigneeIds: newAssigneeIds,
+        assigneeId: isSingle ? (newAssigneeIds[0] || undefined) : t.assigneeId,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+
+    setUsers(updatedUsers);
+    saveUsers(updatedUsers);
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+
+    if (currentUserId === userId) {
+      const fallbackUserId = updatedUsers[0].id;
+      setCurrentUserId(fallbackUserId);
+      saveCurrentUserId(fallbackUserId);
+    }
+
+    showToast(`Colaborador ${userToDelete.name} removido.`, 'info');
+  };
+
+  const toggleUserAdmin = (userId: string) => {
+    const targetUser = users.find((u) => u.id === userId);
+    if (!targetUser) return;
+
+    if (targetUser.isAdmin) {
+      const adminCount = users.filter((u) => u.isAdmin).length;
+      if (adminCount <= 1) {
+        showToast('A empresa precisa ter pelo menos um administrador ativo.', 'error');
+        return;
+      }
+    }
+
+    const newAdminStatus = !targetUser.isAdmin;
+    const updatedUsers = users.map((u) =>
+      u.id === userId ? { ...u, isAdmin: newAdminStatus } : u
+    );
+
+    setUsers(updatedUsers);
+    saveUsers(updatedUsers);
+    showToast(
+      newAdminStatus
+        ? `${targetUser.name} agora é Administrador.`
+        : `${targetUser.name} agora é Membro.`,
+      'info'
+    );
+  };
+
+  const addUser = (name: string, role: string, email: string, isAdmin = false): User => {
     const initials = name
+      .trim()
       .split(' ')
+      .filter(Boolean)
       .slice(0, 2)
       .map((n) => n[0])
       .join('')
-      .toUpperCase();
+      .toUpperCase() || 'U';
 
     const colors = [
       'bg-indigo-600',
@@ -328,6 +463,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: email.trim(),
       initials,
       avatarColor,
+      isAdmin: Boolean(isAdmin),
     };
 
     const updatedUsers = [...users, newUser];
@@ -342,6 +478,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTasks(fresh.tasks);
     setBoards(fresh.boards);
     setUsers(fresh.users);
+    setCompany(fresh.company);
     setCurrentUserId(fresh.currentUserId);
     setSelectedBoardId('all');
     showToast('Dados de exemplo restaurados com sucesso!', 'info');
@@ -354,6 +491,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         boards,
         users,
         currentUser,
+        company,
+        updateCompany,
         activeTab,
         setActiveTab,
         selectedBoardId,
@@ -381,8 +520,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addChecklistItem,
         removeChecklistItem,
         addBoard,
+        updateBoard,
         deleteBoard,
         setCurrentUserById,
+        updateUser,
+        deleteUser,
+        toggleUserAdmin,
         addUser,
         resetDemoData,
         toasts,

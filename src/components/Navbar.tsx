@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import {
   CheckSquare2,
@@ -10,6 +10,9 @@ import {
   Building2,
   Moon,
   Sun,
+  Settings,
+  Users,
+  ShieldCheck,
 } from 'lucide-react';
 import { getBoardColorStyles } from '../utils/helpers';
 
@@ -29,6 +32,36 @@ export const Navbar: React.FC = () => {
     theme,
     toggleTheme,
   } = useTaskContext();
+
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Click-outside and Escape key handler for user avatar dropdown menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isUserMenuOpen]);
 
   const myPendingTasksCount = tasks.filter(
     (t) =>
@@ -92,7 +125,7 @@ export const Navbar: React.FC = () => {
             </nav>
           </div>
 
-          {/* Right Section: Theme Toggle, Reset, "+ Nova Tarefa", User Switcher */}
+          {/* Right Section: Theme Toggle, Reset, "+ Nova Tarefa", User Switcher & Dropdown */}
           <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Dark Mode Toggle Button */}
             <button
@@ -135,29 +168,140 @@ export const Navbar: React.FC = () => {
               <span className="sm:hidden">Criar</span>
             </button>
 
-            {/* Active User Switcher Pill */}
+            {/* Active User Switcher Pill & Dropdown Popover */}
             {currentUser && (
-              <button
-                type="button"
-                onClick={() => setIsLoginModalOpen(true)}
-                className="flex items-center gap-2 p-1.5 pl-2 hover:bg-slate-100 dark:hover:bg-white/[0.05] rounded-xl border border-slate-200 dark:border-white/[0.08] dark:bg-white/[0.02] transition-all text-left cursor-pointer"
-                title="Clique para trocar de usuário ou gerenciar equipe"
-              >
-                <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-xs shrink-0 ${currentUser.avatarColor}`}
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                  aria-expanded={isUserMenuOpen}
+                  aria-haspopup="true"
+                  className={`flex items-center gap-2 p-1.5 pl-2 rounded-xl border transition-all text-left cursor-pointer ${
+                    isUserMenuOpen || activeTab === 'settings'
+                      ? 'bg-slate-100 dark:bg-white/[0.08] border-blue-500/50 dark:border-blue-400/50 shadow-xs'
+                      : 'hover:bg-slate-100 dark:hover:bg-white/[0.05] border-slate-200 dark:border-white/[0.08] dark:bg-white/[0.02]'
+                  }`}
+                  title="Menu do usuário e configurações"
                 >
-                  {currentUser.initials}
-                </div>
-                <div className="hidden sm:block leading-tight pr-1">
-                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
-                    <span>{currentUser.name.split(' ')[0]}</span>
-                    <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                  <div
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-xs shrink-0 ${currentUser.avatarColor}`}
+                  >
+                    {currentUser.initials}
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[90px]">
-                    {currentUser.role.split('&')[0]}
+                  <div className="hidden sm:block leading-tight pr-1">
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                      <span>{currentUser.name.split(' ')[0]}</span>
+                      <ChevronDown
+                        className={`w-3 h-3 text-slate-400 dark:text-slate-500 transition-transform duration-200 ${
+                          isUserMenuOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
+                        }`}
+                      />
+                    </div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[90px]">
+                      {currentUser.isAdmin ? 'Admin' : currentUser.role.split('&')[0]}
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+
+                {/* Avatar Popover Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white dark:bg-[#121826] rounded-2xl shadow-xl border border-slate-200/90 dark:border-white/[0.1] py-2 z-50 animate-fade-in">
+                    {/* Header: User Profile details & role */}
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/[0.08]">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shadow-sm shrink-0 ${currentUser.avatarColor}`}
+                        >
+                          {currentUser.initials}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                              {currentUser.name}
+                            </p>
+                            {currentUser.isAdmin ? (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200/60 dark:border-blue-700/50">
+                                <ShieldCheck className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                Administrador
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 dark:bg-white/[0.08] dark:text-slate-400">
+                                Colaborador
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {currentUser.email}
+                          </p>
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                            {currentUser.role}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="p-1.5 space-y-1">
+                      {/* Menu item 1: Configurações / Meu Perfil */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('settings');
+                          setIsUserMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all text-left cursor-pointer ${
+                          activeTab === 'settings'
+                            ? 'bg-blue-50 dark:bg-blue-600/15 text-blue-700 dark:text-blue-300 font-semibold'
+                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            activeTab === 'settings'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          <Settings className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold flex items-center justify-between">
+                            <span>Configurações</span>
+                            {activeTab === 'settings' && (
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                Aberto
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                            Meu perfil, empresa, áreas e membros
+                          </p>
+                        </div>
+                      </button>
+
+                      {/* Menu item 2: Trocar Colaborador */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLoginModalOpen(true);
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 flex items-center justify-center shrink-0">
+                          <Users className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold">Trocar Colaborador</div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                            Alternar usuário ativo ou adicionar membros
+                          </p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -187,7 +331,20 @@ export const Navbar: React.FC = () => {
             }`}
           >
             <UserCheck className="w-3.5 h-3.5" />
-            <span>Minhas Tarefas ({myPendingTasksCount})</span>
+            <span>Tarefas ({myPendingTasksCount})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+              activeTab === 'settings'
+                ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/20'
+                : 'text-slate-600 dark:text-slate-400'
+            }`}
+          >
+            <Settings className="w-3.5 h-3.5" />
+            <span>Ajustes</span>
           </button>
         </div>
       </div>

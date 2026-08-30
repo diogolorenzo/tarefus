@@ -3,6 +3,7 @@ import { TaskProvider, useTaskContext } from './context/TaskContext';
 import { Navbar } from './components/Navbar';
 import { BoardView } from './components/BoardView';
 import { MyTasksView } from './components/MyTasksView';
+import { SettingsView } from './components/settings/SettingsView';
 import { TaskModal } from './components/TaskModal';
 import { BoardModal } from './components/BoardModal';
 import { LoginModal } from './components/LoginModal';
@@ -13,7 +14,9 @@ const MainContent: React.FC = () => {
 
   return (
     <main className="flex-1 flex flex-col">
-      {activeTab === 'board' ? <BoardView /> : <MyTasksView />}
+      {activeTab === 'board' && <BoardView />}
+      {activeTab === 'my-tasks' && <MyTasksView />}
+      {activeTab === 'settings' && <SettingsView />}
     </main>
   );
 };

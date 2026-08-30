@@ -1,5 +1,7 @@
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 
+export type ActiveTab = 'board' | 'my-tasks' | 'settings';
+
 export interface ChecklistItem {
   id: string;
   text: string;
@@ -13,6 +15,7 @@ export interface User {
   role: string;
   initials: string;
   avatarColor: string; // Tailwind color class or hex
+  isAdmin?: boolean;
 }
 
 export interface Board {
@@ -39,3 +42,14 @@ export interface Task {
 }
 
 export type Priority = 'low' | 'medium' | 'high';
+
+export interface CompanyInfo {
+  name: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  segment?: string;
+  description?: string;
+  updatedAt?: string;
+}
+
