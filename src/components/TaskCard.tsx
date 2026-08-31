@@ -3,7 +3,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import type { Task } from '../types';
 import { useTaskContext } from '../context/TaskContext';
 import { formatDueDate, getBoardColorStyles } from '../utils/helpers';
-import { Check, Calendar, CheckSquare, AlignLeft } from 'lucide-react';
+import { Check, Calendar, CheckSquare, AlignLeft, AlertCircle, Clock } from 'lucide-react';
 
 interface TaskCardProps {
   task: Task;
@@ -19,7 +19,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
   const board = boards.find((b) => b.id === task.boardId);
   const isDone = task.status === 'done';
 
-  const { label: dateLabel, isOverdue, isToday } = formatDueDate(task.dueDate);
+  const dueInfo = formatDueDate(task.dueDate);
 
   const checklistTotal = task.checklist.length;
   const checklistCompleted = task.checklist.filter((item) => item.completed).length;
@@ -41,12 +41,22 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => openTaskModal(task)}
-          className={`group relative bg-white dark:bg-[#151D2C] rounded-xl p-4 border transition-all duration-200 cursor-grab active:cursor-grabbing select-none ${
+          className={`group relative bg-white dark:bg-[#151D2C] rounded-xl p-4 border transition-all duration-200 cursor-grab active:cursor-grabbing select-none overflow-hidden ${
             snapshot.isDragging
               ? 'shadow-2xl ring-2 ring-indigo-500 border-indigo-400 rotate-1 scale-102 z-50 bg-white dark:bg-[#1E293B] dark:ring-indigo-400 dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)]'
               : 'shadow-xs hover:shadow-lg dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.6),0_0_0_1px_rgba(99,102,241,0.25)] border-slate-200/90 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-indigo-500/40 dark:hover:bg-[#192336]'
-          } ${isDone ? 'bg-slate-50/70 dark:bg-[#101724]/60 border-slate-200 dark:border-white/[0.04]' : ''}`}
+          } ${isDone ? 'bg-slate-50/70 dark:bg-[#101724]/60 border-slate-200 dark:border-white/[0.04]' : ''} ${
+            !isDone && dueInfo.isToday ? 'ring-1 ring-amber-400/40 dark:ring-amber-500/30' : ''
+          }`}
         >
+          {/* Left indicator stripe for urgent/today tasks */}
+          {!isDone && dueInfo.isToday && (
+            <div className="absolute top-0 left-0 bottom-0 w-1 bg-amber-500 dark:bg-amber-400" />
+          )}
+          {!isDone && dueInfo.isOverdue && (
+            <div className="absolute top-0 left-0 bottom-0 w-1 bg-rose-500 dark:bg-rose-400" />
+          )}
+
           {/* Top Row: Board Tag & Quick Complete Checkbox */}
           <div className="flex items-start justify-between gap-2 mb-2.5">
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -57,6 +67,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
                   }`}
                 >
                   {board.name}
+                </span>
+              )}
+
+              {/* Due Today Quick Tag */}
+              {!isDone && dueInfo.isToday && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Vence Hoje
                 </span>
               )}
             </div>
@@ -101,18 +119,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
               {/* Due Date Badge */}
               {task.dueDate && (
                 <div
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium text-[11px] border ${
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] border ${
                     isDone
                       ? 'bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 border-transparent dark:border-white/[0.04]'
-                      : isOverdue
-                      ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-500/25 font-semibold'
-                      : isToday
-                      ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-500/25 font-semibold'
-                      : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-transparent dark:border-white/[0.05]'
+                      : dueInfo.badgeClasses
                   }`}
                 >
-                  <Calendar className="w-3 h-3" />
-                  <span>{dateLabel}</span>
+                  {!isDone && dueInfo.isToday ? (
+                    <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                  ) : !isDone && dueInfo.isOverdue ? (
+                    <AlertCircle className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+                  ) : (
+                    <Calendar className="w-3 h-3" />
+                  )}
+                  <span>{dueInfo.label}</span>
                 </div>
               )}
 

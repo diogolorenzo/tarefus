@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
+import { NotificationCenter } from './NotificationCenter';
 import {
   CheckSquare2,
   LayoutGrid,
@@ -7,7 +8,6 @@ import {
   Plus,
   RotateCcw,
   ChevronDown,
-  Building2,
   Moon,
   Sun,
   Settings,
@@ -125,8 +125,11 @@ export const Navbar: React.FC = () => {
             </nav>
           </div>
 
-          {/* Right Section: Theme Toggle, Reset, "+ Nova Tarefa", User Switcher & Dropdown */}
+          {/* Right Section: Notification Center, Theme Toggle, Reset, "+ Nova Tarefa", User Switcher & Dropdown */}
           <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Notifications & Due Dates Center */}
+            <NotificationCenter />
+
             {/* Dark Mode Toggle Button */}
             <button
               type="button"
@@ -352,11 +355,7 @@ export const Navbar: React.FC = () => {
       {/* Sub-bar: Board Areas Navigation (only visible in 'board' view) */}
       {activeTab === 'board' && (
         <div className="bg-slate-50/90 dark:bg-[#0D121F]/90 backdrop-blur-md border-t border-slate-200/70 dark:border-white/[0.05] px-4 sm:px-6 py-2 overflow-x-auto">
-          <div className="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
-            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1 flex items-center gap-1">
-              <Building2 className="w-3 h-3" /> Áreas:
-            </span>
-
+          <div className="w-[1232px] max-w-7xl mx-auto flex items-center gap-2 min-w-max">
             {/* "Todas as Áreas" Button */}
             <button
               type="button"

@@ -250,7 +250,7 @@ export const MyTasksView: React.FC = () => {
           displayedTasks.map((task) => {
             const board = boards.find((b) => b.id === task.boardId);
             const isDone = task.status === 'done';
-            const { label: dateLabel, isOverdue, isToday } = formatDueDate(task.dueDate);
+            const dueInfo = formatDueDate(task.dueDate);
             const checklistTotal = task.checklist.length;
             const checklistCompleted = task.checklist.filter((i) => i.completed).length;
             const boardStyles = board ? getBoardColorStyles(board.color) : null;
@@ -263,12 +263,20 @@ export const MyTasksView: React.FC = () => {
               <div
                 key={task.id}
                 onClick={() => openTaskModal(task)}
-                className={`group bg-white dark:bg-[#151D2C] rounded-2xl p-4 border transition-all duration-200 hover:shadow-md cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                className={`group relative bg-white dark:bg-[#151D2C] rounded-2xl p-4 border transition-all duration-200 hover:shadow-md cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-hidden ${
                   isDone
                     ? 'bg-slate-50/70 dark:bg-[#101724]/60 border-slate-200 dark:border-white/[0.04] opacity-80'
                     : 'border-slate-200/90 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-indigo-500/40 dark:hover:bg-[#192336]'
-                }`}
+                } ${!isDone && dueInfo.isToday ? 'ring-1 ring-amber-400/40 dark:ring-amber-500/30' : ''}`}
               >
+                {/* Visual left edge stripe */}
+                {!isDone && dueInfo.isToday && (
+                  <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-amber-500" />
+                )}
+                {!isDone && dueInfo.isOverdue && (
+                  <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-rose-500" />
+                )}
+
                 {/* Left part: Checkbox + Title + Details */}
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                   {/* Quick Toggle Checkbox */}
@@ -304,15 +312,21 @@ export const MyTasksView: React.FC = () => {
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border ${
                             isDone
                               ? 'bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 border-transparent dark:border-white/[0.04]'
-                              : isOverdue
-                              ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-500/25 font-semibold'
-                              : isToday
-                              ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-500/25 font-semibold'
-                              : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-transparent dark:border-white/[0.05]'
+                              : dueInfo.badgeClasses
                           }`}
                         >
-                          <Calendar className="w-3 h-3" />
-                          {dateLabel}
+                          {!isDone && dueInfo.isToday ? (
+                            <>
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                              <span className="font-bold">Vence Hoje</span>
+                            </>
+                          ) : (
+                            <>
+                              <Calendar className="w-3 h-3" />
+                              <span>{dueInfo.label}</span>
+                            </>
+                          )}
                         </span>
                       )}
 
