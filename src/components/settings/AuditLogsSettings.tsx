@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
+import { canManageAuditLogs } from '../../utils/rbac';
 import {
   History,
   Database,
@@ -13,12 +14,14 @@ import {
 } from 'lucide-react';
 
 export const AuditLogsSettings: React.FC = () => {
-  const { activityLogs, isCloudSynced: _isCloudSynced, reseedDatabase } = useTaskContext();
+  const { activityLogs, currentUser, isCloudSynced: _isCloudSynced, reseedDatabase } = useTaskContext();
+  const canReseed = canManageAuditLogs(currentUser);
   const [filterAction, setFilterAction] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isReseeding, setIsReseeding] = useState<boolean>(false);
 
   const handleReseed = async () => {
+    if (!canReseed) return;
     if (window.confirm('Deseja repovoar o banco Firestore com o esquema padrão corporativo?')) {
       setIsReseeding(true);
       await reseedDatabase();
@@ -33,7 +36,13 @@ export const AuditLogsSettings: React.FC = () => {
       log.details.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (!matchesSearch) return false;
-    if (filterAction !== 'all' && log.action !== filterAction) return false;
+    if (filterAction !== 'all') {
+      if (filterAction === 'move') {
+        if (log.action !== 'move' && log.action !== 'status_change') return false;
+      } else if (log.action !== filterAction) {
+        return false;
+      }
+    }
     return true;
   });
 
@@ -51,17 +60,19 @@ export const AuditLogsSettings: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            disabled={isReseeding}
-            onClick={handleReseed}
-            className="px-3.5 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-ink rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isReseeding ? 'animate-spin' : ''}`} />
-            <span>Repovoar Banco (Seed)</span>
-          </button>
-        </div>
+        {canReseed && (
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              disabled={isReseeding}
+              onClick={handleReseed}
+              className="px-3.5 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-ink rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isReseeding ? 'animate-spin' : ''}`} />
+              <span>Repovoar Banco (Seed)</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Database Connection Status Banner */}
@@ -105,7 +116,7 @@ export const AuditLogsSettings: React.FC = () => {
             onClick={() => setFilterAction('all')}
             className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
               filterAction === 'all'
-                ? 'bg-white dark:bg-[#1A2234] text-ink shadow-2xs font-bold'
+                ? 'bg-surface text-ink shadow-2xs font-bold'
                 : 'text-muted'
             }`}
           >
@@ -116,7 +127,7 @@ export const AuditLogsSettings: React.FC = () => {
             onClick={() => setFilterAction('create')}
             className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
               filterAction === 'create'
-                ? 'bg-white dark:bg-[#1A2234] text-blue-600 dark:text-blue-400 shadow-2xs font-bold'
+                ? 'bg-surface text-blue-600 dark:text-blue-400 shadow-2xs font-bold'
                 : 'text-muted'
             }`}
           >
@@ -127,7 +138,7 @@ export const AuditLogsSettings: React.FC = () => {
             onClick={() => setFilterAction('move')}
             className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
               filterAction === 'move'
-                ? 'bg-white dark:bg-[#1A2234] text-purple-600 dark:text-purple-400 shadow-2xs font-bold'
+                ? 'bg-surface text-purple-600 dark:text-purple-400 shadow-2xs font-bold'
                 : 'text-muted'
             }`}
           >
@@ -138,7 +149,7 @@ export const AuditLogsSettings: React.FC = () => {
             onClick={() => setFilterAction('complete')}
             className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
               filterAction === 'complete'
-                ? 'bg-white dark:bg-[#1A2234] text-emerald-600 dark:text-emerald-400 shadow-2xs font-bold'
+                ? 'bg-surface text-emerald-600 dark:text-emerald-400 shadow-2xs font-bold'
                 : 'text-muted'
             }`}
           >

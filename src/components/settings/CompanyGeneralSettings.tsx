@@ -1,5 +1,6 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
+import { canManageCompany } from '../../utils/rbac';
 import {
   Building2,
   Hash,
@@ -10,11 +11,13 @@ import {
   Save,
   Check,
   Calendar,
+  ShieldAlert,
 } from 'lucide-react';
 import { AiMark } from '../ui/AiMark';
 
 export const CompanyGeneralSettings: React.FC = () => {
-  const { company, updateCompany } = useTaskContext();
+  const { company, currentUser, updateCompany } = useTaskContext();
+  const canManage = canManageCompany(currentUser);
 
   const [name, setName] = useState(company?.name || '');
   const [cnpj, setCNPJ] = useState(company?.cnpj || '');
@@ -26,7 +29,7 @@ export const CompanyGeneralSettings: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!canManage || !name.trim()) return;
 
     updateCompany({
       name: name.trim(),
@@ -67,12 +70,20 @@ export const CompanyGeneralSettings: React.FC = () => {
           </p>
         </div>
 
-        {formattedUpdatedAt && (
-          <div className="self-start sm:self-auto flex items-center gap-1.5 text-xs text-subtle bg-slate-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-xl">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Última atualização: {formattedUpdatedAt}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          {!canManage && (
+            <span className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-xl font-bold border border-amber-500/20">
+              <ShieldAlert className="w-4 h-4" /> Somente Leitura (Restrito a Administradores)
+            </span>
+          )}
+
+          {formattedUpdatedAt && (
+            <div className="self-start sm:self-auto flex items-center gap-1.5 text-xs text-subtle bg-slate-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-xl">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Última atualização: {formattedUpdatedAt}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Layout */}
@@ -94,10 +105,11 @@ export const CompanyGeneralSettings: React.FC = () => {
               <input
                 type="text"
                 required
+                disabled={!canManage}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Acme Inovações Tecnológicas S/A"
-                className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
+                className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -110,10 +122,11 @@ export const CompanyGeneralSettings: React.FC = () => {
                 </label>
                 <input
                   type="text"
+                  disabled={!canManage}
                   value={cnpj}
                   onChange={(e) => setCNPJ(e.target.value)}
                   placeholder="00.000.000/0001-00"
-                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
+                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -124,10 +137,11 @@ export const CompanyGeneralSettings: React.FC = () => {
                 </label>
                 <input
                   type="text"
+                  disabled={!canManage}
                   value={segment}
                   onChange={(e) => setSegment(e.target.value)}
                   placeholder="Ex: Tecnologia & Serviços"
-                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
+                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -141,10 +155,11 @@ export const CompanyGeneralSettings: React.FC = () => {
                 </label>
                 <input
                   type="email"
+                  disabled={!canManage}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="contato@empresa.com.br"
-                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
+                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -155,10 +170,11 @@ export const CompanyGeneralSettings: React.FC = () => {
                 </label>
                 <input
                   type="text"
+                  disabled={!canManage}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="(11) 98765-4321"
-                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
+                  className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -171,14 +187,15 @@ export const CompanyGeneralSettings: React.FC = () => {
               </label>
               <textarea
                 rows={3}
+                disabled={!canManage}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Descreva a missão ou área de atuação da organização..."
-                className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-xs sm:text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle resize-none"
+                className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-xs sm:text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle resize-none disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
-            {/* Save Button */}
+            {/* Save Button / Read Only Notice */}
             <div className="pt-4 border-t border-line flex items-center justify-between">
               <span className="text-xs text-muted">
                 {isSavedRecently && (
@@ -186,14 +203,21 @@ export const CompanyGeneralSettings: React.FC = () => {
                     <Check className="w-3.5 h-3.5 stroke-[3]" /> Informações salvas com sucesso!
                   </span>
                 )}
+                {!canManage && (
+                  <span className="text-subtle italic">
+                    Modificações desabilitadas para seu perfil de acesso.
+                  </span>
+                )}
               </span>
-              <button
-                type="submit"
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-98 cursor-pointer flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" />
-                <span>Salvar Informações da Empresa</span>
-              </button>
+              {canManage && (
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-98 cursor-pointer flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Salvar Informações da Empresa</span>
+                </button>
+              )}
             </div>
           </div>
         </form>

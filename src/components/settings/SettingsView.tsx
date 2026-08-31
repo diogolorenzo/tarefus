@@ -5,6 +5,7 @@ import { CompanyGeneralSettings } from './CompanyGeneralSettings';
 import { AreasSettings } from './AreasSettings';
 import { MembersSettings } from './MembersSettings';
 import { AuditLogsSettings } from './AuditLogsSettings';
+import { canManageCompany, canManageAuditLogs } from '../../utils/rbac';
 import {
   User,
   Building2,
@@ -54,14 +55,12 @@ const NAV_ITEMS: { group: string; adminOnly?: boolean; items: NavItem[] }[] = [
         label: 'Áreas & Quadros',
         description: 'Setores, fluxos e quadros Kanban',
         icon: LayoutGrid,
-        adminOnly: true,
       },
       {
         id: 'members',
         label: 'Membros & Permissões',
         description: 'Equipe, convites e perfis de acesso',
         icon: Users,
-        adminOnly: true,
       },
       {
         id: 'audit',
@@ -81,12 +80,28 @@ export const SettingsView: React.FC = () => {
   const isAdminOrManager = Boolean(
     currentUser?.isAdmin || currentUser?.permissionRole === 'admin' || currentUser?.permissionRole === 'manager'
   );
+  const canCompany = canManageCompany(currentUser);
+  const canAudit = canManageAuditLogs(currentUser);
 
-  // RBAC Guard
-  const effectiveSubTab: SettingsSubTab = !isAdminOrManager && activeSubTab !== 'profile' ? 'profile' : activeSubTab;
+  const isItemVisible = (item: NavItem) => {
+    if (item.id === 'company') return canCompany;
+    if (item.id === 'audit') return canAudit;
+    if (item.id === 'members' || item.id === 'areas') return isAdminOrManager;
+    return true;
+  };
 
-  const activeTabDetails =
-    NAV_ITEMS.flatMap((g) => g.items).find((item) => item.id === effectiveSubTab) || NAV_ITEMS[0].items[0];
+  // RBAC Guard on active subtab
+  let effectiveSubTab: SettingsSubTab = activeSubTab;
+  if (effectiveSubTab === 'company' && !canCompany) {
+    effectiveSubTab = 'profile';
+  } else if (effectiveSubTab === 'audit' && !canAudit) {
+    effectiveSubTab = 'profile';
+  } else if (!isAdminOrManager && effectiveSubTab !== 'profile') {
+    effectiveSubTab = 'profile';
+  }
+
+  const allVisibleItems = NAV_ITEMS.flatMap((g) => g.items.filter(isItemVisible));
+  const activeTabDetails = allVisibleItems.find((item) => item.id === effectiveSubTab) || NAV_ITEMS[0].items[0];
   const ActiveIcon = activeTabDetails.icon;
 
   return (
@@ -140,7 +155,8 @@ export const SettingsView: React.FC = () => {
         {/* Navigation Sidebar */}
         <div className="lg:col-span-4 xl:col-span-3 space-y-4">
           {NAV_ITEMS.map((group) => {
-            if (group.adminOnly && !isAdminOrManager) return null;
+            const visibleGroupItems = group.items.filter(isItemVisible);
+            if (visibleGroupItems.length === 0) return null;
 
             return (
               <div
@@ -157,7 +173,7 @@ export const SettingsView: React.FC = () => {
                 </div>
 
                 <div className="space-y-1 mt-1">
-                  {group.items.map((item) => {
+                  {visibleGroupItems.map((item) => {
                     const isItemActive = effectiveSubTab === item.id;
                     const Icon = item.icon;
 

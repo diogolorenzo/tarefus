@@ -18,9 +18,11 @@ import {
   saveTheme,
   saveUsers,
 } from '../services/storage';
+import { logoutFirebase } from '../lib/firebase';
 import {
   ensureDatabaseSeeded,
   saveTaskToFirestore,
+  batchSaveTasksToFirestore,
   deleteTaskFromFirestore,
   saveBoardToFirestore,
   deleteBoardFromFirestore,
@@ -34,6 +36,7 @@ import {
   subscribeToActivityLogs,
   seedCorporateData,
 } from '../services/firestoreService';
+import { fireCelebration } from '../utils/confetti';
 
 export interface Toast {
   id: string;
@@ -137,13 +140,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [company, setCompany] = useState<CompanyInfo>(() => loadCompany());
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [isCloudSynced, setIsCloudSynced] = useState<boolean>(false);
-  const [currentUserId, setCurrentUserId] = useState<string>(() => loadCurrentUserId());
+  const initialSession = loadAuthSession();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(() => initialSession?.userId || loadCurrentUserId());
   
   // Authentication & Session State
-  const initialSession = loadAuthSession();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    // If an active session exists or if local user is set
-    return Boolean(initialSession?.userId || loadCurrentUserId());
+    return Boolean(initialSession?.userId);
   });
   const [sessionToken, setSessionToken] = useState<string | null>(() => initialSession?.token || null);
 
@@ -175,21 +177,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Subscribe to real-time updates
         unsubscribeTasks = subscribeToTasks((cloudTasks) => {
-          if (cloudTasks && cloudTasks.length > 0) {
+          if (Array.isArray(cloudTasks)) {
             setTasks(cloudTasks);
             saveTasks(cloudTasks);
           }
         });
 
         unsubscribeBoards = subscribeToBoards((cloudBoards) => {
-          if (cloudBoards && cloudBoards.length > 0) {
+          if (Array.isArray(cloudBoards) && cloudBoards.length > 0) {
             setBoards(cloudBoards);
             saveBoards(cloudBoards);
           }
         });
 
         unsubscribeUsers = subscribeToUsers((cloudUsers) => {
-          if (cloudUsers && cloudUsers.length > 0) {
+          if (Array.isArray(cloudUsers) && cloudUsers.length > 0) {
             setUsers(cloudUsers);
             saveUsers(cloudUsers);
           }
@@ -235,7 +237,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showToast(nextTheme === 'dark' ? 'Modo escuro ativado' : 'Modo claro ativado', 'info');
   };
 
-  const currentUser = users.find((u) => u.id === currentUserId) || users[0] || null;
+  const currentUser = isAuthenticated
+    ? (users.find((u) => u.id === currentUserId) || users[0] || null)
+    : null;
 
   const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
@@ -400,6 +404,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: now,
     };
 
+    if (newTask.status === 'done') {
+      fireCelebration();
+    }
+
     const updatedTasks = [newTask, ...tasks];
     setTasks(updatedTasks);
     saveTasks(updatedTasks);
@@ -427,6 +435,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateTask = async (taskId: string, updates: Partial<Task>) => {
     const targetTask = tasks.find((t) => t.id === taskId);
     if (!targetTask) return;
+
+    const isMarkingAsDone = updates.status === 'done' && targetTask.status !== 'done';
+    if (isMarkingAsDone) {
+      fireCelebration();
+    }
 
     const now = new Date().toISOString();
     const updatedTask: Task = {
@@ -490,6 +503,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!targetTask) return;
 
     if (targetTask.status === destinationStatus && newIndex === undefined) return;
+
+    // Trigger celebration if moved to 'done' from another status
+    if (destinationStatus === 'done' && targetTask.status !== 'done') {
+      fireCelebration();
+      showToast('🎉 Tarefa concluída com sucesso!', 'success');
+    }
 
     const updatedTask = {
       ...targetTask,
@@ -669,6 +688,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       await deleteBoardFromFirestore(boardId);
+      const reassignedTasks = updatedTasks.filter((t) => t.boardId === fallbackBoardId);
+      if (reassignedTasks.length > 0) {
+        await batchSaveTasksToFirestore(reassignedTasks);
+      }
       if (targetBoard) {
         await logActivityToFirestore({
           boardId,
@@ -781,6 +804,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       await deleteUserFromFirestore(userId);
+      const affectedTasks = updatedTasks.filter((t) =>
+        tasks.some((orig) => orig.id === t.id && (orig.assigneeIds?.includes(userId) || orig.assigneeId === userId))
+      );
+      if (affectedTasks.length > 0) {
+        await batchSaveTasksToFirestore(affectedTasks);
+      }
       await logActivityToFirestore({
         userId: currentUser?.id || 'admin',
         userName: currentUser?.name || 'Administrador',
@@ -989,13 +1018,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (!matchedUser.resetCode || matchedUser.resetCode.trim() !== code.trim()) {
-      return { success: false, error: 'Código de recuperação incorreto ou expirado.' };
+      return { success: false, error: 'Código de recuperação incorreto.' };
+    }
+
+    if (matchedUser.resetCodeExpiresAt && new Date(matchedUser.resetCodeExpiresAt).getTime() < Date.now()) {
+      return { success: false, error: 'Código de recuperação expirado.' };
     }
 
     await updateUser(matchedUser.id, {
       password: newPassword,
-      resetCode: undefined,
-      resetCodeExpiresAt: undefined,
+      resetCode: '',
+      resetCodeExpiresAt: '',
     });
 
     try {
@@ -1035,6 +1068,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    logoutFirebase().catch(() => {});
     clearAuthSession();
     setIsAuthenticated(false);
     setSessionToken(null);
@@ -1049,6 +1083,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin = false,
     password = '123456'
   ): Promise<User> => {
+    const trimmedEmail = email.trim().toLowerCase();
+    const exists = users.some(
+      (u) => u.email.trim().toLowerCase() === trimmedEmail
+    );
+    if (exists) {
+      showToast('Já existe um colaborador cadastrado com este e-mail.', 'error');
+      throw new Error('E-mail corporativo já cadastrado.');
+    }
+
     const initials = name
       .trim()
       .split(' ')

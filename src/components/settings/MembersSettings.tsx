@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
 import { InviteMemberModal } from './InviteMemberModal';
+import { canManageMembers } from '../../utils/rbac';
 import type { PermissionRole, User } from '../../types';
 import {
   Users,
@@ -16,6 +17,7 @@ import { Select } from '../ui/Select';
 
 export const MembersSettings: React.FC = () => {
   const { users, currentUser, updateUser, deleteUser } = useTaskContext();
+  const canManage = canManageMembers(currentUser);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'manager' | 'member'>('all');
@@ -40,6 +42,7 @@ export const MembersSettings: React.FC = () => {
   });
 
   const handleDeleteUser = (user: User) => {
+    if (!canManage) return;
     if (user.id === currentUser?.id) return;
     if ((user.isAdmin || user.permissionRole === 'admin') && adminCount <= 1) return;
 
@@ -53,6 +56,7 @@ export const MembersSettings: React.FC = () => {
   };
 
   const handleRoleChange = (userId: string, newRole: PermissionRole) => {
+    if (!canManage) return;
     const target = users.find((u) => u.id === userId);
     if (!target) return;
 
@@ -81,14 +85,16 @@ export const MembersSettings: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsInviteModalOpen(true)}
-          className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-98 cursor-pointer flex items-center gap-2"
-        >
-          <UserPlus className="w-4 h-4 stroke-[2.5]" />
-          <span>Convidar Membro</span>
-        </button>
+        {canManage && (
+          <button
+            type="button"
+            onClick={() => setIsInviteModalOpen(true)}
+            className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-98 cursor-pointer flex items-center gap-2"
+          >
+            <UserPlus className="w-4 h-4 stroke-[2.5]" />
+            <span>Convidar Membro</span>
+          </button>
+        )}
       </div>
 
       {/* Metrics Cards */}
@@ -277,7 +283,7 @@ export const MembersSettings: React.FC = () => {
                   {/* Select Role */}
                   <Select
                     value={currentRole}
-                    disabled={isMe && currentRole === 'admin' && adminCount <= 1}
+                    disabled={!canManage || (isMe && currentRole === 'admin' && adminCount <= 1)}
                     onChange={(v) => handleRoleChange(user.id, v as PermissionRole)}
                     size="sm"
                     ariaLabel={`Nível de acesso de ${user.name}`}
@@ -291,21 +297,23 @@ export const MembersSettings: React.FC = () => {
                   />
 
                   {/* Delete User */}
-                  <button
-                    type="button"
-                    disabled={isMe || ((user.isAdmin || currentRole === 'admin') && adminCount <= 1)}
-                    onClick={() => handleDeleteUser(user)}
-                    title={
-                      isMe
-                        ? 'Você não pode excluir sua própria conta'
-                        : (user.isAdmin || currentRole === 'admin') && adminCount <= 1
-                        ? 'Não é possível remover o único administrador'
-                        : 'Remover colaborador'
-                    }
-                    className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {canManage && (
+                    <button
+                      type="button"
+                      disabled={isMe || ((user.isAdmin || currentRole === 'admin') && adminCount <= 1)}
+                      onClick={() => handleDeleteUser(user)}
+                      title={
+                        isMe
+                          ? 'Você não pode excluir sua própria conta'
+                          : (user.isAdmin || currentRole === 'admin') && adminCount <= 1
+                          ? 'Não é possível remover o único administrador'
+                          : 'Remover colaborador'
+                      }
+                      className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             );

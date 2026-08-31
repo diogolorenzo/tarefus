@@ -31,20 +31,45 @@ export const COLLECTIONS = {
   TASKS: 'tasks',
   ACTIVITY_LOGS: 'activity_logs',
   COMPANY: 'company',
+  SYSTEM: 'system',
 } as const;
 
 // Single-tenant company doc ID
 const COMPANY_DOC_ID = 'single_tenant_company';
 
 /**
- * Check if the database has already been seeded. If empty, automatically seeds with initial corporate data.
+ * Recursively removes all undefined fields from an object/array so Firestore SDK never throws Unsupported field value: undefined.
+ */
+export const sanitizeForFirestore = <T>(obj: T): T => {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizeForFirestore) as unknown as T;
+  }
+  if (typeof obj === 'object' && !(obj instanceof Date)) {
+    const cleaned: Record<string, any> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = sanitizeForFirestore(value);
+      }
+    }
+    return cleaned as T;
+  }
+  return obj;
+};
+
+/**
+ * Check if the database has already been seeded. Uses dedicated system/metadata doc flag so emptying collections does not trigger an unwanted reseed.
  */
 export const ensureDatabaseSeeded = async (force: boolean = false): Promise<boolean> => {
   try {
-    const tasksSnapshot = await getDocs(collection(db, COLLECTIONS.TASKS));
-    if (tasksSnapshot.empty || force) {
+    const metaRef = doc(db, COLLECTIONS.SYSTEM, 'metadata');
+    const metaSnap = await getDoc(metaRef);
+    const isAlreadySeeded = metaSnap.exists() && metaSnap.data()?.isSeeded;
+
+    if (!isAlreadySeeded || force) {
       console.log('🌱 Inicializando/Populando banco de dados Firestore (Seed Corporativo)...');
       await seedCorporateData();
+      await setDoc(metaRef, { isSeeded: true, seededAt: new Date().toISOString() }, { merge: true });
       return true;
     }
     return false;
@@ -60,38 +85,42 @@ export const ensureDatabaseSeeded = async (force: boolean = false): Promise<bool
 export const seedCorporateData = async (): Promise<void> => {
   const batch = writeBatch(db);
 
+  // 0. Metadata
+  const metaRef = doc(db, COLLECTIONS.SYSTEM, 'metadata');
+  batch.set(metaRef, { isSeeded: true, seededAt: new Date().toISOString() }, { merge: true });
+
   // 1. Company
   const companyRef = doc(db, COLLECTIONS.COMPANY, COMPANY_DOC_ID);
-  batch.set(companyRef, { ...INITIAL_COMPANY, id: COMPANY_DOC_ID });
+  batch.set(companyRef, sanitizeForFirestore({ ...INITIAL_COMPANY, id: COMPANY_DOC_ID }));
 
   // 2. Users
   for (const user of INITIAL_USERS) {
     const userRef = doc(db, COLLECTIONS.USERS, user.id);
-    batch.set(userRef, user);
+    batch.set(userRef, sanitizeForFirestore(user));
   }
 
   // 3. Boards
   for (const board of INITIAL_BOARDS) {
     const boardRef = doc(db, COLLECTIONS.BOARDS, board.id);
-    batch.set(boardRef, board);
+    batch.set(boardRef, sanitizeForFirestore(board));
   }
 
   // 4. Columns
   for (const col of INITIAL_COLUMNS) {
     const colRef = doc(db, COLLECTIONS.COLUMNS, col.id);
-    batch.set(colRef, col);
+    batch.set(colRef, sanitizeForFirestore(col));
   }
 
   // 5. Tasks
   for (const task of INITIAL_TASKS) {
     const taskRef = doc(db, COLLECTIONS.TASKS, task.id);
-    batch.set(taskRef, task);
+    batch.set(taskRef, sanitizeForFirestore(task));
   }
 
   // 6. Activity Logs
   for (const log of INITIAL_ACTIVITY_LOGS) {
     const logRef = doc(db, COLLECTIONS.ACTIVITY_LOGS, log.id);
-    batch.set(logRef, log);
+    batch.set(logRef, sanitizeForFirestore(log));
   }
 
   await batch.commit();
@@ -116,11 +145,11 @@ export const fetchUsersFromFirestore = async (): Promise<User[]> => {
 
 export const saveUserToFirestore = async (user: User): Promise<void> => {
   const userRef = doc(db, COLLECTIONS.USERS, user.id);
-  await setDoc(userRef, {
+  await setDoc(userRef, sanitizeForFirestore({
     ...user,
     updatedAt: new Date().toISOString(),
     createdAt: user.createdAt || new Date().toISOString(),
-  }, { merge: true });
+  }), { merge: true });
 };
 
 export const deleteUserFromFirestore = async (userId: string): Promise<void> => {
@@ -130,11 +159,9 @@ export const deleteUserFromFirestore = async (userId: string): Promise<void> => 
 
 export const subscribeToUsers = (onUpdate: (users: User[]) => void) => {
   return onSnapshot(collection(db, COLLECTIONS.USERS), (snapshot) => {
-    if (!snapshot.empty) {
-      const users: User[] = [];
-      snapshot.forEach((d) => users.push(d.data() as User));
-      onUpdate(users);
-    }
+    const users: User[] = [];
+    snapshot.forEach((d) => users.push(d.data() as User));
+    onUpdate(users);
   }, (error) => {
     console.warn('Erro na subscription de usuários Firestore:', error);
   });
@@ -158,11 +185,11 @@ export const fetchBoardsFromFirestore = async (): Promise<Board[]> => {
 
 export const saveBoardToFirestore = async (board: Board): Promise<void> => {
   const boardRef = doc(db, COLLECTIONS.BOARDS, board.id);
-  await setDoc(boardRef, {
+  await setDoc(boardRef, sanitizeForFirestore({
     ...board,
     updatedAt: new Date().toISOString(),
     createdAt: board.createdAt || new Date().toISOString(),
-  }, { merge: true });
+  }), { merge: true });
 };
 
 export const deleteBoardFromFirestore = async (boardId: string): Promise<void> => {
@@ -172,11 +199,9 @@ export const deleteBoardFromFirestore = async (boardId: string): Promise<void> =
 
 export const subscribeToBoards = (onUpdate: (boards: Board[]) => void) => {
   return onSnapshot(collection(db, COLLECTIONS.BOARDS), (snapshot) => {
-    if (!snapshot.empty) {
-      const boards: Board[] = [];
-      snapshot.forEach((d) => boards.push(d.data() as Board));
-      onUpdate(boards.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
-    }
+    const boards: Board[] = [];
+    snapshot.forEach((d) => boards.push(d.data() as Board));
+    onUpdate(boards.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
   }, (error) => {
     console.warn('Erro na subscription de quadros Firestore:', error);
   });
@@ -200,11 +225,11 @@ export const fetchColumnsFromFirestore = async (): Promise<KanbanColumn[]> => {
 
 export const saveColumnToFirestore = async (column: KanbanColumn): Promise<void> => {
   const colRef = doc(db, COLLECTIONS.COLUMNS, column.id);
-  await setDoc(colRef, {
+  await setDoc(colRef, sanitizeForFirestore({
     ...column,
     updatedAt: new Date().toISOString(),
     createdAt: column.createdAt || new Date().toISOString(),
-  }, { merge: true });
+  }), { merge: true });
 };
 
 // ==========================================
@@ -232,11 +257,25 @@ export const fetchTasksFromFirestore = async (): Promise<Task[]> => {
 
 export const saveTaskToFirestore = async (task: Task): Promise<void> => {
   const taskRef = doc(db, COLLECTIONS.TASKS, task.id);
-  await setDoc(taskRef, {
+  await setDoc(taskRef, sanitizeForFirestore({
     ...task,
     updatedAt: new Date().toISOString(),
     createdAt: task.createdAt || new Date().toISOString(),
-  }, { merge: true });
+  }), { merge: true });
+};
+
+export const batchSaveTasksToFirestore = async (tasks: Task[]): Promise<void> => {
+  if (!tasks || tasks.length === 0) return;
+  const batch = writeBatch(db);
+  for (const task of tasks) {
+    const taskRef = doc(db, COLLECTIONS.TASKS, task.id);
+    batch.set(taskRef, sanitizeForFirestore({
+      ...task,
+      updatedAt: new Date().toISOString(),
+      createdAt: task.createdAt || new Date().toISOString(),
+    }), { merge: true });
+  }
+  await batch.commit();
 };
 
 export const updateTaskStatusInFirestore = async (
@@ -244,10 +283,10 @@ export const updateTaskStatusInFirestore = async (
   newStatus: Task['status']
 ): Promise<void> => {
   const taskRef = doc(db, COLLECTIONS.TASKS, taskId);
-  await updateDoc(taskRef, {
+  await updateDoc(taskRef, sanitizeForFirestore({
     status: newStatus,
     updatedAt: new Date().toISOString(),
-  });
+  }));
 };
 
 export const deleteTaskFromFirestore = async (taskId: string): Promise<void> => {
@@ -257,21 +296,19 @@ export const deleteTaskFromFirestore = async (taskId: string): Promise<void> => 
 
 export const subscribeToTasks = (onUpdate: (tasks: Task[]) => void) => {
   return onSnapshot(collection(db, COLLECTIONS.TASKS), (snapshot) => {
-    if (!snapshot.empty) {
-      const tasks: Task[] = [];
-      snapshot.forEach((d) => {
-        const t = d.data() as Task;
-        tasks.push({
-          ...t,
-          assigneeIds: Array.isArray(t.assigneeIds)
-            ? t.assigneeIds
-            : t.assigneeId
-            ? [t.assigneeId]
-            : [],
-        });
+    const tasks: Task[] = [];
+    snapshot.forEach((d) => {
+      const t = d.data() as Task;
+      tasks.push({
+        ...t,
+        assigneeIds: Array.isArray(t.assigneeIds)
+          ? t.assigneeIds
+          : t.assigneeId
+          ? [t.assigneeId]
+          : [],
       });
-      onUpdate(tasks);
-    }
+    });
+    onUpdate(tasks);
   }, (error) => {
     console.warn('Erro na subscription de tarefas Firestore:', error);
   });
@@ -289,7 +326,7 @@ export const logActivityToFirestore = async (
 
   try {
     const logRef = doc(db, COLLECTIONS.ACTIVITY_LOGS, id);
-    await setDoc(logRef, fullLog);
+    await setDoc(logRef, sanitizeForFirestore(fullLog));
   } catch (error) {
     console.warn('Erro ao salvar log no Firestore:', error);
   }
@@ -341,9 +378,9 @@ export const fetchCompanyFromFirestore = async (): Promise<CompanyInfo> => {
 
 export const saveCompanyToFirestore = async (company: CompanyInfo): Promise<void> => {
   const docRef = doc(db, COLLECTIONS.COMPANY, COMPANY_DOC_ID);
-  await setDoc(docRef, {
+  await setDoc(docRef, sanitizeForFirestore({
     ...company,
     id: COMPANY_DOC_ID,
     updatedAt: new Date().toISOString(),
-  }, { merge: true });
+  }), { merge: true });
 };

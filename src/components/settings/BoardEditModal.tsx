@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
 import type { Board } from '../../types';
 import {
@@ -74,7 +74,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
     if (!name.trim()) return;
 
     if (isEditing && board) {
-      updateBoard(board.id, {
+      await updateBoard(board.id, {
         name: name.trim(),
         color,
         icon,

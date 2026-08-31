@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { TaskAICreator } from './TaskAICreator';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { canDeleteTask } from '../utils/rbac';
 import type { ChecklistItem, Task, TaskStatus } from '../types';
 import {
   X,
@@ -159,7 +160,7 @@ const TaskModalForm: React.FC<TaskModalFormProps> = ({
   };
 
   const handleDelete = () => {
-    if (!task) return;
+    if (!task || !canDeleteTask(currentUser, task)) return;
     if (window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
       deleteTask(task.id);
       onClose();
@@ -526,7 +527,7 @@ const TaskModalForm: React.FC<TaskModalFormProps> = ({
 
           {/* Footer Actions */}
           <div className="pt-4 border-t border-line flex items-center justify-between gap-3">
-            {isEditing ? (
+            {isEditing && canDeleteTask(currentUser, task ?? undefined) ? (
               <button
                 type="button"
                 onClick={handleDelete}
