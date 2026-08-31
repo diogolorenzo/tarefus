@@ -202,21 +202,6 @@ export const Navbar: React.FC = () => {
                 )}
               </button>
 
-              {/* Reset Demo Data Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm('Deseja restaurar os dados de exemplo e banco de dados corporativo?')) {
-                    resetDemoData();
-                  }
-                }}
-                title="Restaurar dados de exemplo e banco"
-                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-subtle hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] rounded-lg transition-colors cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restaurar Seed</span>
-              </button>
-
               {/* "+ Nova Tarefa" Primary Button */}
               <button
                 id="tour-new-task-btn"
@@ -379,8 +364,31 @@ export const Navbar: React.FC = () => {
                         </button>
                       </div>
 
-                      {/* Logout Action */}
-                      <div className="p-1.5">
+                      {/* Ações de consequência: restaurar dados e sair */}
+                      <div className="p-1.5 space-y-0.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            if (
+                              window.confirm(
+                                'Isto apaga as tarefas, quadros e membros atuais e recarrega os dados de exemplo. Deseja continuar?'
+                              )
+                            ) {
+                              resetDemoData();
+                            }
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-muted hover:bg-sunken hover:text-ink transition-all text-left cursor-pointer"
+                        >
+                          <RotateCcw className="w-4 h-4 text-subtle shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <span className="font-bold">Restaurar Dados de Exemplo</span>
+                            <p className="text-[10px] text-subtle truncate">
+                              Substitui o conteúdo atual pelo seed inicial
+                            </p>
+                          </div>
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => {
