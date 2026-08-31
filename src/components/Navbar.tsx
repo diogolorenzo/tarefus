@@ -27,6 +27,7 @@ import { getEffectiveRole, getRoleBadgeInfo, canCreateBoard } from '../utils/rba
 export const Navbar: React.FC = () => {
   const {
     boards,
+    company,
     currentUser,
     activeTab,
     setActiveTab,
@@ -98,27 +99,32 @@ export const Navbar: React.FC = () => {
       <header className="bg-surface/90 backdrop-blur-md border-b border-line sticky top-0 z-30 transition-colors duration-200">
         {/* Top Main Navigation Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14 gap-3">
-            {/* Logo & Brand */}
-            <div className="flex items-center gap-6">
+          <div className="relative flex items-center justify-between h-14 gap-3">
+            {/* Esquerda: marca (só o símbolo) + abas */}
+            <div className="flex items-center gap-4 min-w-0">
               <button
                 type="button"
-                className="flex items-center gap-2 cursor-pointer shrink-0"
+                className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white cursor-pointer shrink-0"
                 onClick={() => setActiveTab('board')}
                 title="Ir para os quadros"
+                aria-label="Ir para os quadros"
               >
-                <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
-                  <CheckSquare2 className="w-4 h-4 stroke-[2.5]" />
-                </div>
-                <span className="hidden sm:block text-[15px] font-bold tracking-tight text-ink leading-none">
-                  Tarefus
-                </span>
+                <CheckSquare2 className="w-4 h-4 stroke-[2.5]" />
               </button>
+
+              {/* Abaixo de xl não há espaço simétrico para centralizar
+                  (medido: 58px em 768px), então o nome fica aqui. */}
+              <span
+                className="hidden sm:block xl:hidden text-sm font-semibold text-ink truncate"
+                title={company.name}
+              >
+                {company.name}
+              </span>
 
               {/* Main Navigation Tabs */}
               <nav
                 id="tour-nav-tabs"
-                className="hidden md:flex items-center gap-1 bg-sunken border border-line p-1 rounded-xl"
+                className="hidden lg:flex items-center gap-1 bg-sunken border border-line p-1 rounded-xl"
               >
                 <button
                   type="button"
@@ -153,8 +159,20 @@ export const Navbar: React.FC = () => {
               </nav>
             </div>
 
-            {/* Right Section */}
-            <div id="tour-help-user" className="flex items-center gap-2 sm:gap-2.5">
+            {/* Nome da empresa centralizado na barra.
+                Substitui o nome do produto: para quem já está logado, o que
+                importa é confirmar em qual empresa está trabalhando.
+                Absoluto para centralizar de fato — as laterais têm larguras
+                bem diferentes, então um layout em colunas sairia torto. */}
+            <span
+              className="hidden xl:block absolute left-1/2 -translate-x-1/2 max-w-[200px] text-sm font-semibold text-ink truncate text-center pointer-events-none"
+              title={company.name}
+            >
+              {company.name}
+            </span>
+
+            {/* Direita: ações da sessão */}
+            <div id="tour-help-user" className="flex items-center justify-end gap-2 sm:gap-2.5">
               {/* Notifications & Due Dates Center */}
               <NotificationCenter />
 
@@ -383,7 +401,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile Navigation Tabs */}
-          <div className="flex md:hidden items-center justify-center gap-2 pb-2.5 pt-1 border-t border-line">
+          <div className="flex lg:hidden items-center justify-center gap-2 pb-2.5 pt-1 border-t border-line">
             <button
               type="button"
               onClick={() => setActiveTab('board')}
