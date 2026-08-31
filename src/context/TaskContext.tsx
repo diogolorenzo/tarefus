@@ -36,6 +36,7 @@ import {
   subscribeToActivityLogs,
   seedCorporateData,
 } from '../services/firestoreService';
+import { fireCelebration } from '../utils/confetti';
 
 export interface Toast {
   id: string;
@@ -403,6 +404,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: now,
     };
 
+    if (newTask.status === 'done') {
+      fireCelebration();
+    }
+
     const updatedTasks = [newTask, ...tasks];
     setTasks(updatedTasks);
     saveTasks(updatedTasks);
@@ -430,6 +435,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateTask = async (taskId: string, updates: Partial<Task>) => {
     const targetTask = tasks.find((t) => t.id === taskId);
     if (!targetTask) return;
+
+    const isMarkingAsDone = updates.status === 'done' && targetTask.status !== 'done';
+    if (isMarkingAsDone) {
+      fireCelebration();
+    }
 
     const now = new Date().toISOString();
     const updatedTask: Task = {
@@ -493,6 +503,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!targetTask) return;
 
     if (targetTask.status === destinationStatus && newIndex === undefined) return;
+
+    // Trigger celebration if moved to 'done' from another status
+    if (destinationStatus === 'done' && targetTask.status !== 'done') {
+      fireCelebration();
+      showToast('🎉 Tarefa concluída com sucesso!', 'success');
+    }
 
     const updatedTask = {
       ...targetTask,
