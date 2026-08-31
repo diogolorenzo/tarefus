@@ -33,7 +33,7 @@ export const canEditBoard = (user: User | null, board?: Board): boolean => {
   if (role === 'admin') return true;
   if (role === 'manager') {
     if (!board || !board.createdBy) return true;
-    return board.createdBy === user.id || (board.memberIds && board.memberIds.includes(user.id)) || true;
+    return board.createdBy === user.id || Boolean(board.memberIds && board.memberIds.includes(user.id));
   }
   return false;
 };

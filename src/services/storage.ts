@@ -58,6 +58,7 @@ export const clearAuthSession = (): void => {
     localStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
     sessionStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+    sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
   } catch (error) {
     console.error('Erro ao limpar sessão:', error);
   }
@@ -191,17 +192,12 @@ export const saveUsers = (users: User[]): void => {
   }
 };
 
-export const loadCurrentUserId = (): string => {
+export const loadCurrentUserId = (): string | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
-    if (!raw) {
-      const defaultId = INITIAL_USERS[0].id;
-      saveCurrentUserId(defaultId);
-      return defaultId;
-    }
-    return raw;
+    return raw || null;
   } catch {
-    return INITIAL_USERS[0].id;
+    return null;
   }
 };
 

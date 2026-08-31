@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
 import type { Board } from '../../types';
 import {
@@ -69,19 +69,19 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
     if (isEditing && board) {
-      updateBoard(board.id, {
+      await updateBoard(board.id, {
         name: name.trim(),
         color,
         icon,
         description: description.trim(),
       });
     } else {
-      const created = addBoard(name.trim(), color, icon, description.trim());
+      const created = await addBoard(name.trim(), color, icon, description.trim());
       setSelectedBoardId(created.id);
     }
 

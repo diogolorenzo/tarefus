@@ -20,11 +20,11 @@ export const BoardModal: React.FC = () => {
 
   if (!isBoardModalOpen) return null;
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newBoard = addBoard(name, color, 'Building2', description);
+    const newBoard = await addBoard(name, color, 'Building2', description);
     setSelectedBoardId(newBoard.id);
     setName('');
     setDescription('');

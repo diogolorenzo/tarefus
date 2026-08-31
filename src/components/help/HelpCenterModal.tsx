@@ -526,6 +526,16 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                       <p className="text-slate-500 dark:text-slate-400">Pesquisa instantânea e responsáveis</p>
                     </div>
                   </div>
+
+                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-xl flex items-start gap-2.5 sm:col-span-2">
+                    <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-bold flex items-center justify-center shrink-0">
+                      5
+                    </span>
+                    <div className="text-xs">
+                      <p className="font-bold text-slate-800 dark:text-slate-200">Alertas, Ajuda e Perfil</p>
+                      <p className="text-slate-500 dark:text-slate-400">Notificações, temas, Central de Ajuda e perfil corporativo com RBAC</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

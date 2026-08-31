@@ -1,5 +1,6 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
+import { canDeleteBoard, canCreateBoard, canEditBoard } from '../../utils/rbac';
 import type { Board } from '../../types';
 import { BoardEditModal } from './BoardEditModal';
 import {
@@ -36,7 +37,7 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
 };
 
 export const AreasSettings: React.FC = () => {
-  const { boards, tasks, deleteBoard } = useTaskContext();
+  const { boards, tasks, currentUser, deleteBoard } = useTaskContext();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,17 +49,19 @@ export const AreasSettings: React.FC = () => {
   );
 
   const handleCreate = () => {
+    if (!canCreateBoard(currentUser)) return;
     setSelectedBoard(null);
     setIsModalOpen(true);
   };
 
   const handleEdit = (board: Board) => {
+    if (!canEditBoard(currentUser, board)) return;
     setSelectedBoard(board);
     setIsModalOpen(true);
   };
 
   const handleDelete = (board: Board) => {
-    if (boards.length <= 1) return;
+    if (!canDeleteBoard(currentUser) || boards.length <= 1) return;
 
     const boardTasks = tasks.filter((t) => t.boardId === board.id);
     const otherBoard = boards.find((b) => b.id !== board.id);
@@ -88,14 +91,16 @@ export const AreasSettings: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleCreate}
-          className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-98 cursor-pointer flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Nova Área</span>
-        </button>
+        {canCreateBoard(currentUser) && (
+          <button
+            type="button"
+            onClick={handleCreate}
+            className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-98 cursor-pointer flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>Nova Área</span>
+          </button>
+        )}
       </div>
 
       {/* Filter and Stats Bar */}
@@ -155,32 +160,36 @@ export const AreasSettings: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(board)}
-                        title="Editar / Renomear Área"
-                        className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors cursor-pointer"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
+                      {canEditBoard(currentUser, board) && (
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(board)}
+                          title="Editar / Renomear Área"
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors cursor-pointer"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      )}
 
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(board)}
-                        disabled={isOnlyBoard}
-                        title={
-                          isOnlyBoard
-                            ? 'Mínimo de 1 área obrigatória no sistema'
-                            : 'Excluir área'
-                        }
-                        className={`p-2 rounded-xl transition-colors ${
-                          isOnlyBoard
-                            ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-50'
-                            : 'text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer'
-                        }`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canDeleteBoard(currentUser) && (
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(board)}
+                          disabled={isOnlyBoard}
+                          title={
+                            isOnlyBoard
+                              ? 'Mínimo de 1 área obrigatória no sistema'
+                              : 'Excluir área'
+                          }
+                          className={`p-2 rounded-xl transition-colors ${
+                            isOnlyBoard
+                              ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-50'
+                              : 'text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer'
+                          }`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
