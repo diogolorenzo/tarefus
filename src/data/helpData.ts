@@ -81,7 +81,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'rbac',
     categoryLabel: 'Cargos & Permissões',
     question: 'Qual a diferença entre Administrador, Gestor e Colaborador?',
-    answer: '• Administrador (👑): Acesso total ao sistema, configurações da empresa, gerenciamento e convite de membros, logs de auditoria e exclusões.\n• Gestor (💼): Cria e organiza quadros de áreas, gerencia fluxos de trabalho e delega tarefas.\n• Colaborador (⚡): Executa tarefas, atualiza status, marca checklists e visualiza os quadros da empresa.',
+    answer: '• Administrador: Acesso total ao sistema, configurações da empresa, gerenciamento e convite de membros, logs de auditoria e exclusões.\n• Gestor (💼): Cria e organiza quadros de áreas, gerencia fluxos de trabalho e delega tarefas.\n• Colaborador (⚡): Executa tarefas, atualiza status, marca checklists e visualiza os quadros da empresa.',
     tags: ['rbac', 'perfis', 'cargos', 'segurança', 'admin'],
   },
   {

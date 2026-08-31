@@ -63,7 +63,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
               {showBoardBadge && board && (
                 <span
                   className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-                    boardStyles?.bg || 'bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/[0.06]'
+                    boardStyles?.bg || 'bg-slate-100 dark:bg-white/[0.05] text-ink border-line'
                   }`}
                 >
                   {board.name}
@@ -100,7 +100,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
           {/* Title */}
           <h4
             className={`text-sm font-semibold leading-snug break-words transition-colors ${
-              isDone ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-300'
+              isDone ? 'line-through text-subtle' : 'text-ink group-hover:text-indigo-600 dark:group-hover:text-indigo-300'
             }`}
           >
             {task.title}
@@ -108,20 +108,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
 
           {/* Description Excerpt */}
           {task.description && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5 leading-relaxed">
+            <p className="text-xs text-muted line-clamp-2 mt-1.5 leading-relaxed">
               {task.description}
             </p>
           )}
 
           {/* Card Footer: Badges (Prazo, Checklist, Assignee) */}
-          <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between gap-2">
+          <div className="mt-3.5 pt-2.5 border-t border-line flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-wrap text-xs">
               {/* Due Date Badge */}
               {task.dueDate && (
                 <div
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] border ${
                     isDone
-                      ? 'bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 border-transparent dark:border-white/[0.04]'
+                      ? 'bg-slate-100 dark:bg-white/[0.05] text-subtle border-transparent dark:border-white/[0.04]'
                       : dueInfo.badgeClasses
                   }`}
                 >
@@ -155,7 +155,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
 
               {/* Has description icon if no text preview */}
               {task.description && (
-                <span className="text-slate-400 dark:text-slate-500" title="Possui descrição detalhada">
+                <span className="text-subtle" title="Possui descrição detalhada">
                   <AlignLeft className="w-3 h-3" />
                 </span>
               )}

@@ -8,9 +8,9 @@ import {
   ShieldAlert,
   Palette,
   Check,
-  Sparkles,
   Save,
 } from 'lucide-react';
+import { AiMark } from '../ui/AiMark';
 
 const AVATAR_COLORS = [
   { id: 'bg-blue-600', label: 'Azul Tarefus', hex: '#2563EB' },
@@ -34,8 +34,8 @@ export const ProfileSettings: React.FC = () => {
 
   if (!currentUser) {
     return (
-      <div className="p-8 text-center bg-white dark:bg-[#121826] rounded-3xl border border-slate-200/80 dark:border-white/[0.08]">
-        <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum usuário conectado no momento.</p>
+      <div className="p-8 text-center bg-surface rounded-3xl border border-slate-200/80 dark:border-white/[0.08]">
+        <p className="text-sm text-muted">Nenhum usuário conectado no momento.</p>
       </div>
     );
   }
@@ -72,13 +72,13 @@ export const ProfileSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-5 border-b border-slate-200/80 dark:border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-5 border-b border-line">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+          <h2 className="text-xl font-extrabold text-ink tracking-tight flex items-center gap-2.5">
             <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             <span>Meu Perfil</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-muted mt-0.5">
             Gerencie suas informações pessoais, avatar e identificação na equipe
           </p>
         </div>
@@ -91,7 +91,7 @@ export const ProfileSettings: React.FC = () => {
               <span>Administrador do Sistema</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.06] text-xs font-semibold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] text-ink border border-line text-xs font-semibold">
               <User className="w-4 h-4 text-slate-500" />
               <span>Colaborador</span>
             </div>
@@ -103,15 +103,15 @@ export const ProfileSettings: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Edit Form */}
         <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-5">
-          <div className="bg-white dark:bg-[#121826] rounded-3xl p-6 border border-slate-200/80 dark:border-white/[0.08] shadow-xs space-y-4.5">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <div className="bg-surface rounded-3xl p-6 border border-slate-200/80 dark:border-white/[0.08] shadow-xs space-y-4.5">
+            <h3 className="text-sm font-bold text-ink uppercase tracking-wider flex items-center gap-2">
+              <AiMark className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span>Informações Pessoais</span>
             </h3>
 
             {/* Name Input */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 <span>Nome Completo</span> <span className="text-rose-500">*</span>
               </label>
@@ -121,13 +121,13 @@ export const ProfileSettings: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome completo..."
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#111728] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
               />
             </div>
 
             {/* Email Input */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 <span>E-mail Corporativo</span> <span className="text-rose-500">*</span>
               </label>
@@ -137,13 +137,13 @@ export const ProfileSettings: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu.email@empresa.com"
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#111728] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
               />
             </div>
 
             {/* Role Input */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 <span>Cargo / Função</span> <span className="text-rose-500">*</span>
               </label>
@@ -153,13 +153,13 @@ export const ProfileSettings: React.FC = () => {
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 placeholder="Ex: Desenvolvedor Front-end, Gerente de Projetos..."
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#111728] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
               />
             </div>
 
             {/* Avatar Color Picker */}
             <div className="pt-2">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                 <Palette className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 <span>Cor do Avatar</span>
               </label>
@@ -174,7 +174,7 @@ export const ProfileSettings: React.FC = () => {
                       className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                         isSelected
                           ? 'border-blue-600 dark:border-blue-500 ring-2 ring-blue-500/25 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100'
-                          : 'border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                          : 'border-line text-ink hover:bg-slate-50 dark:hover:bg-white/[0.03]'
                       }`}
                     >
                       <span className={`w-4 h-4 rounded-lg shadow-xs shrink-0 ${c.id}`} />
@@ -189,8 +189,8 @@ export const ProfileSettings: React.FC = () => {
             </div>
 
             {/* Save Button */}
-            <div className="pt-4 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
-              <span className="text-xs text-slate-500 dark:text-slate-400">
+            <div className="pt-4 border-t border-line flex items-center justify-between">
+              <span className="text-xs text-muted">
                 {isSavedRecently && (
                   <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                     <Check className="w-3.5 h-3.5 stroke-[3]" /> Alterações salvas com sucesso!
@@ -210,12 +210,12 @@ export const ProfileSettings: React.FC = () => {
 
         {/* Right Column: Live Card Preview */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white dark:bg-[#121826] rounded-3xl p-6 border border-slate-200/80 dark:border-white/[0.08] shadow-xs relative overflow-hidden">
+          <div className="bg-surface rounded-3xl p-6 border border-slate-200/80 dark:border-white/[0.08] shadow-xs relative overflow-hidden">
             {/* Ambient Background Glow */}
             <div className="absolute top-0 right-0 w-36 h-36 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
 
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-line">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-subtle">
                 Pré-visualização do Cartão
               </span>
               <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold">
@@ -224,35 +224,35 @@ export const ProfileSettings: React.FC = () => {
             </div>
 
             {/* Preview Card */}
-            <div className="flex flex-col items-center text-center p-4 bg-slate-50/80 dark:bg-[#0D121E]/60 rounded-2xl border border-slate-100 dark:border-white/[0.06]">
+            <div className="flex flex-col items-center text-center p-4 bg-slate-50/80 dark:bg-[#0D121E]/60 rounded-2xl border border-line">
               <div
                 className={`w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg mb-3.5 transition-all transform hover:scale-105 duration-200 ${avatarColor}`}
               >
                 {liveInitials}
               </div>
 
-              <h4 className="text-base font-extrabold text-slate-900 dark:text-white truncate max-w-full">
+              <h4 className="text-base font-extrabold text-ink truncate max-w-full">
                 {name || 'Nome do Usuário'}
               </h4>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-full mt-0.5">
+              <p className="text-xs text-muted font-medium truncate max-w-full mt-0.5">
                 {email || 'usuario@empresa.com'}
               </p>
 
               <div className="mt-3">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-[#161F32] border border-slate-200/80 dark:border-white/[0.08] text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-slate-200/80 dark:border-white/[0.08] text-xs font-semibold text-ink shadow-2xs">
                   <Briefcase className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                   <span>{role || 'Cargo Não Definido'}</span>
                 </span>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-white/[0.06] w-full flex items-center justify-center">
+              <div className="mt-4 pt-3 border-t border-line w-full flex items-center justify-center">
                 {currentUser.isAdmin ? (
                   <span className="text-[11px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" /> Administrador com Acesso Total
                   </span>
                 ) : (
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+                  <span className="text-[11px] text-muted font-medium flex items-center gap-1">
                     <ShieldAlert className="w-3.5 h-3.5 text-slate-400" /> Acesso Padrão de Colaborador
                   </span>
                 )}
@@ -262,7 +262,7 @@ export const ProfileSettings: React.FC = () => {
             {/* Quick Tips */}
             <div className="mt-4 p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
               <p className="text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
-                💡 <strong>Dica:</strong> A cor e iniciais selecionadas são exibidas nos cartões de tarefas atribuídas a você e no menu superior.
+                <strong>Dica:</strong> A cor e iniciais selecionadas são exibidas nos cartões de tarefas atribuídas a você e no menu superior.
               </p>
             </div>
           </div>

@@ -535,7 +535,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done';
     await updateTask(taskId, { status: newStatus });
     if (newStatus === 'done') {
-      showToast('🎉 Parabéns! Tarefa concluída!', 'success');
+      showToast('Tarefa concluída!', 'success');
     }
   };
 

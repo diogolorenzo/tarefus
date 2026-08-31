@@ -69,7 +69,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
@@ -81,7 +81,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
         description: description.trim(),
       });
     } else {
-      const created = addBoard(name.trim(), color, icon, description.trim());
+      const created = await addBoard(name.trim(), color, icon, description.trim());
       setSelectedBoardId(created.id);
     }
 
@@ -91,20 +91,20 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in">
       <div
-        className="bg-white dark:bg-[#121826] rounded-3xl shadow-2xl max-w-lg w-full border border-slate-200/80 dark:border-white/[0.08] overflow-hidden transition-all"
+        className="bg-surface rounded-3xl shadow-2xl max-w-lg w-full border border-slate-200/80 dark:border-white/[0.08] overflow-hidden transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/70 dark:bg-[#161F32]/80">
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-line bg-slate-50/70 dark:bg-[#161F32]/80">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <LayoutGrid className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-ink">
                 {isEditing ? 'Editar Área / Quadro' : 'Nova Área / Quadro'}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted">
                 {isEditing
                   ? 'Atualize o nome, cor e identificação visual deste quadro'
                   : 'Crie um novo espaço para organizar tarefas da equipe'}
@@ -123,7 +123,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4.5 max-h-[80vh] overflow-y-auto">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5">
               Nome da Área / Quadro <span className="text-rose-500">*</span>
             </label>
             <input
@@ -133,12 +133,12 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
               placeholder="Ex: Suporte, Jurídico, Logística, Marketing..."
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#111728] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5">
               Descrição Curta (Opcional)
             </label>
             <textarea
@@ -146,13 +146,13 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
               placeholder="Ex: Demandas internas, acompanhamento e atendimentos deste setor..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#111728] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none"
+              className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-xs sm:text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-surface transition-all placeholder:text-subtle resize-none"
             />
           </div>
 
           {/* Color Selector */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Palette className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Cor de Identificação
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -166,7 +166,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
                       isSelected
                         ? 'border-blue-600 dark:border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100 font-bold'
-                        : 'border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]'
+                        : 'border-line text-ink hover:bg-slate-50 dark:hover:bg-white/[0.04]'
                     }`}
                   >
                     <span className={`w-3.5 h-3.5 rounded-full shrink-0 ${c.bg}`} />
@@ -180,7 +180,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
 
           {/* Icon Selector */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Tag className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Ícone Representativo
             </label>
             <div className="flex items-center gap-2 flex-wrap">
@@ -196,7 +196,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
                     className={`p-2.5 rounded-xl border transition-all flex items-center gap-1.5 text-xs font-medium cursor-pointer ${
                       isSelected
                         ? 'border-blue-600 dark:border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/60 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold'
-                        : 'border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white'
+                        : 'border-line text-muted hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <IconComponent className="w-4 h-4" />
@@ -208,11 +208,11 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-end gap-2.5">
+          <div className="pt-4 border-t border-line flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 border border-transparent rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+              className="px-4 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-ink border border-transparent rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
             >
               Cancelar
             </button>

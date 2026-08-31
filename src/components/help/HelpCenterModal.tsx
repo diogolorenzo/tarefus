@@ -11,7 +11,6 @@ import {
   Search,
   X,
   ChevronDown,
-  Sparkles,
   Command,
   Compass,
   CheckCircle2,
@@ -21,6 +20,7 @@ import {
   Keyboard,
   Play,
 } from 'lucide-react';
+import { AiMark } from '../ui/AiMark';
 
 interface HelpCenterModalProps {
   isOpen: boolean;
@@ -91,21 +91,21 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
+        <div className="px-6 py-5 border-b border-line flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20 shadow-xs">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                <h2 className="text-lg sm:text-xl font-extrabold text-ink tracking-tight">
                   Central de Ajuda & Conhecimento
                 </h2>
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-200/60 dark:border-indigo-800/50">
                   Tarefus MVP
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted">
                 Guias práticos, atalhos de produtividade e tutorial interativo
               </p>
             </div>
@@ -122,7 +122,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 border-b border-slate-100 dark:border-white/[0.06] bg-white dark:bg-[#0E1424]">
+        <div className="px-6 border-b border-line bg-white dark:bg-[#0E1424]">
           <div className="flex items-center gap-1 overflow-x-auto py-2">
             <button
               type="button"
@@ -130,7 +130,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'faq'
                   ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-500/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                  : 'text-muted hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
               }`}
             >
               <BookOpen className="w-4 h-4" />
@@ -143,7 +143,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'shortcuts'
                   ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-500/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                  : 'text-muted hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
               }`}
             >
               <Keyboard className="w-4 h-4" />
@@ -156,10 +156,10 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'ai-guide'
                   ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-500/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                  : 'text-muted hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
               }`}
             >
-              <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+              <AiMark className="w-4 h-4 text-purple-500 dark:text-purple-400" />
               <span>Guia de IA & Boas Práticas</span>
             </button>
 
@@ -169,7 +169,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'tour'
                   ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-500/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                  : 'text-muted hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.03]'
               }`}
             >
               <Compass className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
@@ -186,13 +186,13 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               {/* Search Bar & Category Filter */}
               <div className="space-y-3">
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Pesquisar por dúvidas, recursos, atalhos ou permissões..."
-                    className="w-full pl-10 pr-9 py-2.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-2xl text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all shadow-2xs"
+                    className="w-full pl-10 pr-9 py-2.5 bg-slate-50 dark:bg-white/[0.03] border border-line rounded-2xl text-xs sm:text-sm text-ink placeholder:text-subtle focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all shadow-2xs"
                   />
                   {searchQuery && (
                     <button
@@ -227,12 +227,12 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               {/* FAQ Accordion List */}
               <div className="space-y-2.5">
                 {filteredFaqItems.length === 0 ? (
-                  <div className="text-center py-10 px-4 bg-slate-50 dark:bg-white/[0.02] border border-dashed border-slate-200 dark:border-white/[0.08] rounded-2xl">
+                  <div className="text-center py-10 px-4 bg-slate-50 dark:bg-white/[0.02] border border-dashed border-line rounded-2xl">
                     <HelpCircle className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-60" />
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    <p className="text-sm font-bold text-ink">
                       Nenhuma dúvida encontrada para "{searchQuery}"
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-muted mt-1">
                       Tente buscar com outros termos ou navegue pelas categorias acima.
                     </p>
                     <button
@@ -255,7 +255,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                         className={`border rounded-2xl transition-all overflow-hidden ${
                           isExpanded
                             ? 'bg-slate-50/70 dark:bg-white/[0.03] border-indigo-200 dark:border-indigo-500/30 shadow-xs'
-                            : 'bg-white dark:bg-white/[0.01] border-slate-200/80 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.12]'
+                            : 'bg-white dark:bg-white/[0.01] border-line hover:border-slate-300 dark:hover:border-white/[0.12]'
                         }`}
                       >
                         <button
@@ -267,12 +267,12 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 shrink-0">
                               {item.categoryLabel}
                             </span>
-                            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                            <span className="text-xs sm:text-sm font-bold text-ink">
                               {item.question}
                             </span>
                           </div>
                           <ChevronDown
-                            className={`w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 transition-transform duration-200 ${
+                            className={`w-4 h-4 text-subtle shrink-0 transition-transform duration-200 ${
                               isExpanded ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : ''
                             }`}
                           />
@@ -286,7 +286,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                                 {item.tags.map((tag) => (
                                   <span
                                     key={tag}
-                                    className="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/[0.04] px-2 py-0.5 rounded-full"
+                                    className="text-[10px] text-subtle bg-slate-100 dark:bg-white/[0.04] px-2 py-0.5 rounded-full"
                                   >
                                     #{tag}
                                   </span>
@@ -317,13 +317,13 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                 {KEYBOARD_SHORTCUTS.map((shortcut) => (
                   <div
                     key={shortcut.id}
-                    className="p-3.5 bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl flex items-center justify-between gap-3"
+                    className="p-3.5 bg-slate-50/80 dark:bg-white/[0.02] border border-line rounded-2xl flex items-center justify-between gap-3"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                      <p className="text-xs sm:text-sm font-semibold text-ink">
                         {shortcut.description}
                       </p>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                      <span className="text-[10px] text-subtle font-medium">
                         {shortcut.categoryLabel}
                       </span>
                     </div>
@@ -332,7 +332,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                       {shortcut.keys.map((key) => (
                         <kbd
                           key={key}
-                          className="px-2.5 py-1 text-xs font-mono font-bold bg-white dark:bg-[#1A2234] text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/[0.15] rounded-lg shadow-2xs min-w-[28px] text-center"
+                          className="px-2.5 py-1 text-xs font-mono font-bold bg-white dark:bg-[#1A2234] text-ink border border-slate-300 dark:border-white/[0.15] rounded-lg shadow-2xs min-w-[28px] text-center"
                         >
                           {key}
                         </kbd>
@@ -350,10 +350,10 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               {/* Header Box */}
               <div className="p-4.5 rounded-2xl bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-blue-500/10 border border-purple-200/60 dark:border-purple-500/20 flex items-start gap-3.5">
                 <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-sm shrink-0">
-                  <Sparkles className="w-5 h-5" />
+                  <AiMark className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  <h3 className="text-sm font-extrabold text-ink">
                     Como tirar o máximo proveito do Assistente Tarefus IA
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
@@ -370,7 +370,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Como obter o melhor resultado</span>
                   </div>
-                  <ul className="text-xs text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed">
+                  <ul className="text-xs text-ink space-y-2 leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-emerald-600 font-bold">•</span>
                       <span><strong>Cite datas relativas:</strong> "amanhã às 14h", "até sexta-feira", "no fim do mês".</span>
@@ -392,7 +392,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                     <XCircle className="w-4 h-4" />
                     <span>O que evitar</span>
                   </div>
-                  <ul className="text-xs text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed">
+                  <ul className="text-xs text-ink space-y-2 leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-rose-600 font-bold">•</span>
                       <span><strong>Comandos vagos:</strong> "fazer uma reunião" (sem contexto de tema, participante ou data).</span>
@@ -407,18 +407,18 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
 
               {/* Real Examples by Department */}
               <div className="space-y-3">
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-muted">
                   Exemplos Reais por Área Corporativa
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {AI_PROMPT_EXAMPLES.map((ex) => (
                     <div
                       key={ex.department}
-                      className="p-4 rounded-2xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] space-y-2.5 flex flex-col justify-between"
+                      className="p-4 rounded-2xl bg-slate-50/80 dark:bg-white/[0.02] border border-line space-y-2.5 flex flex-col justify-between"
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white">
+                          <span className="text-xs font-bold text-ink">
                             {ex.title}
                           </span>
                           <span
@@ -427,11 +427,11 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                             {ex.department}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 italic bg-white dark:bg-[#121826] p-2.5 rounded-xl border border-slate-200/60 dark:border-white/[0.06]">
+                        <p className="text-xs text-ink italic bg-surface p-2.5 rounded-xl border border-line">
                           "{ex.prompt}"
                         </p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
-                          ✨ <strong>Resultado:</strong> {ex.resultSummary}
+                        <p className="text-[11px] text-muted mt-2">
+                          <strong>Resultado:</strong> {ex.resultSummary}
                         </p>
                       </div>
 
@@ -461,7 +461,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                   <Compass className="w-7 h-7" />
                 </div>
                 <div className="max-w-md mx-auto">
-                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  <h3 className="text-lg font-extrabold text-ink">
                     Tutorial Interativo de Primeiro Acesso
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
@@ -483,47 +483,47 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
 
               {/* Steps Overview */}
               <div className="space-y-2.5">
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-muted">
                   O que você aprenderá no Tour:
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-xl flex items-start gap-2.5">
+                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-line rounded-xl flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-bold flex items-center justify-center shrink-0">
                       1
                     </span>
                     <div className="text-xs">
-                      <p className="font-bold text-slate-800 dark:text-slate-200">Navegação e Visões</p>
-                      <p className="text-slate-500 dark:text-slate-400">Quadros por Área e Minhas Tarefas</p>
+                      <p className="font-bold text-ink">Navegação e Visões</p>
+                      <p className="text-muted">Quadros por Área e Minhas Tarefas</p>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-xl flex items-start gap-2.5">
+                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-line rounded-xl flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-bold flex items-center justify-center shrink-0">
                       2
                     </span>
                     <div className="text-xs">
-                      <p className="font-bold text-slate-800 dark:text-slate-200">Painel Kanban</p>
-                      <p className="text-slate-500 dark:text-slate-400">Arrastar, soltar e fluxo de cartões</p>
+                      <p className="font-bold text-ink">Painel Kanban</p>
+                      <p className="text-muted">Arrastar, soltar e fluxo de cartões</p>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-xl flex items-start gap-2.5">
+                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-line rounded-xl flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-bold flex items-center justify-center shrink-0">
                       3
                     </span>
                     <div className="text-xs">
-                      <p className="font-bold text-slate-800 dark:text-slate-200">Criação com IA & Voz</p>
-                      <p className="text-slate-500 dark:text-slate-400">Automação de prazos e checklists</p>
+                      <p className="font-bold text-ink">Criação com IA & Voz</p>
+                      <p className="text-muted">Automação de prazos e checklists</p>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-xl flex items-start gap-2.5">
+                  <div className="p-3 bg-slate-50 dark:bg-white/[0.02] border border-line rounded-xl flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-bold flex items-center justify-center shrink-0">
                       4
                     </span>
                     <div className="text-xs">
-                      <p className="font-bold text-slate-800 dark:text-slate-200">Filtros & Busca</p>
-                      <p className="text-slate-500 dark:text-slate-400">Pesquisa instantânea e responsáveis</p>
+                      <p className="font-bold text-ink">Filtros & Busca</p>
+                      <p className="text-muted">Pesquisa instantânea e responsáveis</p>
                     </div>
                   </div>
                 </div>
@@ -533,7 +533,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 border-t border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <div className="px-6 py-3.5 border-t border-line bg-slate-50/50 dark:bg-white/[0.02] flex items-center justify-between text-xs text-muted">
           <div className="flex items-center gap-1.5">
             <kbd className="px-2 py-0.5 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.1] rounded text-[10px] font-mono font-bold">
               Esc
@@ -544,7 +544,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-200/80 dark:bg-white/[0.06] hover:bg-slate-300 dark:hover:bg-white/[0.1] text-slate-800 dark:text-slate-200 font-bold transition-all cursor-pointer"
+            className="px-4 py-1.5 rounded-xl bg-slate-200/80 dark:bg-white/[0.06] hover:bg-slate-300 dark:hover:bg-white/[0.1] text-ink font-bold transition-all cursor-pointer"
           >
             Fechar
           </button>

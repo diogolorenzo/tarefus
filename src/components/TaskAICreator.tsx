@@ -4,7 +4,6 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { getBoardColorStyles } from '../utils/helpers';
 import type { ChecklistItem, Task, TaskStatus } from '../types';
 import {
-  Sparkles,
   Mic,
   MicOff,
   RotateCcw,
@@ -18,6 +17,8 @@ import {
   AlertCircle,
   Info,
 } from 'lucide-react';
+import { Select } from './ui/Select';
+import { AiMark } from './ui/AiMark';
 
 interface TaskDraft {
   title: string;
@@ -187,7 +188,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
         };
 
         setDraft(finalDraft);
-        showToast('✨ Rascunho inteligente gerado!', 'success');
+        showToast('Rascunho gerado. Revise antes de criar a tarefa.', 'success');
       } else {
         throw new Error(data.error || 'Não foi possível estruturar a tarefa.');
       }
@@ -235,7 +236,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
                 </span>
                 <div className="text-xs font-semibold text-rose-700 dark:text-rose-300">
-                  🎙️ Gravando áudio... Fale naturalmente sobre a sua tarefa
+                  Gravando... fale naturalmente sobre a sua tarefa
                 </div>
               </div>
               <button
@@ -259,7 +260,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
           {/* Main Textarea + Dictation Integration */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
                 O que precisa ser feito? <span className="text-rose-500">*</span>
               </label>
 
@@ -288,7 +289,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                   )}
                 </button>
               ) : (
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                <span className="text-[11px] text-subtle flex items-center gap-1">
                   <Info className="w-3 h-3" /> Digite o comando abaixo
                 </span>
               )}
@@ -300,10 +301,10 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
                 placeholder={isListening ? 'Ouvindo sua voz...' : (placeholderText || 'Descreva o que precisa ser feito...')}
-                className={`w-full p-4 bg-slate-50 dark:bg-[#0D121E] border rounded-2xl text-sm text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-[#111728] transition-all resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500 leading-relaxed ${
+                className={`w-full p-4 bg-sunken border rounded-2xl text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-surface transition-all resize-none placeholder:text-subtle leading-relaxed ${
                   isListening
                     ? 'border-rose-400 ring-2 ring-rose-500/20 dark:border-rose-500'
-                    : 'border-slate-200 dark:border-white/[0.08]'
+                    : 'border-line'
                 }`}
                 disabled={isLoading || isListening}
                 autoFocus
@@ -316,7 +317,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                     setPromptText('');
                     resetTranscript();
                   }}
-                  className="absolute bottom-3 right-3 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-2 py-1 bg-white/80 dark:bg-[#161F32]/80 backdrop-blur-xs rounded-lg border border-slate-200 dark:border-white/[0.08] transition-colors cursor-pointer"
+                  className="absolute bottom-3 right-3 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-2 py-1 bg-white/80 dark:bg-[#161F32]/80 backdrop-blur-xs rounded-lg border border-line transition-colors cursor-pointer"
                 >
                   Limpar
                 </button>
@@ -327,19 +328,21 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
           {/* Optional Board selector hint */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Quadro:</span>
-              <select
+              <span className="text-muted font-medium">Quadro:</span>
+              <Select
                 value={selectedBoardPreference}
                 onChange={(e) => setSelectedBoardPreference(e.target.value)}
-                className="px-2.5 py-1.5 bg-slate-100 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
+                selectSize="sm"
+                aria-label="Quadro de destino"
+                wrapperClassName="w-56"
               >
-                <option value="">✨ IA detecta automaticamente</option>
+                <option value="">Detectar automaticamente</option>
                 {boards.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 
@@ -352,11 +355,11 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
           )}
 
           {/* Footer buttons */}
-          <div className="pt-4 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between gap-3">
+          <div className="pt-4 border-t border-line flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={onSwitchToManual}
-              className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-semibold cursor-pointer underline-offset-4 hover:underline"
+              className="text-xs text-muted hover:text-slate-800 dark:hover:text-slate-200 font-semibold cursor-pointer underline-offset-4 hover:underline"
             >
               Prefiro preencher manualmente
             </button>
@@ -365,7 +368,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
               type="button"
               disabled={isLoading || !promptText.trim()}
               onClick={() => handleGenerateDraft()}
-              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-indigo-600/25 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-colors active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -374,7 +377,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  <AiMark className="w-4 h-4" />
                   <span>Gerar Rascunho com IA</span>
                 </>
               )}
@@ -385,36 +388,36 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
         /* DRAFT REVIEW STATE (Aprovar, Editar, Recriar) */
         <div className="space-y-5 animate-fade-in">
           {/* Draft Preview Card */}
-          <div className="bg-slate-50 dark:bg-[#0D121E] p-5 rounded-2xl border border-slate-200 dark:border-white/[0.08] space-y-4 shadow-xs">
+          <div className="bg-sunken p-5 rounded-2xl border border-line space-y-4 shadow-xs">
             {/* Title */}
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted block mb-1">
                 Título sugerido:
               </span>
-              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-snug">
+              <h3 className="text-base sm:text-lg font-extrabold text-ink leading-snug">
                 {draft.title}
               </h3>
             </div>
 
             {/* Badges / Key info Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-line">
               {/* Board */}
-              <div className="p-2.5 rounded-xl bg-white dark:bg-[#161F32] border border-slate-200/70 dark:border-white/[0.06]">
-                <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+              <div className="p-2.5 rounded-xl bg-surface border border-line">
+                <div className="text-[10px] font-bold uppercase text-muted mb-1 flex items-center gap-1">
                   <Building2 className="w-3 h-3" /> Quadro / Área
                 </div>
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <div className="text-xs font-bold text-ink flex items-center gap-1.5">
                   <span className={`w-2 h-2 rounded-full ${draftBoardStyle?.pill || 'bg-indigo-500'}`} />
                   {currentDraftBoard?.name}
                 </div>
               </div>
 
               {/* Status */}
-              <div className="p-2.5 rounded-xl bg-white dark:bg-[#161F32] border border-slate-200/70 dark:border-white/[0.06]">
-                <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+              <div className="p-2.5 rounded-xl bg-surface border border-line">
+                <div className="text-[10px] font-bold uppercase text-muted mb-1 flex items-center gap-1">
                   Status
                 </div>
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <div className="text-xs font-bold text-ink flex items-center gap-1.5">
                   <span
                     className={`w-2 h-2 rounded-full ${
                       draft.status === 'todo'
@@ -433,11 +436,11 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
               </div>
 
               {/* Due Date */}
-              <div className="p-2.5 rounded-xl bg-white dark:bg-[#161F32] border border-slate-200/70 dark:border-white/[0.06]">
-                <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-surface border border-line">
+                <div className="text-[10px] font-bold uppercase text-muted mb-1 flex items-center justify-between">
                   <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Prazo</span>
                 </div>
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">
+                <div className="text-xs font-bold text-ink mt-1">
                   <input
                     type="date"
                     value={draft.dueDate || ''}
@@ -449,8 +452,8 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
             </div>
 
             {/* Assignees */}
-            <div className="pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
-              <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
+            <div className="pt-2 border-t border-line">
+              <div className="text-[10px] font-bold uppercase text-muted mb-2 flex items-center gap-1">
                 <Users className="w-3 h-3" /> Responsáveis Identificados
               </div>
               <div className="flex flex-wrap gap-2">
@@ -458,7 +461,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                   draftAssignedUsers.map((u) => (
                     <div
                       key={u.id}
-                      className="flex items-center gap-2 px-2.5 py-1 bg-white dark:bg-[#161F32] border border-slate-200/80 dark:border-white/[0.08] rounded-xl shadow-2xs"
+                      className="flex items-center gap-2 px-2.5 py-1 bg-surface border border-slate-200/80 dark:border-white/[0.08] rounded-xl shadow-2xs"
                     >
                       <div
                         className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold text-white ${
@@ -467,10 +470,10 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                       >
                         {u.initials}
                       </div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <span className="text-xs font-bold text-ink">
                         {u.name}
                       </span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                      <span className="text-[10px] text-subtle">
                         ({u.role.split('&')[0]})
                       </span>
                     </div>
@@ -483,11 +486,11 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
             {/* Description */}
             {draft.description && (
-              <div className="pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+              <div className="pt-2 border-t border-line">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted block mb-1">
                   Descrição / Contexto:
                 </span>
-                <p className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-white/70 dark:bg-[#161F32]/70 p-3 rounded-xl border border-slate-200/60 dark:border-white/[0.06]">
+                <p className="text-xs text-ink whitespace-pre-line leading-relaxed bg-white/70 dark:bg-[#161F32]/70 p-3 rounded-xl border border-line">
                   {draft.description}
                 </p>
               </div>
@@ -495,21 +498,21 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
             {/* Checklist */}
             {draft.checklist && draft.checklist.length > 0 && (
-              <div className="pt-2 border-t border-slate-200/60 dark:border-white/[0.06] space-y-2.5">
+              <div className="pt-2 border-t border-line space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <CheckSquare
                       className={`w-3.5 h-3.5 transition-colors ${
                         includeChecklist
                           ? 'text-indigo-600 dark:text-indigo-400'
-                          : 'text-slate-400 dark:text-slate-500'
+                          : 'text-subtle'
                       }`}
                     />
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
                         includeChecklist
                           ? 'text-indigo-600 dark:text-indigo-400'
-                          : 'text-slate-500 dark:text-slate-400'
+                          : 'text-muted'
                       }`}
                     >
                       Subtarefas Geradas ({draft.checklist.length})
@@ -549,15 +552,15 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                       key={item.id || idx}
                       className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs transition-all ${
                         includeChecklist
-                          ? 'bg-white dark:bg-[#161F32] border-indigo-200/80 dark:border-indigo-500/30 font-semibold text-slate-800 dark:text-slate-100 shadow-2xs'
-                          : 'bg-slate-100/60 dark:bg-white/[0.02] border-dashed border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400'
+                          ? 'bg-surface border-indigo-200/80 dark:border-indigo-500/30 font-semibold text-ink shadow-2xs'
+                          : 'bg-slate-100/60 dark:bg-white/[0.02] border-dashed border-line text-muted'
                       }`}
                     >
                       <div
                         className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
                           includeChecklist
                             ? 'bg-indigo-600 text-white text-[10px] font-bold shadow-xs'
-                            : 'bg-slate-200/70 dark:bg-white/[0.06] text-slate-400 dark:text-slate-500 text-[10px] font-semibold'
+                            : 'bg-slate-200/70 dark:bg-white/[0.06] text-subtle text-[10px] font-semibold'
                         }`}
                       >
                         {idx + 1}
@@ -571,11 +574,11 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
           </div>
 
           {/* Action Bar with the 3 required options: Aprovar, Editar Sugestão, Ajustar */}
-          <div className="pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="pt-4 border-t border-line flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <button
               type="button"
               onClick={handleRecriar}
-              className="px-4 py-2.5 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer order-3 sm:order-1"
+              className="px-4 py-2.5 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-ink rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer order-3 sm:order-1"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Ajustar</span>

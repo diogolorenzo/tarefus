@@ -77,13 +77,13 @@ export const AreasSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-200/80 dark:border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-line">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+          <h2 className="text-xl font-extrabold text-ink tracking-tight flex items-center gap-2.5">
             <LayoutGrid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             <span>Áreas & Quadros</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-muted mt-0.5">
             Cadastre, edite e organize os setores da empresa e seus fluxos de tarefas
           </p>
         </div>
@@ -102,34 +102,34 @@ export const AreasSettings: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Search Input */}
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por nome ou descrição..."
-            className="w-full pl-9.5 pr-4 py-2 bg-white dark:bg-[#121826] border border-slate-200 dark:border-white/[0.08] rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500"
+            className="w-full pl-9.5 pr-4 py-2 bg-surface border border-line rounded-xl text-xs font-semibold text-ink placeholder:text-subtle focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500"
           />
         </div>
 
         {/* Counter Badge */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 self-end sm:self-auto">
+        <div className="flex items-center gap-2 text-xs text-muted self-end sm:self-auto">
           <span>
-            Total: <strong className="text-slate-800 dark:text-slate-200">{boards.length}</strong> {boards.length === 1 ? 'área' : 'áreas'}
+            Total: <strong className="text-ink">{boards.length}</strong> {boards.length === 1 ? 'área' : 'áreas'}
           </span>
           <span>•</span>
           <span>
-            <strong className="text-slate-800 dark:text-slate-200">{tasks.length}</strong> {tasks.length === 1 ? 'tarefa' : 'tarefas'} no sistema
+            <strong className="text-ink">{tasks.length}</strong> {tasks.length === 1 ? 'tarefa' : 'tarefas'} no sistema
           </span>
         </div>
       </div>
 
       {/* Areas Grid */}
       {filteredBoards.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-[#121826] rounded-3xl border border-slate-200/80 dark:border-white/[0.08]">
+        <div className="p-12 text-center bg-surface rounded-3xl border border-slate-200/80 dark:border-white/[0.08]">
           <LayoutGrid className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">Nenhuma área encontrada</h4>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+          <h4 className="text-sm font-bold text-ink">Nenhuma área encontrada</h4>
+          <p className="text-xs text-subtle mt-1">
             Tente outro termo de busca ou crie uma nova área.
           </p>
         </div>
@@ -145,7 +145,7 @@ export const AreasSettings: React.FC = () => {
             return (
               <div
                 key={board.id}
-                className="bg-white dark:bg-[#121826] rounded-3xl p-5 border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:border-slate-300 dark:hover:border-white/[0.14] transition-all flex flex-col justify-between group"
+                className="bg-surface rounded-3xl p-5 border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:border-slate-300 dark:hover:border-white/[0.14] transition-all flex flex-col justify-between group"
               >
                 <div>
                   {/* Card Top: Icon + Actions */}
@@ -159,7 +159,7 @@ export const AreasSettings: React.FC = () => {
                         type="button"
                         onClick={() => handleEdit(board)}
                         title="Editar / Renomear Área"
-                        className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors cursor-pointer"
+                        className="p-2 text-subtle hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors cursor-pointer"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
@@ -176,7 +176,7 @@ export const AreasSettings: React.FC = () => {
                         className={`p-2 rounded-xl transition-colors ${
                           isOnlyBoard
                             ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-50'
-                            : 'text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer'
+                            : 'text-subtle hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer'
                         }`}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -185,18 +185,18 @@ export const AreasSettings: React.FC = () => {
                   </div>
 
                   {/* Title & Description */}
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                  <h3 className="text-base font-bold text-ink group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
                     {board.name}
                   </h3>
 
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 min-h-[32px] leading-relaxed">
+                  <p className="text-xs text-muted mt-1 line-clamp-2 min-h-[32px] leading-relaxed">
                     {board.description || 'Sem descrição definida para este setor.'}
                   </p>
                 </div>
 
                 {/* Footer: Metrics Badges */}
                 <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-white/[0.05] flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="flex items-center gap-1.5 font-semibold text-ink">
                     <span className={`w-2 h-2 rounded-full ${styles.pill}`} />
                     <span>{taskCount} {taskCount === 1 ? 'tarefa' : 'tarefas'}</span>
                   </div>

@@ -92,10 +92,10 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fade-in">
       {/* Top Header & Breadcrumb Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pb-5 border-b border-slate-200/80 dark:border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pb-5 border-b border-line">
         <div>
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 mb-1.5 font-medium">
+          <nav className="flex items-center gap-1.5 text-xs text-subtle mb-1.5 font-medium">
             <button
               type="button"
               onClick={() => setActiveTab('board')}
@@ -114,10 +114,10 @@ export const SettingsView: React.FC = () => {
               <ActiveIcon className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+              <h1 className="text-2xl font-black text-ink tracking-tight leading-none">
                 Configurações Corporativas
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-muted mt-1">
                 {activeTabDetails.description}
               </p>
             </div>
@@ -128,7 +128,7 @@ export const SettingsView: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('board')}
-          className="self-start sm:self-auto px-4 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2"
+          className="self-start sm:self-auto px-4 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-ink rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Voltar ao Quadro</span>
@@ -145,9 +145,9 @@ export const SettingsView: React.FC = () => {
             return (
               <div
                 key={group.group}
-                className="bg-white dark:bg-[#121826] rounded-2xl border border-slate-200/80 dark:border-white/[0.08] p-3 shadow-xs"
+                className="bg-surface rounded-2xl border border-slate-200/80 dark:border-white/[0.08] p-3 shadow-xs"
               >
-                <div className="px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
+                <div className="px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-subtle flex items-center justify-between">
                   <span>{group.group}</span>
                   {group.adminOnly && (
                     <span className="flex items-center gap-1 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded-md font-bold">
@@ -169,10 +169,10 @@ export const SettingsView: React.FC = () => {
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all cursor-pointer ${
                           isItemActive
                             ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 font-bold'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white font-medium'
+                            : 'text-muted hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white font-medium'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 shrink-0 ${isItemActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
+                        <Icon className={`w-4 h-4 shrink-0 ${isItemActive ? 'text-white' : 'text-subtle'}`} />
                         <span className="text-xs truncate">{item.label}</span>
                       </button>
                     );
@@ -184,7 +184,7 @@ export const SettingsView: React.FC = () => {
         </div>
 
         {/* Dynamic Content Panel */}
-        <div className="lg:col-span-8 xl:col-span-9 bg-white dark:bg-[#121826] rounded-3xl border border-slate-200/80 dark:border-white/[0.08] p-6 sm:p-8 shadow-xs min-h-[500px]">
+        <div className="lg:col-span-8 xl:col-span-9 bg-surface rounded-3xl border border-slate-200/80 dark:border-white/[0.08] p-6 sm:p-8 shadow-xs min-h-[500px]">
           {effectiveSubTab === 'profile' && <ProfileSettings />}
           {effectiveSubTab === 'company' && <CompanyGeneralSettings />}
           {effectiveSubTab === 'areas' && <AreasSettings />}
