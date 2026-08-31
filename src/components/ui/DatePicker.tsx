@@ -60,7 +60,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   min,
   variant = 'default',
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const selected = useMemo(() => parse(value), [value]);
   const today = useMemo(() => {
     const d = new Date();
@@ -74,10 +73,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     return new Date(base.getFullYear(), base.getMonth(), 1);
   });
 
-  const close = React.useCallback(() => setIsOpen(false), []);
-  const { triggerRef, panelRef, position } = useAnchoredPopup({
-    isOpen,
-    onClose: close,
+  const { isOpen, open, close, triggerRef, panelRef, position } = useAnchoredPopup({
     estimatedHeight: 380,
     minWidth: 300,
   });
@@ -104,7 +100,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const openPicker = () => {
     const base = selected ?? today;
     setViewMonth(new Date(base.getFullYear(), base.getMonth(), 1));
-    setIsOpen(true);
+    open();
   };
 
   const shiftMonth = (delta: number) =>
@@ -113,7 +109,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const choose = (date: Date) => {
     if (isUnavailable(date)) return;
     onChange(format(date));
-    setIsOpen(false);
+    close();
     triggerRef.current?.focus();
   };
 
@@ -141,7 +137,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-label={ariaLabel}
-        onClick={() => (isOpen ? setIsOpen(false) : openPicker())}
+        onClick={() => (isOpen ? close() : openPicker())}
         className={
           variant === 'bare'
             ? 'w-full flex items-center gap-2 text-left text-xs font-bold cursor-pointer rounded-lg focus:outline-hidden focus-visible:ring-2 focus-visible:ring-indigo-500/30'
@@ -274,7 +270,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                     type="button"
                     onClick={() => {
                       onChange('');
-                      setIsOpen(false);
+                      close();
                     }}
                     className="ml-auto px-2.5 py-1.5 rounded-lg text-[11px] font-medium
                       text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10

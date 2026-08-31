@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown } from 'lucide-react';
 import { useAnchoredPopup } from './useAnchoredPopup';
@@ -57,10 +57,9 @@ export const Select: React.FC<SelectProps> = ({
   className = '',
   wrapperClassName = '',
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const typeahead = useRef({ query: '', at: 0 });
-  const listId = useRef(`listbox-${Math.random().toString(36).slice(2, 9)}`);
+  const listId = useId();
 
   const selectedIndex = useMemo(
     () => options.findIndex((o) => o.value === value),
@@ -68,10 +67,7 @@ export const Select: React.FC<SelectProps> = ({
   );
   const selected = selectedIndex >= 0 ? options[selectedIndex] : undefined;
 
-  const close = React.useCallback(() => setIsOpen(false), []);
-  const { triggerRef, panelRef, position } = useAnchoredPopup({
-    isOpen,
-    onClose: close,
+  const { isOpen, open: openPanel, close, triggerRef, panelRef, position } = useAnchoredPopup({
     estimatedHeight: 280,
     minWidth: 180,
   });
@@ -81,14 +77,14 @@ export const Select: React.FC<SelectProps> = ({
   const open = () => {
     if (disabled) return;
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-    setIsOpen(true);
+    openPanel();
   };
 
   const pick = (index: number) => {
     const option = options[index];
     if (!option || option.disabled) return;
     onChange(option.value);
-    setIsOpen(false);
+    close();
     triggerRef.current?.focus();
   };
 
@@ -136,7 +132,7 @@ export const Select: React.FC<SelectProps> = ({
         pick(activeIndex);
         break;
       case 'Tab':
-        setIsOpen(false);
+        close();
         break;
       default:
         // Busca por digitação: "ma" salta para "Marketing".
@@ -169,10 +165,10 @@ export const Select: React.FC<SelectProps> = ({
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-controls={isOpen ? listId.current : undefined}
+        aria-controls={isOpen ? listId : undefined}
         aria-label={ariaLabel}
         disabled={disabled}
-        onClick={() => (isOpen ? setIsOpen(false) : open())}
+        onClick={() => (isOpen ? close() : open())}
         onKeyDown={handleKeyDown}
         className={`w-full flex items-center gap-2 rounded-xl border text-left font-medium transition-colors cursor-pointer
           bg-surface text-ink
@@ -199,9 +195,9 @@ export const Select: React.FC<SelectProps> = ({
         createPortal(
           <div
             ref={panelRef}
-            id={listId.current}
+            id={listId}
             role="listbox"
-            aria-activedescendant={activeIndex >= 0 ? `${listId.current}-${activeIndex}` : undefined}
+            aria-activedescendant={activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
             style={{
               position: 'fixed',
               top: position.placement === 'bottom' ? position.top : undefined,
@@ -221,7 +217,7 @@ export const Select: React.FC<SelectProps> = ({
               return (
                 <div
                   key={option.value}
-                  id={`${listId.current}-${index}`}
+                  id={`${listId}-${index}`}
                   data-index={index}
                   role="option"
                   aria-selected={isSelected}

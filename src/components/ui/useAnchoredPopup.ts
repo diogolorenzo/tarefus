@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface AnchoredPosition {
   top: number;
@@ -8,8 +8,6 @@ export interface AnchoredPosition {
 }
 
 interface Options {
-  isOpen: boolean;
-  onClose: () => void;
   /** Altura estimada do painel, usada para decidir se abre para cima. */
   estimatedHeight?: number;
   /** Largura mínima do painel; por padrão acompanha a do gatilho. */
@@ -18,11 +16,15 @@ interface Options {
 }
 
 /**
- * Ancora um painel flutuante a um gatilho.
+ * Ancora um painel flutuante a um gatilho e controla sua abertura.
  *
  * O painel é renderizado em portal com `position: fixed` porque os nossos
  * popups vivem dentro de modais que têm `overflow-y-auto` — posicionado
  * de forma absoluta ali dentro, ele seria cortado pela área de rolagem.
+ *
+ * A posição é medida no próprio handler de abertura, e não num efeito
+ * após a renderização, para não disparar um segundo render só para
+ * posicionar.
  *
  * O fechamento por clique externo escuta `mousedown`, e não `click`, de
  * propósito: ao clicar num dia do calendário ou numa opção da lista, o
@@ -33,19 +35,19 @@ interface Options {
  * que saia do DOM entre os dois eventos.
  */
 export const useAnchoredPopup = ({
-  isOpen,
-  onClose,
   estimatedHeight = 300,
   minWidth,
   gap = 6,
-}: Options) => {
+}: Options = {}) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<AnchoredPosition | null>(null);
 
-  const reposition = useCallback(() => {
+  const isOpen = position !== null;
+
+  const measure = useCallback((): AnchoredPosition | null => {
     const trigger = triggerRef.current;
-    if (!trigger) return;
+    if (!trigger) return null;
 
     const rect = trigger.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
@@ -56,18 +58,20 @@ export const useAnchoredPopup = ({
     // Mantém o painel dentro da janela na horizontal.
     const left = Math.min(Math.max(8, rect.left), Math.max(8, window.innerWidth - width - 8));
 
-    setPosition({
+    return {
       top: openUpward ? rect.top - gap : rect.bottom + gap,
       left,
       width,
       placement: openUpward ? 'top' : 'bottom',
-    });
+    };
   }, [estimatedHeight, minWidth, gap]);
 
-  useLayoutEffect(() => {
-    if (isOpen) reposition();
-    else setPosition(null);
-  }, [isOpen, reposition]);
+  const open = useCallback(() => setPosition(measure()), [measure]);
+  const close = useCallback(() => setPosition(null), []);
+  const toggle = useCallback(
+    () => setPosition((current) => (current ? null : measure())),
+    [measure]
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -75,26 +79,28 @@ export const useAnchoredPopup = ({
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node | null;
       if (!target) return;
-      // Nó já removido do DOM (grid recriado): não é um clique "fora".
+      // Nó já removido do DOM (grade recriada): não é um clique "fora".
       if (!target.isConnected) return;
       if (triggerRef.current?.contains(target)) return;
       if (panelRef.current?.contains(target)) return;
-      onClose();
+      close();
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.stopPropagation();
-        onClose();
+        close();
         triggerRef.current?.focus();
       }
     };
 
-    // `true` para acompanhar a rolagem de qualquer ancestral, não só da janela.
+    const reposition = () => setPosition(measure());
+
     document.addEventListener('mousedown', handlePointerDown);
     document.addEventListener('touchstart', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', reposition);
+    // `true` para acompanhar a rolagem de qualquer ancestral, não só da janela.
     window.addEventListener('scroll', reposition, true);
 
     return () => {
@@ -104,7 +110,7 @@ export const useAnchoredPopup = ({
       window.removeEventListener('resize', reposition);
       window.removeEventListener('scroll', reposition, true);
     };
-  }, [isOpen, onClose, reposition]);
+  }, [isOpen, close, measure]);
 
-  return { triggerRef, panelRef, position };
+  return { isOpen, open, close, toggle, triggerRef, panelRef, position };
 };
