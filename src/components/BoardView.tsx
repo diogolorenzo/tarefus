@@ -101,7 +101,7 @@ export const BoardView: React.FC = () => {
         </div>
 
         {/* Search & Assignee Filter */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div id="tour-filters-bar" className="flex items-center gap-2 flex-wrap">
           {/* Search Box */}
           <div className="relative flex-1 sm:w-64">
             <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -156,7 +156,7 @@ export const BoardView: React.FC = () => {
 
       {/* Kanban Board with 3 Columns */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 items-start overflow-x-auto pb-6">
+        <div id="tour-kanban-board" className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 items-start overflow-x-auto pb-6">
           <KanbanColumn
             id="todo"
             title="A Fazer"

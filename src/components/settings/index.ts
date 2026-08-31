@@ -1,7 +1,8 @@
-﻿export { SettingsView } from './SettingsView';
-export { ProfileSettings } from './ProfileSettings';
-export { CompanyGeneralSettings } from './CompanyGeneralSettings';
-export { AreasSettings } from './AreasSettings';
-export { BoardEditModal } from './BoardEditModal';
-export { MembersSettings } from './MembersSettings';
-export { InviteMemberModal } from './InviteMemberModal';
+export * from './ProfileSettings';
+export * from './CompanyGeneralSettings';
+export * from './AreasSettings';
+export * from './MembersSettings';
+export * from './AuditLogsSettings';
+export * from './BoardEditModal';
+export * from './InviteMemberModal';
+export * from './SettingsView';

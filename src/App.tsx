@@ -8,34 +8,46 @@ import { SettingsView } from './components/settings/SettingsView';
 import { TaskModal } from './components/TaskModal';
 import { BoardModal } from './components/BoardModal';
 import { LoginModal } from './components/LoginModal';
+import { HelpCenterModal } from './components/help/HelpCenterModal';
+import { GuidedTour } from './components/tour/GuidedTour';
+import { AuthPage } from './components/auth/AuthPage';
 import { ToastContainer } from './components/ToastContainer';
 
 const MainContent: React.FC = () => {
-  const { activeTab } = useTaskContext();
+  const { activeTab, isAuthenticated, currentUser, isHelpCenterOpen, setIsHelpCenterOpen } = useTaskContext();
+
+  if (!isAuthenticated || !currentUser) {
+    return <AuthPage />;
+  }
 
   return (
-    <main className="flex-1 flex flex-col">
-      {activeTab === 'board' && <BoardView />}
-      {activeTab === 'my-tasks' && <MyTasksView />}
-      {activeTab === 'settings' && <SettingsView />}
-    </main>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white dark:selection:bg-indigo-500/30 dark:selection:text-indigo-200 transition-colors duration-200 relative">
+      <Navbar />
+      <DueTodayAlertBanner />
+      <main className="flex-1 flex flex-col">
+        {activeTab === 'board' && <BoardView />}
+        {activeTab === 'my-tasks' && <MyTasksView />}
+        {activeTab === 'settings' && <SettingsView />}
+      </main>
+
+      {/* Modals & Overlays */}
+      <TaskModal />
+      <BoardModal />
+      <LoginModal />
+      <HelpCenterModal
+        isOpen={isHelpCenterOpen}
+        onClose={() => setIsHelpCenterOpen(false)}
+      />
+      <GuidedTour />
+    </div>
   );
 };
 
 function App() {
   return (
     <TaskProvider>
-      <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white dark:selection:bg-indigo-500/30 dark:selection:text-indigo-200 transition-colors duration-200 relative">
-        <Navbar />
-        <DueTodayAlertBanner />
-        <MainContent />
-        
-        {/* Modals & Overlays */}
-        <TaskModal />
-        <BoardModal />
-        <LoginModal />
-        <ToastContainer />
-      </div>
+      <MainContent />
+      <ToastContainer />
     </TaskProvider>
   );
 }

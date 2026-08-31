@@ -6,8 +6,61 @@ const STORAGE_KEYS = {
   BOARDS: 'tarefus_boards_v1',
   USERS: 'tarefus_users_v1',
   CURRENT_USER_ID: 'tarefus_current_user_id_v1',
+  AUTH_SESSION: 'tarefus_auth_session_v1',
   THEME: 'tarefus_theme_v1',
   COMPANY: 'tarefus_company_v1',
+};
+
+export interface AuthSession {
+  userId: string;
+  token: string;
+  rememberMe: boolean;
+  loggedInAt: string;
+}
+
+export const loadAuthSession = (): AuthSession | null => {
+  try {
+    // Check localStorage first (rememberMe: true)
+    const local = localStorage.getItem(STORAGE_KEYS.AUTH_SESSION);
+    if (local) {
+      return JSON.parse(local);
+    }
+    // Check sessionStorage (rememberMe: false)
+    const session = sessionStorage.getItem(STORAGE_KEYS.AUTH_SESSION);
+    if (session) {
+      return JSON.parse(session);
+    }
+    return null;
+  } catch (error) {
+    console.error('Erro ao ler sessão de autenticação:', error);
+    return null;
+  }
+};
+
+export const saveAuthSession = (session: AuthSession): void => {
+  try {
+    const raw = JSON.stringify(session);
+    if (session.rememberMe) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, raw);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
+    } else {
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_SESSION, raw);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
+    }
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, session.userId);
+  } catch (error) {
+    console.error('Erro ao salvar sessão de autenticação:', error);
+  }
+};
+
+export const clearAuthSession = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+  } catch (error) {
+    console.error('Erro ao limpar sessão:', error);
+  }
 };
 
 export const loadTasks = (): Task[] => {

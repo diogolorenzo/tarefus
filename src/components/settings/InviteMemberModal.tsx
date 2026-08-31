@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
+import type { PermissionRole } from '../../types';
 import {
   X,
   UserPlus,
@@ -8,6 +9,8 @@ import {
   Briefcase,
   ShieldCheck,
   Check,
+  Shield,
+  UserCheck,
 } from 'lucide-react';
 
 interface InviteMemberModalProps {
@@ -21,7 +24,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ isOpen, on
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [permissionRole, setPermissionRole] = useState<PermissionRole>('member');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -39,11 +42,11 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ isOpen, on
     e.preventDefault();
     if (!name.trim() || !email.trim() || !role.trim()) return;
 
-    addUser(name.trim(), role.trim(), email.trim(), isAdmin);
+    addUser(name.trim(), role.trim(), email.trim(), permissionRole, permissionRole === 'admin');
     setName('');
     setEmail('');
     setRole('');
-    setIsAdmin(false);
+    setPermissionRole('member');
     onClose();
   };
 
@@ -51,7 +54,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ isOpen, on
     setName('');
     setEmail('');
     setRole('');
-    setIsAdmin(false);
+    setPermissionRole('member');
     onClose();
   };
 
@@ -69,7 +72,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ isOpen, on
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Convidar / Cadastrar Membro</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Adicione um novo colaborador à equipe da empresa</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Adicione um novo colaborador ao banco de dados corporativo</p>
             </div>
           </div>
           <button
@@ -119,43 +122,76 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ isOpen, on
             <input
               type="text"
               required
-              placeholder="Ex: Desenvolvedor Front-end, Designer, Coordenador..."
+              placeholder="Ex: Coordenador de Logística, Designer UI/UX..."
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#111728] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
 
-          {/* Admin Privilege Toggle */}
+          {/* Role Selection (Admin, Gestor, Membro) */}
           <div className="pt-2">
-            <label
-              onClick={() => setIsAdmin(!isAdmin)}
-              className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
-                isAdmin
-                  ? 'bg-blue-50/70 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600/40 shadow-xs'
-                  : 'bg-slate-50/60 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.08] hover:border-slate-300'
-              }`}
-            >
-              <div className="pt-0.5">
-                <input
-                  type="checkbox"
-                  checked={isAdmin}
-                  onChange={(e) => setIsAdmin(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className={`w-4 h-4 ${isAdmin ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`} />
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    Conceder acesso de Administrador
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                  Permite gerenciar informações da empresa, criar/excluir quadros e gerenciar permissões de outros membros.
-                </p>
-              </div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Perfil de Permissão <span className="text-rose-500">*</span>
             </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setPermissionRole('member')}
+                className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                  permissionRole === 'member'
+                    ? 'bg-blue-50/80 dark:bg-blue-900/25 border-blue-500 dark:border-blue-500 text-blue-700 dark:text-blue-300 shadow-2xs ring-1 ring-blue-500/30'
+                    : 'bg-slate-50 dark:bg-[#0D121E] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <UserCheck className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                  {permissionRole === 'member' && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
+                </div>
+                <div>
+                  <div className="text-xs font-bold">Membro</div>
+                  <div className="text-[10px] opacity-75 mt-0.5">Acesso básico e execução</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPermissionRole('manager')}
+                className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                  permissionRole === 'manager'
+                    ? 'bg-purple-50/80 dark:bg-purple-900/25 border-purple-500 dark:border-purple-500 text-purple-700 dark:text-purple-300 shadow-2xs ring-1 ring-purple-500/30'
+                    : 'bg-slate-50 dark:bg-[#0D121E] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <Briefcase className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                  {permissionRole === 'manager' && <Check className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />}
+                </div>
+                <div>
+                  <div className="text-xs font-bold">Gestor</div>
+                  <div className="text-[10px] opacity-75 mt-0.5">Gerencia quadros e times</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPermissionRole('admin')}
+                className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                  permissionRole === 'admin'
+                    ? 'bg-amber-50/80 dark:bg-amber-900/25 border-amber-500 dark:border-amber-500 text-amber-700 dark:text-amber-300 shadow-2xs ring-1 ring-amber-500/30'
+                    : 'bg-slate-50 dark:bg-[#0D121E] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <ShieldCheck className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                  {permissionRole === 'admin' && <Check className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
+                </div>
+                <div>
+                  <div className="text-xs font-bold">Admin</div>
+                  <div className="text-[10px] opacity-75 mt-0.5">Acesso e controle total</div>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Footer Actions */}

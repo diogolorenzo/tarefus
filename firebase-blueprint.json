@@ -1,0 +1,125 @@
+{
+  "entities": {
+    "users": {
+      "title": "Usuários",
+      "description": "Usuários e colaboradores da empresa (Single-tenant)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "passwordHash": { "type": "string" },
+        "role": { "type": "string" },
+        "permissionRole": { "type": "string", "enum": ["admin", "manager", "member"] },
+        "initials": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "isAdmin": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "permissionRole"]
+    },
+    "boards": {
+      "title": "Quadros de Áreas",
+      "description": "Quadros de setores e departamentos da empresa",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "color": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "memberIds": { "type": "array", "items": { "type": "string" } },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "color"]
+    },
+    "columns": {
+      "title": "Colunas Kanban",
+      "description": "Colunas de status vinculadas aos quadros",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "boardId": { "type": "string" },
+        "title": { "type": "string" },
+        "statusKey": { "type": "string" },
+        "order": { "type": "number" },
+        "color": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "boardId", "title", "statusKey", "order"]
+    },
+    "tasks": {
+      "title": "Tarefas",
+      "description": "Tarefas corporativas distribuídas pelos quadros",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+        "status": { "type": "string", "enum": ["todo", "in_progress", "done"] },
+        "boardId": { "type": "string" },
+        "assigneeIds": { "type": "array", "items": { "type": "string" } },
+        "assigneeId": { "type": "string" },
+        "dueDate": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "checklist": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" },
+              "completed": { "type": "boolean" }
+            },
+            "required": ["id", "text", "completed"]
+          }
+        },
+        "aiNotes": { "type": "string" },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "title", "boardId", "status", "checklist"]
+    },
+    "activity_logs": {
+      "title": "Histórico de Atividades",
+      "description": "Logs de auditoria e movimentações de tarefas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "taskId": { "type": "string" },
+        "taskTitle": { "type": "string" },
+        "boardId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "userName", "action", "details", "timestamp"]
+    },
+    "company": {
+      "title": "Dados da Empresa",
+      "description": "Informações institucionais da organização",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "cnpj": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "segment": { "type": "string" },
+        "description": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    }
+  }
+}

@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Allow read and write to all single-tenant collections
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // Boards Collection
+    match /boards/{boardId} {
+      allow read, write: if true;
+    }
+
+    // Kanban Columns Collection
+    match /columns/{columnId} {
+      allow read, write: if true;
+    }
+
+    // Tasks Collection
+    match /tasks/{taskId} {
+      allow read, write: if true;
+    }
+
+    // Activity Logs Collection
+    match /activity_logs/{logId} {
+      allow read, write: if true;
+    }
+
+    // Company Information
+    match /company/{companyId} {
+      allow read, write: if true;
+    }
+  }
+}

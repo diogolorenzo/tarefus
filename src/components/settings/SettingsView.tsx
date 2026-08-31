@@ -1,9 +1,10 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
 import { ProfileSettings } from './ProfileSettings';
 import { CompanyGeneralSettings } from './CompanyGeneralSettings';
 import { AreasSettings } from './AreasSettings';
 import { MembersSettings } from './MembersSettings';
+import { AuditLogsSettings } from './AuditLogsSettings';
 import {
   User,
   Building2,
@@ -12,10 +13,10 @@ import {
   ArrowLeft,
   ChevronRight,
   ShieldCheck,
-  Sparkles,
+  History,
 } from 'lucide-react';
 
-export type SettingsSubTab = 'profile' | 'company' | 'areas' | 'members';
+export type SettingsSubTab = 'profile' | 'company' | 'areas' | 'members' | 'audit';
 
 interface NavItem {
   id: SettingsSubTab;
@@ -38,7 +39,7 @@ const NAV_ITEMS: { group: string; adminOnly?: boolean; items: NavItem[] }[] = [
     ],
   },
   {
-    group: 'Empresa',
+    group: 'Empresa & Equipe',
     adminOnly: true,
     items: [
       {
@@ -58,8 +59,15 @@ const NAV_ITEMS: { group: string; adminOnly?: boolean; items: NavItem[] }[] = [
       {
         id: 'members',
         label: 'Membros & Permissões',
-        description: 'Equipe, convites e administradores',
+        description: 'Equipe, convites e perfis de acesso',
         icon: Users,
+        adminOnly: true,
+      },
+      {
+        id: 'audit',
+        label: 'Auditoria & Banco',
+        description: 'Logs de atividades e status do Firestore',
+        icon: History,
         adminOnly: true,
       },
     ],
@@ -70,10 +78,12 @@ export const SettingsView: React.FC = () => {
   const { currentUser, setActiveTab } = useTaskContext();
   const [activeSubTab, setActiveSubTab] = useState<SettingsSubTab>('profile');
 
-  const isAdmin = Boolean(currentUser?.isAdmin);
+  const isAdminOrManager = Boolean(
+    currentUser?.isAdmin || currentUser?.permissionRole === 'admin' || currentUser?.permissionRole === 'manager'
+  );
 
-  // RBAC Guard: If user is not admin and tries to view admin tabs, fallback to 'profile'
-  const effectiveSubTab: SettingsSubTab = !isAdmin && activeSubTab !== 'profile' ? 'profile' : activeSubTab;
+  // RBAC Guard
+  const effectiveSubTab: SettingsSubTab = !isAdminOrManager && activeSubTab !== 'profile' ? 'profile' : activeSubTab;
 
   const activeTabDetails =
     NAV_ITEMS.flatMap((g) => g.items).find((item) => item.id === effectiveSubTab) || NAV_ITEMS[0].items[0];
@@ -105,7 +115,7 @@ export const SettingsView: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                Configurações do Sistema
+                Configurações Corporativas
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 {activeTabDetails.description}
@@ -118,145 +128,69 @@ export const SettingsView: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('board')}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#121826] hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-2xs hover:shadow-xs active:scale-98 cursor-pointer group"
+          className="self-start sm:self-auto px-4 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Voltar para os Quadros</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Voltar ao Quadro</span>
         </button>
       </div>
 
-      {/* Mobile Horizontal Segmented Tabs */}
-      <div className="lg:hidden mb-6 overflow-x-auto pb-1">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-white/[0.04] rounded-2xl border border-slate-200/60 dark:border-white/[0.06] min-w-max">
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('profile')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              effectiveSubTab === 'profile'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>Meu Perfil</span>
-          </button>
+      {/* Main Settings Layout (Sidebar Navigation + Dynamic Content Area) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        {/* Navigation Sidebar */}
+        <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+          {NAV_ITEMS.map((group) => {
+            if (group.adminOnly && !isAdminOrManager) return null;
 
-          {isAdmin && (
-            <>
-              <button
-                type="button"
-                onClick={() => setActiveSubTab('company')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  effectiveSubTab === 'company'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+            return (
+              <div
+                key={group.group}
+                className="bg-white dark:bg-[#121826] rounded-2xl border border-slate-200/80 dark:border-white/[0.08] p-3 shadow-xs"
               >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>Empresa</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveSubTab('areas')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  effectiveSubTab === 'areas'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Áreas & Quadros</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveSubTab('members')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  effectiveSubTab === 'members'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" />
-                <span>Membros</span>
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Desktop Layout: Sidebar on Left, Content on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Sidebar Navigation (Desktop) */}
-        <aside className="hidden lg:block lg:col-span-3 space-y-6">
-          <div className="bg-white dark:bg-[#121826] rounded-3xl p-4 border border-slate-200/80 dark:border-white/[0.08] shadow-xs space-y-5">
-            {NAV_ITEMS.map((group) => {
-              // Hide group if it's admin-only and user is not admin
-              if (group.adminOnly && !isAdmin) return null;
-
-              return (
-                <div key={group.group} className="space-y-1.5">
-                  <div className="px-3 py-1 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                    <span>{group.group}</span>
-                    {group.adminOnly && (
-                      <span className="inline-flex items-center gap-1 text-[9px] font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">
-                        <ShieldCheck className="w-2.5 h-2.5" /> Admin
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-1">
-                    {group.items.map((item) => {
-                      if (item.adminOnly && !isAdmin) return null;
-                      const isSelected = effectiveSubTab === item.id;
-                      const IconComponent = item.icon;
-
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setActiveSubTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-left cursor-pointer ${
-                            isSelected
-                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
-                              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white'
-                          }`}
-                        >
-                          <IconComponent
-                            className={`w-4 h-4 shrink-0 ${
-                              isSelected ? 'text-white' : 'text-slate-400 dark:text-slate-500'
-                            }`}
-                          />
-                          <span className="truncate">{item.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
+                  <span>{group.group}</span>
+                  {group.adminOnly && (
+                    <span className="flex items-center gap-1 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded-md font-bold">
+                      <ShieldCheck className="w-3 h-3" /> Gestão
+                    </span>
+                  )}
                 </div>
-              );
-            })}
-          </div>
 
-          {/* Quick Help Card */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 dark:from-blue-950/20 dark:to-[#161F32]/50 rounded-3xl p-4.5 border border-blue-100 dark:border-blue-900/30">
-            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-xs font-bold mb-1">
-              <Sparkles className="w-4 h-4" />
-              <span>Painel Central</span>
-            </div>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-              Todas as modificações são gravadas automaticamente no seu navegador com persistência LocalStorage.
-            </p>
-          </div>
-        </aside>
+                <div className="space-y-1 mt-1">
+                  {group.items.map((item) => {
+                    const isItemActive = effectiveSubTab === item.id;
+                    const Icon = item.icon;
 
-        {/* Main Content Area */}
-        <section className="lg:col-span-9 min-w-0">
-          {effectiveSubTab === 'profile' && <ProfileSettings key={currentUser?.id || 'profile'} />}
-          {effectiveSubTab === 'company' && isAdmin && <CompanyGeneralSettings />}
-          {effectiveSubTab === 'areas' && isAdmin && <AreasSettings />}
-          {effectiveSubTab === 'members' && isAdmin && <MembersSettings />}
-        </section>
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setActiveSubTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all cursor-pointer ${
+                          isItemActive
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 font-bold'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white font-medium'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 shrink-0 ${isItemActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
+                        <span className="text-xs truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Content Panel */}
+        <div className="lg:col-span-8 xl:col-span-9 bg-white dark:bg-[#121826] rounded-3xl border border-slate-200/80 dark:border-white/[0.08] p-6 sm:p-8 shadow-xs min-h-[500px]">
+          {effectiveSubTab === 'profile' && <ProfileSettings />}
+          {effectiveSubTab === 'company' && <CompanyGeneralSettings />}
+          {effectiveSubTab === 'areas' && <AreasSettings />}
+          {effectiveSubTab === 'members' && <MembersSettings />}
+          {effectiveSubTab === 'audit' && <AuditLogsSettings />}
+        </div>
       </div>
     </div>
   );
