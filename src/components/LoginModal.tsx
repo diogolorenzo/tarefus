@@ -72,19 +72,19 @@ export const LoginModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
       <div
-        className="bg-white dark:bg-[#121826] rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 dark:border-white/[0.08] overflow-hidden"
+        className="bg-surface rounded-3xl shadow-2xl max-w-md w-full border border-line overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/70 dark:bg-[#161F32]/80">
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-line bg-slate-50/70 dark:bg-[#161F32]/80">
           <div className="flex items-center gap-2.5">
             <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-base font-bold text-slate-800 dark:text-white">Identificação & Acesso Corporativo</h3>
+            <h3 className="text-base font-bold text-ink">Identificação & Acesso Corporativo</h3>
           </div>
           <button
             type="button"
             onClick={() => setIsLoginModalOpen(false)}
-            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
+            className="p-1.5 text-subtle hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -97,7 +97,7 @@ export const LoginModal: React.FC = () => {
             type="button"
             disabled={isSigningInGoogle}
             onClick={handleGoogleSignIn}
-            className="w-full py-2.5 px-4 bg-white dark:bg-[#182032] hover:bg-slate-50 dark:hover:bg-[#1f2a42] border border-slate-200 dark:border-white/[0.1] rounded-2xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-xs transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+            className="w-full py-2.5 px-4 bg-white dark:bg-[#182032] hover:bg-slate-50 dark:hover:bg-[#1f2a42] border border-slate-200 dark:border-white/[0.1] rounded-2xl text-xs font-bold text-ink shadow-xs transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -141,7 +141,7 @@ export const LoginModal: React.FC = () => {
                   className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-blue-50/80 dark:bg-[#1A2234] border-blue-400 dark:border-blue-500 ring-2 ring-blue-500/20 shadow-xs'
-                      : 'border-slate-200 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.12] hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                      : 'border-line hover:border-slate-300 dark:hover:border-white/[0.12] hover:bg-slate-50 dark:hover:bg-white/[0.03]'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -152,7 +152,7 @@ export const LoginModal: React.FC = () => {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">{user.name}</h4>
+                        <h4 className="text-xs font-bold text-ink truncate">{user.name}</h4>
                         {roleType === 'admin' ? (
                           <span className="text-[9px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-1.5 py-0.2 rounded-md flex items-center gap-0.5">
                             <ShieldCheck className="w-2.5 h-2.5" /> Admin
@@ -167,7 +167,7 @@ export const LoginModal: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{user.role}</p>
+                      <p className="text-[11px] text-muted truncate">{user.role}</p>
                     </div>
                   </div>
 
@@ -178,7 +178,7 @@ export const LoginModal: React.FC = () => {
                   ) : (
                     <button
                       type="button"
-                      className="text-xs text-slate-400 dark:text-slate-500 font-medium px-2 py-1 rounded-lg hover:bg-slate-200/60 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                      className="text-xs text-subtle font-medium px-2 py-1 rounded-lg hover:bg-slate-200/60 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                     >
                       Acessar
                     </button>
@@ -189,20 +189,20 @@ export const LoginModal: React.FC = () => {
           </div>
 
           {/* Add New User Toggle/Form */}
-          <div className="pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+          <div className="pt-2 border-t border-line">
             {!isAddingNew ? (
               <button
                 type="button"
                 onClick={() => setIsAddingNew(true)}
-                className="w-full py-2.5 px-3 border border-dashed border-slate-300 dark:border-white/[0.08] hover:border-blue-400 dark:hover:border-blue-500/40 hover:bg-blue-50/50 dark:hover:bg-blue-500/10 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-3 border border-dashed border-line-strong hover:border-blue-400 dark:hover:border-blue-500/40 hover:bg-blue-50/50 dark:hover:bg-blue-500/10 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Cadastrar novo colaborador</span>
               </button>
             ) : (
-              <form onSubmit={handleAddUser} className="space-y-3 bg-slate-50 dark:bg-[#0D121E]/60 p-3.5 rounded-2xl border border-slate-200 dark:border-white/[0.06]">
+              <form onSubmit={handleAddUser} className="space-y-3 bg-sunken/60 p-3.5 rounded-2xl border border-line">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Novo Colaborador</span>
+                  <span className="text-xs font-bold text-ink">Novo Colaborador</span>
                   <button
                     type="button"
                     onClick={() => setIsAddingNew(false)}
@@ -217,7 +217,7 @@ export const LoginModal: React.FC = () => {
                   placeholder="Nome completo..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#121826] border border-slate-200 dark:border-white/[0.08] rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400"
+                  className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs text-ink placeholder:text-subtle focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400"
                 />
                 <input
                   type="text"
@@ -225,7 +225,7 @@ export const LoginModal: React.FC = () => {
                   placeholder="Cargo / Setor (ex: Suporte Técnico)..."
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#121826] border border-slate-200 dark:border-white/[0.08] rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400"
+                  className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs text-ink placeholder:text-subtle focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400"
                 />
                 <button
                   type="submit"

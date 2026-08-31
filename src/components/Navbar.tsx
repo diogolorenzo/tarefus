@@ -27,6 +27,7 @@ import { getEffectiveRole, getRoleBadgeInfo, canCreateBoard } from '../utils/rba
 export const Navbar: React.FC = () => {
   const {
     boards,
+    company,
     currentUser,
     activeTab,
     setActiveTab,
@@ -95,41 +96,43 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="bg-white/85 dark:bg-[#090D16]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.06] sticky top-0 z-30 shadow-xs dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] transition-colors duration-200">
+      <header className="bg-surface/90 backdrop-blur-md border-b border-line sticky top-0 z-30 transition-colors duration-200">
         {/* Top Main Navigation Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16 gap-3">
-            {/* Logo & Brand */}
-            <div className="flex items-center gap-6">
-              <div
-                className="flex items-center gap-2.5 cursor-pointer"
+          <div className="relative flex items-center justify-between h-14 gap-3">
+            {/* Esquerda: marca (só o símbolo) + abas */}
+            <div className="flex items-center gap-4 min-w-0">
+              <button
+                type="button"
+                className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white cursor-pointer shrink-0"
                 onClick={() => setActiveTab('board')}
+                title="Ir para os quadros"
+                aria-label="Ir para os quadros"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                  <CheckSquare2 className="w-5 h-5 stroke-[2.5]" />
-                </div>
-                <div>
-                  <span className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">
-                    Tarefus
-                  </span>
-                  <span className="block text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                    Gestão Integrada
-                  </span>
-                </div>
-              </div>
+                <CheckSquare2 className="w-4 h-4 stroke-[2.5]" />
+              </button>
+
+              {/* Abaixo de xl não há espaço simétrico para centralizar
+                  (medido: 58px em 768px), então o nome fica aqui. */}
+              <span
+                className="hidden sm:block xl:hidden text-sm font-semibold text-ink truncate"
+                title={company.name}
+              >
+                {company.name}
+              </span>
 
               {/* Main Navigation Tabs */}
               <nav
                 id="tour-nav-tabs"
-                className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-white/[0.04] border border-transparent dark:border-white/[0.05] p-1 rounded-xl"
+                className="hidden lg:flex items-center gap-1 bg-sunken border border-line p-1 rounded-xl"
               >
                 <button
                   type="button"
                   onClick={() => setActiveTab('board')}
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                     activeTab === 'board'
-                      ? 'bg-white dark:bg-[#151D2C] text-slate-900 dark:text-white shadow-xs dark:shadow-md dark:border dark:border-white/[0.08]'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      ? 'bg-surface text-ink shadow-xs border border-line'
+                      : 'text-muted hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   <LayoutGrid className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -141,8 +144,8 @@ export const Navbar: React.FC = () => {
                   onClick={() => setActiveTab('my-tasks')}
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                     activeTab === 'my-tasks'
-                      ? 'bg-white dark:bg-[#151D2C] text-slate-900 dark:text-white shadow-xs dark:shadow-md dark:border dark:border-white/[0.08]'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      ? 'bg-surface text-ink shadow-xs border border-line'
+                      : 'text-muted hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -156,8 +159,20 @@ export const Navbar: React.FC = () => {
               </nav>
             </div>
 
-            {/* Right Section */}
-            <div id="tour-help-user" className="flex items-center gap-2 sm:gap-2.5">
+            {/* Nome da empresa centralizado na barra.
+                Substitui o nome do produto: para quem já está logado, o que
+                importa é confirmar em qual empresa está trabalhando.
+                Absoluto para centralizar de fato — as laterais têm larguras
+                bem diferentes, então um layout em colunas sairia torto. */}
+            <span
+              className="hidden xl:block absolute left-1/2 -translate-x-1/2 max-w-[200px] text-sm font-semibold text-ink truncate text-center pointer-events-none"
+              title={company.name}
+            >
+              {company.name}
+            </span>
+
+            {/* Direita: ações da sessão */}
+            <div id="tour-help-user" className="flex items-center justify-end gap-2 sm:gap-2.5">
               {/* Notifications & Due Dates Center */}
               <NotificationCenter />
 
@@ -167,7 +182,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => setIsHelpCenterOpen(true)}
                 title="Central de Ajuda & Atalhos (?)"
                 aria-label="Abrir Central de Ajuda"
-                className="p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-all cursor-pointer border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/20"
+                className="p-2 text-muted hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-all cursor-pointer border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/20"
               >
                 <HelpCircle className="w-4 h-4" />
               </button>
@@ -178,28 +193,13 @@ export const Navbar: React.FC = () => {
                 onClick={toggleTheme}
                 title={theme === 'dark' ? 'Mudar para modo claro (D)' : 'Mudar para modo escuro (D)'}
                 aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
-                className="p-2 text-slate-500 dark:text-amber-400 hover:text-slate-900 dark:hover:text-amber-300 hover:bg-slate-100 dark:hover:bg-amber-400/10 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-200 dark:border-white/[0.06] dark:bg-white/[0.03]"
+                className="p-2 text-slate-500 dark:text-amber-400 hover:text-slate-900 dark:hover:text-amber-300 hover:bg-slate-100 dark:hover:bg-amber-400/10 rounded-xl transition-all cursor-pointer border border-transparent hover:border-line dark:bg-white/[0.03]"
               >
                 {theme === 'dark' ? (
                   <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
                 ) : (
                   <Moon className="w-4 h-4 text-slate-600 hover:-rotate-12 transition-transform" />
                 )}
-              </button>
-
-              {/* Reset Demo Data Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm('Deseja restaurar os dados de exemplo e banco de dados corporativo?')) {
-                    resetDemoData();
-                  }
-                }}
-                title="Restaurar dados de exemplo e banco"
-                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] rounded-lg transition-colors cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restaurar Seed</span>
               </button>
 
               {/* "+ Nova Tarefa" Primary Button */}
@@ -226,7 +226,7 @@ export const Navbar: React.FC = () => {
                     className={`flex items-center gap-2 p-1.5 pl-2 rounded-xl border transition-all text-left cursor-pointer ${
                       isUserMenuOpen || activeTab === 'settings'
                         ? 'bg-indigo-50/60 dark:bg-white/[0.08] border-indigo-500/50 dark:border-indigo-400/50 shadow-xs'
-                        : 'hover:bg-slate-100 dark:hover:bg-white/[0.05] border-slate-200 dark:border-white/[0.08] dark:bg-white/[0.02]'
+                        : 'hover:bg-slate-100 dark:hover:bg-white/[0.05] border-line dark:bg-white/[0.02]'
                     }`}
                     title="Menu de sessão e perfil corporativo"
                   >
@@ -236,15 +236,15 @@ export const Navbar: React.FC = () => {
                       {currentUser.initials}
                     </div>
                     <div className="hidden sm:block leading-tight pr-1">
-                      <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                      <div className="text-xs font-bold text-ink flex items-center gap-1">
                         <span>{currentUser.name.split(' ')[0]}</span>
                         <ChevronDown
-                          className={`w-3 h-3 text-slate-400 dark:text-slate-500 transition-transform duration-200 ${
+                          className={`w-3 h-3 text-subtle transition-transform duration-200 ${
                             isUserMenuOpen ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : ''
                           }`}
                         />
                       </div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[95px] flex items-center gap-1">
+                      <div className="text-[10px] text-muted truncate max-w-[95px] flex items-center gap-1">
                         {role === 'admin' && <ShieldCheck className="w-2.5 h-2.5 text-amber-500 shrink-0" />}
                         {role === 'manager' && <Briefcase className="w-2.5 h-2.5 text-purple-500 shrink-0" />}
                         {role === 'member' && <UserIcon className="w-2.5 h-2.5 text-blue-500 shrink-0" />}
@@ -255,7 +255,7 @@ export const Navbar: React.FC = () => {
 
                   {/* Authenticated User Popover Menu */}
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white dark:bg-[#121826] rounded-2xl shadow-2xl border border-slate-200/90 dark:border-white/[0.1] py-2 z-50 animate-fade-in divide-y divide-slate-100 dark:divide-white/[0.06]">
+                    <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-overlay rounded-2xl shadow-2xl border border-line-strong py-2 z-50 animate-fade-in divide-y divide-slate-100 dark:divide-white/[0.06]">
                       {/* User details & RBAC badge */}
                       <div className="px-4 py-3">
                         <div className="flex items-start gap-3">
@@ -265,10 +265,10 @@ export const Navbar: React.FC = () => {
                             {currentUser.initials}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                            <p className="text-sm font-bold text-ink truncate">
                               {currentUser.name}
                             </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                            <p className="text-xs text-muted truncate">
                               {currentUser.email}
                             </p>
                             <div className="mt-1.5 flex items-center gap-1.5">
@@ -294,12 +294,12 @@ export const Navbar: React.FC = () => {
                             setIsHelpCenterOpen(true);
                             setIsUserMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-ink hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
                         >
                           <HelpCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
                           <div className="flex-1 min-w-0">
                             <span className="font-bold">Central de Ajuda & FAQ</span>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            <p className="text-[10px] text-muted truncate">
                               Dúvidas, atalhos e guia de IA
                             </p>
                           </div>
@@ -312,12 +312,12 @@ export const Navbar: React.FC = () => {
                             setIsUserMenuOpen(false);
                             startTour();
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-ink hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
                         >
                           <Compass className="w-4 h-4 text-emerald-500 shrink-0" />
                           <div className="flex-1 min-w-0">
                             <span className="font-bold">Tour Interativo</span>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            <p className="text-[10px] text-muted truncate">
                               Rever o passo a passo do sistema
                             </p>
                           </div>
@@ -333,13 +333,13 @@ export const Navbar: React.FC = () => {
                           className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all text-left cursor-pointer ${
                             activeTab === 'settings'
                               ? 'bg-indigo-50 dark:bg-indigo-600/15 text-indigo-700 dark:text-indigo-300 font-semibold'
-                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white'
+                              : 'text-ink hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           <Settings className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
                           <div className="flex-1 min-w-0">
                             <span className="font-bold">Painel de Configurações</span>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            <p className="text-[10px] text-muted truncate">
                               Perfil, empresa, membros e permissões
                             </p>
                           </div>
@@ -352,20 +352,43 @@ export const Navbar: React.FC = () => {
                             setIsPasswordModalOpen(true);
                             setIsUserMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-ink hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
                         >
                           <KeyRound className="w-4 h-4 text-amber-500 shrink-0" />
                           <div className="flex-1 min-w-0">
                             <span className="font-bold">Alterar Senha</span>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            <p className="text-[10px] text-muted truncate">
                               Redefinir credencial de acesso
                             </p>
                           </div>
                         </button>
                       </div>
 
-                      {/* Logout Action */}
-                      <div className="p-1.5">
+                      {/* Ações de consequência: restaurar dados e sair */}
+                      <div className="p-1.5 space-y-0.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            if (
+                              window.confirm(
+                                'Isto apaga as tarefas, quadros e membros atuais e recarrega os dados de exemplo. Deseja continuar?'
+                              )
+                            ) {
+                              resetDemoData();
+                            }
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-muted hover:bg-sunken hover:text-ink transition-all text-left cursor-pointer"
+                        >
+                          <RotateCcw className="w-4 h-4 text-subtle shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <span className="font-bold">Restaurar Dados de Exemplo</span>
+                            <p className="text-[10px] text-subtle truncate">
+                              Substitui o conteúdo atual pelo seed inicial
+                            </p>
+                          </div>
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => {
@@ -386,14 +409,14 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile Navigation Tabs */}
-          <div className="flex md:hidden items-center justify-center gap-2 pb-2.5 pt-1 border-t border-slate-100 dark:border-white/[0.06]">
+          <div className="flex lg:hidden items-center justify-center gap-2 pb-2.5 pt-1 border-t border-line">
             <button
               type="button"
               onClick={() => setActiveTab('board')}
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
                 activeTab === 'board'
                   ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20'
-                  : 'text-slate-600 dark:text-slate-400'
+                  : 'text-muted'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -406,7 +429,7 @@ export const Navbar: React.FC = () => {
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
                 activeTab === 'my-tasks'
                   ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20'
-                  : 'text-slate-600 dark:text-slate-400'
+                  : 'text-muted'
               }`}
             >
               <UserCheck className="w-3.5 h-3.5" />
@@ -419,7 +442,7 @@ export const Navbar: React.FC = () => {
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
                 activeTab === 'settings'
                   ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/20'
-                  : 'text-slate-600 dark:text-slate-400'
+                  : 'text-muted'
               }`}
             >
               <Settings className="w-3.5 h-3.5" />
@@ -430,7 +453,7 @@ export const Navbar: React.FC = () => {
 
         {/* Sub-bar: Board Areas Navigation (only visible in 'board' view) */}
         {activeTab === 'board' && (
-          <div className="bg-slate-50/90 dark:bg-[#0D121F]/90 backdrop-blur-md border-t border-slate-200/70 dark:border-white/[0.05] px-4 sm:px-6 py-2 overflow-x-auto">
+          <div className="bg-app/90 backdrop-blur-md border-t border-line px-4 sm:px-6 py-2 overflow-x-auto">
             <div className="w-[1232px] max-w-7xl mx-auto flex items-center gap-2 min-w-max">
               {/* "Todas as Áreas" Button */}
               <button
@@ -439,10 +462,10 @@ export const Navbar: React.FC = () => {
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   selectedBoardId === 'all'
                     ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold shadow-xs'
-                    : 'bg-white dark:bg-[#121826] text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-[#1A2234] border border-slate-200 dark:border-white/[0.06]'
+                    : 'bg-surface text-muted hover:text-ink border border-line hover:border-line-strong'
                 }`}
               >
-                🏢 Todas as Áreas ({tasks.length})
+                Todas as Áreas ({tasks.length})
               </button>
 
               {/* Individual Boards */}
@@ -459,7 +482,7 @@ export const Navbar: React.FC = () => {
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       isSelected
                         ? styles.activeTab
-                        : 'bg-white dark:bg-[#121826] text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-[#1A2234] border border-slate-200 dark:border-white/[0.06]'
+                        : 'bg-surface text-muted hover:text-ink border border-line hover:border-line-strong'
                     }`}
                   >
                     <span>{board.name}</span>
@@ -481,7 +504,7 @@ export const Navbar: React.FC = () => {
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors ml-1 cursor-pointer ${
                   canAddBoard
                     ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/20'
-                    : 'text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] opacity-75'
+                    : 'text-subtle bg-slate-100 dark:bg-white/[0.04] border border-line opacity-75'
                 }`}
                 title={canAddBoard ? 'Criar novo quadro' : 'Apenas Gestores ou Administradores'}
               >

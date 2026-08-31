@@ -278,7 +278,7 @@ export const AuthPage: React.FC = () => {
               {/* Quick Access Demo Profiles */}
               <div className="mt-6 pt-5 border-t border-white/[0.06]">
                 <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2.5 text-center">
-                  ⚡ Acesso Rápido para Demonstração (1 Clique)
+                  Acesso rápido para demonstração (1 clique)
                 </span>
                 <div className="grid grid-cols-3 gap-2">
                   <button
@@ -420,7 +420,7 @@ export const AuthPage: React.FC = () => {
                   <select
                     value={regPermissionRole}
                     onChange={(e) => setRegPermissionRole(e.target.value as PermissionRole)}
-                    className="w-full px-3.5 py-2.5 bg-[#090D16] border border-white/[0.08] rounded-xl text-xs font-bold text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/30 cursor-pointer"
+                    className="w-full appearance-none px-3.5 py-2.5 pr-9 bg-[#0b0f17] border border-white/[0.08] rounded-xl text-xs font-semibold text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/30 cursor-pointer bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 fill=%22none%22 stroke=%22%2393a1b8%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M4 6l4 4 4-4%22/></svg>')] bg-no-repeat bg-[right_0.75rem_center]"
                   >
                     <option value="member">Membro / Executor (Acesso aos quadros e tarefas)</option>
                     <option value="manager">Gestor (Criação e administração de quadros)</option>

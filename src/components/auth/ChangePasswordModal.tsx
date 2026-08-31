@@ -48,19 +48,19 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
       <div
-        className="bg-white dark:bg-[#121826] rounded-3xl shadow-2xl max-w-md w-full border border-slate-100 dark:border-white/[0.08] overflow-hidden"
+        className="bg-surface rounded-3xl shadow-2xl max-w-md w-full border border-line overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/70 dark:bg-[#161F32]/80">
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-line bg-slate-50/70 dark:bg-[#161F32]/80">
           <div className="flex items-center gap-2.5">
             <KeyRound className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <h3 className="text-base font-bold text-slate-800 dark:text-white">Alterar Senha de Acesso</h3>
+            <h3 className="text-base font-bold text-ink">Alterar Senha de Acesso</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
+            className="p-1.5 text-subtle hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -76,7 +76,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span>Senha Atual</span>
             </label>
@@ -86,12 +86,12 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Digite sua senha atual"
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
+              className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5">
               Nova Senha
             </label>
             <input
@@ -101,12 +101,12 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Mínimo 6 caracteres"
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
+              className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5">
               Confirmar Nova Senha
             </label>
             <input
@@ -116,15 +116,15 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Repita a nova senha"
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#0D121E] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
+              className="w-full px-4 py-2.5 bg-sunken border border-line rounded-xl text-sm font-semibold text-ink placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-line flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-muted hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
             >
               Cancelar
             </button>

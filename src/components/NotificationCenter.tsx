@@ -125,7 +125,7 @@ export const NotificationCenter: React.FC = () => {
             ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-300/60 dark:border-amber-500/30 hover:bg-amber-500/20'
             : urgentCount > 0
             ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-300/60 dark:border-rose-500/30 hover:bg-rose-500/20'
-            : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06] border-transparent'
+            : 'text-muted hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06] border-transparent'
         }`}
       >
         <Bell className="w-4 h-4" />
@@ -149,15 +149,15 @@ export const NotificationCenter: React.FC = () => {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-[-48px] sm:right-0 mt-2 w-[calc(100vw-32px)] max-w-sm sm:w-96 bg-white dark:bg-[#121826] border border-slate-200 dark:border-white/[0.09] rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-[-48px] sm:right-0 mt-2 w-[calc(100vw-32px)] max-w-sm sm:w-96 bg-surface border border-slate-200 dark:border-white/[0.09] rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
-          <div className="p-4 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/70 dark:bg-[#151D2C]/70 backdrop-blur-xs flex items-center justify-between">
+          <div className="p-4 border-b border-line bg-slate-50/70 dark:bg-[#151D2C]/70 backdrop-blur-xs flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                 <Bell className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-1.5">
+                <h3 className="text-sm font-bold text-ink leading-tight flex items-center gap-1.5">
                   Notificações & Prazos
                   {tasksDueToday.length > 0 && (
                     <span className="text-[10px] font-extrabold px-1.5 py-0.2 bg-amber-500 text-white rounded-full">
@@ -165,7 +165,7 @@ export const NotificationCenter: React.FC = () => {
                     </span>
                   )}
                 </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="text-[11px] text-muted">
                   Acompanhe vencimentos de hoje e próximos dias
                 </p>
               </div>
@@ -181,14 +181,14 @@ export const NotificationCenter: React.FC = () => {
           </div>
 
           {/* Filter Pills */}
-          <div className="p-2.5 bg-slate-100/60 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/[0.06] flex items-center gap-1.5 overflow-x-auto text-xs">
+          <div className="p-2.5 bg-slate-100/60 dark:bg-white/[0.02] border-b border-line flex items-center gap-1.5 overflow-x-auto text-xs">
             <button
               type="button"
               onClick={() => setActiveFilter('today')}
               className={`px-2.5 py-1 rounded-lg font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 activeFilter === 'today'
                   ? 'bg-amber-500 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/[0.06]'
+                  : 'text-muted hover:bg-slate-200 dark:hover:bg-white/[0.06]'
               }`}
             >
               <Flame className="w-3 h-3" />
@@ -201,7 +201,7 @@ export const NotificationCenter: React.FC = () => {
               className={`px-2.5 py-1 rounded-lg font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 activeFilter === 'overdue'
                   ? 'bg-rose-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/[0.06]'
+                  : 'text-muted hover:bg-slate-200 dark:hover:bg-white/[0.06]'
               }`}
             >
               <AlertTriangle className="w-3 h-3" />
@@ -214,7 +214,7 @@ export const NotificationCenter: React.FC = () => {
               className={`px-2.5 py-1 rounded-lg font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 activeFilter === 'upcoming'
                   ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/[0.06]'
+                  : 'text-muted hover:bg-slate-200 dark:hover:bg-white/[0.06]'
               }`}
             >
               <Clock className="w-3 h-3" />
@@ -227,7 +227,7 @@ export const NotificationCenter: React.FC = () => {
               className={`px-2.5 py-1 rounded-lg font-semibold transition-all shrink-0 cursor-pointer ${
                 activeFilter === 'all'
                   ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/[0.06]'
+                  : 'text-muted hover:bg-slate-200 dark:hover:bg-white/[0.06]'
               }`}
             >
               Todas ({pendingTasksWithDueDate.length})
@@ -241,14 +241,14 @@ export const NotificationCenter: React.FC = () => {
                 <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
-                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <p className="text-xs font-semibold text-ink">
                   {activeFilter === 'today'
                     ? 'Nenhuma tarefa com vencimento para hoje!'
                     : activeFilter === 'overdue'
                     ? 'Nenhuma tarefa atrasada!'
                     : 'Nenhuma tarefa encontrada nesta categoria.'}
                 </p>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                <p className="text-[11px] text-subtle mt-0.5">
                   Tudo organizado e em dia.
                 </p>
               </div>
@@ -299,7 +299,7 @@ export const NotificationCenter: React.FC = () => {
 
                         {/* Board Name */}
                         {board && (
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-white/[0.05] rounded-md">
+                          <span className="text-[10px] text-muted font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-white/[0.05] rounded-md">
                             {board.name}
                           </span>
                         )}
@@ -311,7 +311,7 @@ export const NotificationCenter: React.FC = () => {
                         )}
                       </div>
 
-                      <h4 className="text-xs font-semibold text-slate-900 dark:text-white leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                      <h4 className="text-xs font-semibold text-ink leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                         {task.title}
                       </h4>
                     </div>
@@ -335,8 +335,8 @@ export const NotificationCenter: React.FC = () => {
           </div>
 
           {/* Footer with summary and dismiss */}
-          <div className="p-2.5 border-t border-slate-100 dark:border-white/[0.06] bg-slate-50/70 dark:bg-[#151D2C]/70 text-[11px] flex items-center justify-between">
-            <span className="text-slate-500 dark:text-slate-400 font-medium">
+          <div className="p-2.5 border-t border-line bg-slate-50/70 dark:bg-[#151D2C]/70 text-[11px] flex items-center justify-between">
+            <span className="text-muted font-medium">
               {pendingTasksWithDueDate.length} pendentes com prazo
             </span>
             {pendingTasksWithDueDate.length > 0 && (
