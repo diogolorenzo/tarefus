@@ -18,6 +18,7 @@ import {
   Info,
 } from 'lucide-react';
 import { Select } from './ui/Select';
+import { DatePicker } from './ui/DatePicker';
 import { AiMark } from './ui/AiMark';
 
 interface TaskDraft {
@@ -331,18 +332,15 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
               <span className="text-muted font-medium">Quadro:</span>
               <Select
                 value={selectedBoardPreference}
-                onChange={(e) => setSelectedBoardPreference(e.target.value)}
-                selectSize="sm"
-                aria-label="Quadro de destino"
+                onChange={setSelectedBoardPreference}
+                size="sm"
+                ariaLabel="Quadro de destino"
                 wrapperClassName="w-56"
-              >
-                <option value="">Detectar automaticamente</option>
-                {boards.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </Select>
+                options={[
+                  { value: '', label: 'Detectar automaticamente' },
+                  ...boards.map((b) => ({ value: b.id, label: b.name })),
+                ]}
+              />
             </div>
           </div>
 
@@ -440,12 +438,13 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
                 <div className="text-[10px] font-bold uppercase text-muted mb-1 flex items-center justify-between">
                   <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Prazo</span>
                 </div>
-                <div className="text-xs font-bold text-ink mt-1">
-                  <input
-                    type="date"
+                <div className="mt-1">
+                  <DatePicker
+                    variant="bare"
                     value={draft.dueDate || ''}
-                    onChange={(e) => setDraft({ ...draft, dueDate: e.target.value })}
-                    className="bg-transparent border-none outline-none w-full cursor-pointer dark:[color-scheme:dark]"
+                    onChange={(v) => setDraft({ ...draft, dueDate: v })}
+                    ariaLabel="Prazo sugerido"
+                    placeholder="Sem prazo"
                   />
                 </div>
               </div>

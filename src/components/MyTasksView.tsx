@@ -391,9 +391,9 @@ export const MyTasksView: React.FC = () => {
                 >
                   <Select
                     value={task.status}
-                    onChange={(e) => handleStatusChange(task, e.target.value as TaskStatus)}
-                    selectSize="sm"
-                    aria-label="Alterar status da tarefa"
+                    onChange={(v) => handleStatusChange(task, v as TaskStatus)}
+                    size="sm"
+                    ariaLabel="Alterar status da tarefa"
                     wrapperClassName="w-36"
                     className={`font-semibold ${
                       task.status === 'todo'
@@ -402,11 +402,12 @@ export const MyTasksView: React.FC = () => {
                         ? 'bg-blue-50 dark:bg-sky-500/10 text-blue-800 dark:text-sky-300 border-blue-200 dark:border-sky-500/25'
                         : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/25'
                     }`}
-                  >
-                    <option value="todo">A Fazer</option>
-                    <option value="in_progress">Fazendo</option>
-                    <option value="done">Concluída</option>
-                  </Select>
+                    options={[
+                      { value: 'todo', label: 'A Fazer' },
+                      { value: 'in_progress', label: 'Fazendo' },
+                      { value: 'done', label: 'Concluída' },
+                    ]}
+                  />
 
                   <button
                     type="button"

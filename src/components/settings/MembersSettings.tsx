@@ -278,16 +278,17 @@ export const MembersSettings: React.FC = () => {
                   <Select
                     value={currentRole}
                     disabled={isMe && currentRole === 'admin' && adminCount <= 1}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value as PermissionRole)}
-                    selectSize="sm"
-                    aria-label={`Nível de acesso de ${user.name}`}
+                    onChange={(v) => handleRoleChange(user.id, v as PermissionRole)}
+                    size="sm"
+                    ariaLabel={`Nível de acesso de ${user.name}`}
                     wrapperClassName="w-40"
                     className="font-semibold"
-                  >
-                    <option value="member">Membro</option>
-                    <option value="manager">Gestor</option>
-                    <option value="admin">Administrador</option>
-                  </Select>
+                    options={[
+                      { value: 'member', label: 'Membro', hint: 'Acesso a quadros e tarefas' },
+                      { value: 'manager', label: 'Gestor', hint: 'Cria e administra quadros' },
+                      { value: 'admin', label: 'Administrador', hint: 'Controle total da empresa' },
+                    ]}
+                  />
 
                   {/* Delete User */}
                   <button

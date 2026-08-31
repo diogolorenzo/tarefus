@@ -129,19 +129,16 @@ export const BoardView: React.FC = () => {
 
           <Select
             value={filterAssignee}
-            onChange={(e) => setFilterAssignee(e.target.value)}
+            onChange={setFilterAssignee}
             icon={UserCheck}
-            selectSize="sm"
-            aria-label="Filtrar por responsável"
+            size="sm"
+            ariaLabel="Filtrar por responsável"
             wrapperClassName="w-full sm:w-52"
-          >
-            <option value="all">Todos os colaboradores</option>
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name}
-              </option>
-            ))}
-          </Select>
+            options={[
+              { value: 'all', label: 'Todos os colaboradores' },
+              ...users.map((u) => ({ value: u.id, label: u.name, hint: u.role })),
+            ]}
+          />
 
           {hasActiveFilters && (
             <button
