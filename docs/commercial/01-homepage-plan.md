@@ -5,7 +5,7 @@
 | Documento | `docs/commercial/01-homepage-plan.md` |
 | Autor | Agente 1 — Planejamento comercial |
 | Data | 2026-09-01 |
-| Status | Plano pronto para execução, condicionado aos bloqueios da seção 9 |
+| Status | Pronto para execução em Fase 0 (9.3). A abertura do cadastro depende dos itens da seção 0.C |
 | Escopo | Estratégia de mensagem, arquitetura da homepage, copy inicial, componentes futuros, SEO, analytics, aceite e riscos |
 | Fora de escopo | Implementação de código, definição de preço, cobrança, infraestrutura, credenciais |
 | Documentos irmãos esperados | `02-pricing-plan.md` (preços e plano comercial), `03-guide-plan.md` (Guia público) |
@@ -17,6 +17,52 @@ Toda afirmação de produto usada na copy foi verificada diretamente no código 
 de cada funcionalidade. A regra editorial é simples: **se não está no código, não entra na
 homepage**. Onde a funcionalidade existe mas ainda não está pronta para uso público, o item
 aparece na seção 9 como risco — nunca como promessa.
+
+---
+
+## 0. Para você resolver depois
+
+Esta seção separa o que já está resolvido do que ainda depende de você. **Nada aqui bloqueia o
+início da execução da homepage.** Se você não responder nada, a Fase 0 (seção 9.3) vai ao ar com os
+padrões da tabela B.
+
+### A. Já resolvido — a execução pode começar sem você
+
+Posicionamento e mensagem (2), estrutura das 14 seções (3), copy final de todas as seções (4),
+princípios de hierarquia visual (3.0), componentes e contratos de props (6), arquitetura da rota
+pública (6.1), SEO completo com metadados e JSON-LD (7), catálogo de eventos (8), critérios de
+aceite (9.1), lista de capturas de tela a produzir (4.6) e os arquivos prontos do Anexo A.
+
+### B. Decidido com um padrão — confirme quando puder
+
+Se você discordar de qualquer linha, muda só o ponto indicado; nada mais do plano se desfaz.
+
+| ID | Padrão adotado | Onde muda se você discordar |
+|---|---|---|
+| P2 | Exportação e exclusão de dados em até 30 dias | FAQ 2 e 9 (4.4) |
+| P3 | Suporte por e-mail, resposta em até um dia útil | FAQ e rodapé |
+| P4 | Nada é afirmado sobre localização dos dados | S9 (4.5) |
+| P5 | Faixa de fatos no lugar de depoimentos, até haver três clientes identificados | S2 (4.5) |
+| P7 | Nenhum valor de preço na homepage | S10 (4.5) |
+| D1 | Site público como segunda entrada do Vite, sem dependência nova | 6.1 |
+| D3 | Demonstração da IA pré-computada, sem chamar a API | S3 (3) |
+| D9 | Analytics anônimo, sem cookies e sem banner de consentimento | 8.1 |
+| D10 | Lançar primeiro em Fase 0 (lista de espera) e depois abrir o teste | 9.3 |
+
+### C. Só você resolve — e a Fase 1 depende disso
+
+| ID | O que falta | Por que trava | O que fazemos enquanto isso |
+|---|---|---|---|
+| P6 | Domínio definitivo | Canônica, OG e JSON-LD precisam da URL real | Marcador `SEU-DOMINIO` no código |
+| P1 | Razão social, CNPJ e endereço | Rodapé e dado estruturado `Organization` | Fase 0 publica o rodapé sem esses campos |
+| P2 | Política de Privacidade e Termos publicados | Obrigatórios para abrir cadastro | Fase 0 usa apenas a linha de privacidade da lista de espera |
+| R1–R4 | Isolamento por empresa, regras do Firestore, remoção das contas de demonstração e estado do teste de 14 dias | São de produto, não de comunicação | Fase 0 não abre cadastro, então nenhum desses riscos é exposto |
+
+### Se você tiver dez minutos agora
+
+Responder **P6 (domínio)**, **P1 (razão social e CNPJ)** e **P3 (e-mail de suporte)** é o que
+destrava mais trabalho por minuto: com esses três, a homepage sai do marcador e vira página
+publicável. Pode responder editando a coluna "Padrão adotado" deste próprio arquivo.
 
 ---
 
@@ -603,6 +649,209 @@ Os planos e valores ficam na página de Preços. Durante o teste, todos os recur
 > **Nota de execução.** As respostas 2, 8 e 9 declaram compromissos operacionais (prazo de
 > exportação, exclusão e suporte). Elas só podem ir ao ar depois de confirmadas com o responsável
 > pelo produto e refletidas na Política de Privacidade — pendências P2 e P3.
+
+---
+
+### 4.5 Copy final das demais seções
+
+As seções 4.1 a 4.4 trazem herói, CTAs, benefícios e FAQ. Abaixo está o texto definitivo do
+restante da página, organizado conforme os contratos de props da seção 6.3. **Onde a seção 3 traz
+uma versão resumida do texto, vale o que está aqui.** Nada precisa ser escrito do zero na
+implementação.
+
+#### S2 — Faixa de fatos (`FactStripProps.facts`)
+
+| Ícone (Lucide) | Texto |
+|---|---|
+| `CalendarClock` | 14 dias grátis |
+| `CreditCard` | Sem cartão de crédito |
+| `Users` | Para equipes de 3 a 30 pessoas |
+| `LogIn` | Entre com a conta Google |
+
+#### S4 — Comece em três passos (`StepsSectionProps`)
+
+- **Eyebrow:** Como funciona
+- **Título:** Comece em três passos
+- **Subtítulo:** Sem implantação, sem consultoria e sem migrar planilha.
+
+| # | Título | Descrição |
+|---|---|---|
+| 1 | Crie os quadros das suas áreas | Comercial, operações, marketing, financeiro, atendimento. Você renomeia, adiciona ou remove quando quiser. |
+| 2 | Descreva as tarefas | Escreva ou dite uma frase. A IA sugere título, responsável, prazo e checklist — e você aprova antes de salvar. |
+| 3 | Acompanhe prazos e responsáveis | O quadro mostra em que etapa cada tarefa está, e o painel avisa o que vence hoje e o que atrasou. |
+
+- **Linha de apoio:** Quem entra pela primeira vez recebe um tour de 5 passos e tem uma central de
+  ajuda dentro do sistema.
+
+#### S5 — O dia a dia da equipe (`FeatureShowcaseProps`, `id: 'dia-a-dia'`)
+
+- **Eyebrow:** No dia a dia
+- **Título:** Cada área com seu quadro, cada pessoa com sua lista
+- **Bullets:**
+  - Um quadro por área — ou todas as áreas em uma tela só.
+  - Três etapas, a fazer, fazendo e concluído: o cartão muda de etapa arrastando, no computador ou no celular.
+  - Em "Minhas Tarefas", cada pessoa vê apenas o que é dela.
+- **CTA:** Ver todos os recursos → `#prazos`
+
+#### S6 — Prazos (`FeatureShowcaseProps`, `id: 'prazos'`, imagem à esquerda)
+
+- **Eyebrow:** Prazos
+- **Título:** O atraso aparece antes de o cliente cobrar
+- **Bullets:**
+  - O cartão mostra a data de entrega e destaca o que vence hoje.
+  - Uma faixa no topo avisa as tarefas do dia assim que alguém entra no sistema.
+  - O sino mostra quantas tarefas estão atrasadas e quantas vencem hoje.
+
+#### S7 — Cada pessoa vê o que precisa (`RolesSectionProps`)
+
+- **Eyebrow:** Acessos
+- **Título:** Cada pessoa vê o que precisa
+- **Subtítulo:** Três níveis de acesso, definidos por você.
+
+| Papel | Ícone | Resumo | O que pode fazer |
+|---|---|---|---|
+| Administrador | `ShieldCheck` | Cuida da empresa dentro do sistema. | Configura os dados da empresa · Adiciona, remove e muda o nível de acesso das pessoas · Vê o histórico completo |
+| Gestor | `Briefcase` | Organiza o trabalho da área. | Cria e edita os quadros da área · Distribui tarefas e define prazos · Acompanha o andamento da equipe |
+| Colaborador | `UserCheck` | Toca as tarefas do dia. | Cria e edita tarefas · Move o cartão entre as etapas · Marca os itens do checklist |
+
+- **Nota de histórico:** Criação, movimentação, conclusão e exclusão de tarefas ficam registradas,
+  com autor e data.
+- **Link:** Ver detalhes de permissões no Guia → `/guia`
+
+#### S8 — Planilha, grupo de mensagens e Tarefus (`ComparisonSectionProps`)
+
+- **Título:** Planilha, grupo de mensagens e Tarefus
+- **Subtítulo:** Você já organiza o trabalho de algum jeito. A pergunta é quanto isso custa em retrabalho.
+
+| Critério | Planilha | Grupo de mensagens | Tarefus |
+|---|---|---|---|
+| Onde a tarefa fica | Em uma linha, se alguém lembrar de escrever | No meio da conversa, até alguém rolar para cima | Em um cartão, dentro do quadro da área |
+| Quem é o responsável | Uma coluna que nem sempre é preenchida | Quem respondeu por último — ou ninguém | Um ou mais responsáveis, com avatar no cartão |
+| O que acontece com o prazo | Só aparece se alguém abrir o arquivo | Depende de alguém lembrar de cobrar | Destaque no cartão, faixa do dia e contagem de atrasadas |
+| O que sobra de histórico | A última versão salva | A conversa inteira, sem separar o que era tarefa | Registro de quem criou, moveu, concluiu ou excluiu |
+| O que a pessoa nova encontra | Um arquivo que alguém precisa explicar | Meses de mensagens | Os quadros da área e a lista dela |
+
+- **CTA:** Começar teste grátis de 14 dias → `/cadastro`
+
+#### S9 — Seus dados e seus acessos (`TrustSectionProps`)
+
+**Versão Fase 1** (só depois de R1 e R2 resolvidos):
+
+- **Título:** Seus dados e seus acessos
+
+| Ícone | Título | Descrição |
+|---|---|---|
+| `LogIn` | Acesso com conta própria | Cada pessoa entra com e-mail e senha ou com a conta Google da empresa. |
+| `ShieldCheck` | Três níveis de permissão | Você define quem configura, quem organiza e quem executa. |
+| `History` | Histórico de atividades | Criação, movimentação e exclusão de tarefas ficam registradas. |
+| `Cloud` | Infraestrutura do Google Cloud | O Tarefus roda sobre a nuvem do Google. |
+| `Download` | Seus dados são seus | Você pode pedir a exportação ou a exclusão dos dados da empresa a qualquer momento. |
+
+**Versão Fase 0** (enquanto não há cadastro aberto — não faz afirmação de segurança):
+
+- **Título:** Como vamos tratar seus dados
+- Itens: apenas `Cloud` (infraestrutura do Google Cloud) e `Download` (exportação e exclusão a
+  pedido), mais o link para a Política de Privacidade.
+
+#### S10 — Teste e preço (`TrialTeaserSectionProps`)
+
+- **Título:** Teste 14 dias e depois escolha o plano
+- **Incluído no teste:**
+  - Todos os recursos liberados
+  - Você convida a sua equipe durante o teste
+  - Sem cartão de crédito
+- **Depois do teste:** No 15º dia, você escolhe um plano para continuar. Se não escolher, o acesso
+  é encerrado e nada é cobrado.
+- **Cancelamento:** Encerrar é simplesmente parar de usar.
+- **CTAs:** Começar teste grátis → `/cadastro` · Ver planos e preços → `/precos`
+
+> **Depende do Agente 2.** Limite de pessoas no teste, existência de fidelidade e regras de
+> cancelamento são definições comerciais. Os textos acima assumem o cenário mais simples e devem
+> ser conferidos contra `02-pricing-plan.md` antes de publicar.
+
+**Versão Fase 0:** título "Vai começar com 14 dias grátis"; corpo: "Quando abrirmos, o teste terá
+todos os recursos e não vai pedir cartão de crédito. Quem estiver na lista entra primeiro."
+
+#### S12 — Chamada final (`FinalCtaSectionProps`)
+
+- **Título:** Comece hoje com a sua equipe
+- **Linha de apoio:** Crie os quadros das suas áreas, descreva a primeira tarefa e veja o trabalho
+  se organizar. 14 dias grátis, sem cartão de crédito.
+- **CTA:** Começar teste grátis de 14 dias → `/cadastro`
+
+#### S13 — Rodapé (`SiteFooterProps`)
+
+| Coluna | Links |
+|---|---|
+| Produto | Recursos (`#dia-a-dia`) · Preços (`/precos`) · Guia (`/guia`) |
+| Acesso | Entrar (`/entrar`) · Criar conta (`/cadastro`) |
+| Legal | Política de Privacidade (`/politica-de-privacidade`) · Termos de Uso (`/termos`) |
+| Contato | E-mail de suporte (pendência P3) |
+
+- **Linha final:** Tarefus — [razão social], CNPJ [pendência P1]. © [ano corrente].
+- Colunas cujos destinos ainda não existem são omitidas, não desativadas (decisão D13).
+
+#### SF — Barra fixa do celular (`StickyMobileCtaProps`)
+
+- **Fase 1:** "Testar grátis · 14 dias" → `/cadastro`
+- **Fase 0:** "Quero ser avisado" → `#lista-de-espera`
+
+#### Variantes da Fase 0 (lista de espera)
+
+Só estes elementos mudam entre as fases; o resto da página é idêntico.
+
+| Elemento | Fase 0 | Fase 1 |
+|---|---|---|
+| Rótulo do CTA primário | Quero ser avisado quando abrir | Começar teste grátis de 14 dias |
+| Destino do CTA primário | `#lista-de-espera` | `/cadastro` |
+| Microcopy do herói | Estamos abrindo o acesso aos poucos. Deixe seu e-mail e avisamos quando chegar a sua vez. | 14 dias grátis · Não pedimos cartão de crédito · Cancele quando quiser |
+| S9 | Versão reduzida | Versão completa |
+| S10 | "Vai começar com 14 dias grátis" | "Teste 14 dias e depois escolha o plano" |
+
+**Formulário da lista de espera**
+
+| Elemento | Texto |
+|---|---|
+| Título do bloco | Entre na lista e seja avisado primeiro |
+| Rótulo do campo | Seu e-mail de trabalho |
+| Placeholder | voce@suaempresa.com.br |
+| Campo opcional | Quantas pessoas na sua equipe? (1 a 5 · 6 a 15 · 16 a 30 · mais de 30) |
+| Botão | Entrar na lista |
+| Sucesso | Pronto. Avisamos assim que o acesso abrir. |
+| Erro de validação | Digite um e-mail válido. |
+| Erro de envio | Não consegui salvar agora. Tente de novo em alguns instantes. |
+| Linha de privacidade | Usamos seu e-mail apenas para avisar sobre a abertura. Sem spam, e você pode pedir a remoção quando quiser. |
+
+> **Decisão de implementação pendente:** onde guardar os e-mails. Recomendação padrão: uma coleção
+> `waitlist` no Firestore já existente, com regra que permita **apenas criação** de documento e
+> nenhuma leitura pública — é o caminho de menor custo e não depende de serviço novo. A alternativa
+> (formulário externo) evita mexer nas regras, mas tira o dado do seu controle.
+
+---
+
+### 4.6 Capturas de tela e textos alternativos
+
+**Regras para todas as capturas**
+
+- Dados fictícios plausíveis para uma empresa pequena: use os nomes já existentes no sistema (Ana
+  Silva, Carlos Mendes, Beatriz Lima, Rodrigo Souza, Juliana Costa) e um nome de empresa fictício
+  na barra superior. Nenhum e-mail, telefone ou cliente real.
+- Números pequenos e coerentes: 4 a 8 cartões por quadro, 1 a 3 tarefas atrasadas.
+- **Nenhuma captura pode exibir o bloco de acesso rápido de demonstração** nem qualquer senha.
+- Tema claro como padrão e uma variante escura de cada imagem, servidas por `<picture>`.
+- Exportar em AVIF com alternativa WebP, 2x para telas de alta densidade, largura máxima de
+  1200px, e sempre com `width` e `height` declarados.
+
+| ID do arquivo | Seção | O que capturar | Texto alternativo |
+|---|---|---|---|
+| `hero-composicao` | S1 | Campo do assistente com a frase de exemplo, seta e o cartão de tarefa gerado | Campo de texto do assistente com a frase "Enviar proposta revisada para o cliente Alpha até sexta" e, ao lado, o cartão de tarefa gerado com responsável, prazo de sexta-feira e checklist de três itens |
+| `passo-1-quadros` | S4 | Seletor de quadros por área na barra superior | Barra de quadros do Tarefus com as áreas comercial, operações, marketing e financeiro |
+| `passo-2-assistente` | S4 | Assistente de IA com o rascunho já preenchido e os botões de aprovar e editar | Tela do assistente com o rascunho da tarefa preenchido e os botões "Aprovar e criar" e "Editar sugestão" |
+| `passo-3-prazos` | S4 | Faixa de tarefas que vencem hoje no topo do sistema | Faixa amarela no topo do Tarefus avisando que há tarefas com vencimento para hoje |
+| `quadro-por-area` | S5 | Kanban completo com as três colunas e cartões com avatar e prazo | Quadro Kanban do Tarefus com as colunas a fazer, fazendo e concluído e cartões mostrando responsável e prazo |
+| `minhas-tarefas` | S5 | Tela "Minhas Tarefas" de um colaborador | Tela "Minhas Tarefas" mostrando apenas as tarefas atribuídas a uma pessoa |
+| `alertas-prazo` | S6 | Painel de notificações aberto, com as contagens de hoje e atrasadas | Painel de notificações do Tarefus mostrando a contagem de tarefas que vencem hoje e de tarefas atrasadas |
+| `og-tarefus` | Compartilhamento | Composição 1200×630 com o quadro em destaque e a marca discreta no canto | Quadro do Tarefus com cartões de tarefa mostrando responsável e prazo |
 
 ---
 
@@ -1321,7 +1570,7 @@ Decisões tomadas dentro da autonomia deste planejamento, com a alternativa desc
 ## 11. Pendências que dependem do responsável pelo produto
 
 Cada pendência traz uma recomendação padrão para que a execução não pare enquanto a resposta não
-vem.
+vem. A leitura rápida — o que trava o quê — está na **seção 0**.
 
 | ID | Pendência | Recomendação padrão até a resposta |
 |---|---|---|
@@ -1353,6 +1602,11 @@ vem.
 - Biblioteca de CTAs e regras de tom de voz (4.0 e 4.2), reutilizáveis em Preços e Guia.
 - Contratos de props e mapa de arquivos (6.2 e 6.3), prontos para implementação.
 - Catálogo de eventos (8.2) que precisa existir antes de qualquer investimento em aquisição.
+- Copy final de todas as seções (4.5), incluindo as variantes da Fase 0, e a especificação das
+  capturas de tela com textos alternativos (4.6) — não há nada de criativo pendente.
+- `robots.txt`, `sitemap.xml`, `<noscript>` e a especificação da imagem de compartilhamento
+  (Anexo A), o checklist de virada de fase (Anexo B) e o roteiro de implementação em seis etapas
+  (Anexo C).
 
 **O que ainda não está resolvido e não deveria ser esquecido**
 
@@ -1360,3 +1614,124 @@ vem.
   que isso mude.
 - Não existe medição de resultado do cliente. Enquanto não existir, a copy permanece descritiva —
   o que o software faz — e não promissora de ganho.
+
+---
+
+## Anexo A — Arquivos prontos
+
+Trocar `SEU-DOMINIO` pelo domínio real (pendência P6) é a única edição necessária.
+
+### A.1 `public/robots.txt`
+
+```
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /entrar
+Disallow: /cadastro
+
+Sitemap: https://SEU-DOMINIO/sitemap.xml
+```
+
+### A.2 `public/sitemap.xml`
+
+Incluir apenas páginas que já existem; `lastmod` com a data real da última publicação.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://SEU-DOMINIO/</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- Adicionar /precos quando o Agente 2 publicar -->
+  <!-- Adicionar /guia quando o Agente 3 publicar -->
+  <!-- Adicionar /politica-de-privacidade e /termos quando publicados -->
+</urlset>
+```
+
+### A.3 Conteúdo do `<noscript>` da homepage
+
+Rede de segurança para rastreadores e para conexões que falham. Texto curto, com a promessa, os
+benefícios e um caminho de ação.
+
+```html
+<noscript>
+  <h1>Cada tarefa da sua equipe com um dono e um prazo</h1>
+  <p>
+    O Tarefus organiza o trabalho da sua pequena empresa em quadros por área. Descreva a tarefa
+    por texto ou por voz: a IA sugere título, responsável, prazo e checklist — e nada é salvo
+    antes da sua aprovação.
+  </p>
+  <ul>
+    <li>Um quadro para cada área da empresa</li>
+    <li>Responsável e prazo em cada cartão</li>
+    <li>Alerta do que vence hoje e do que atrasou</li>
+    <li>Tela individual com as tarefas de cada pessoa</li>
+    <li>Três níveis de acesso e histórico de atividades</li>
+  </ul>
+  <p><a href="/cadastro">Começar teste grátis de 14 dias</a> — sem cartão de crédito.</p>
+</noscript>
+```
+
+Na Fase 0, o último parágrafo aponta para `#lista-de-espera` com o rótulo "Quero ser avisado
+quando abrir".
+
+### A.4 Especificação da imagem de compartilhamento
+
+| Item | Valor |
+|---|---|
+| Arquivo | `public/site/og-tarefus.png` |
+| Dimensões | 1200 × 630 px |
+| Peso máximo | 300 KB |
+| Conteúdo | Quadro do Tarefus com três a quatro cartões legíveis mostrando avatar e prazo; marca discreta em um canto |
+| Texto na imagem | No máximo seis palavras, com o mesmo sentido do H1 |
+| Contraste | Legível como miniatura de 400px de largura |
+| O que evitar | Logotipo isolado sobre fundo liso, textos longos, capturas ilegíveis quando reduzidas |
+
+---
+
+## Anexo B — Checklist de virada da Fase 0 para a Fase 1
+
+Só vire a chave quando todas as linhas estiverem marcadas. As quatro primeiras são de produto e
+são as que realmente travam.
+
+- [ ] **R1** — Dados isolados por empresa: cada cadastro cria a própria empresa e nenhuma consulta
+      cruza empresas.
+- [ ] **R2** — `firestore.rules` exige autenticação e restringe o acesso à empresa da pessoa;
+      testado com uma conta de outra empresa.
+- [ ] **R3** — Bloco de acesso rápido de demonstração removido do fluxo público, e as contas de
+      exemplo sem senha padrão.
+- [ ] **R4** — Estado do teste de 14 dias no produto: data de início, data de término, aviso de
+      proximidade e bloqueio ao fim.
+- [ ] **R8** — Limite de uso da geração por IA por conta e por dia.
+- [ ] **P2** — Política de Privacidade e Termos de Uso publicados e enlaçados no rodapé.
+- [ ] **P1** — Razão social, CNPJ e e-mail de contato no rodapé e no JSON-LD `Organization`.
+- [ ] **P6** — Domínio definitivo aplicado na canônica, no OG, no JSON-LD, no `robots.txt` e no
+      `sitemap.xml`.
+- [ ] Eventos `signup_*`, `trial_started` e `activation_*` disparando e visíveis no funil.
+- [ ] Textos trocados conforme a tabela "Variantes da Fase 0" (4.5): CTA, microcopy, S9 e S10.
+- [ ] E-mail de aviso enviado para a lista da Fase 0, antes de qualquer investimento em mídia.
+
+---
+
+## Anexo C — Roteiro de implementação em seis etapas
+
+Sequência recomendada para quem for construir, com um critério objetivo de conclusão por etapa.
+Cada etapa entrega algo verificável, então dá para parar entre uma e outra sem deixar trabalho pela
+metade.
+
+| Etapa | Escopo | Pronto quando |
+|---|---|---|
+| 1. Fundação | Segunda entrada do Vite (D1), rotas no Express, `src/content/home.ts` com toda a copy das seções 4.1 a 4.5, camada `track()` | `/` responde com HTML próprio, `<head>` correto, e o aplicativo continua funcionando em `app.html` |
+| 2. Primitivos | `CtaButton`, `SectionShell`, `SectionHeading`, `ScreenshotFigure`, `Accordion`, hooks de visibilidade e de movimento reduzido | Primitivos renderizam nos dois temas e passam na navegação por teclado |
+| 3. Dobra principal | S0, S1, S2 e SF, com a imagem do herói otimizada | LCP medido em ≤ 2,5s no Lighthouse mobile |
+| 4. Prova e explicação | S3 (demonstração pré-computada), S4, S5, S6 | A demonstração roda sem rede e respeita `prefers-reduced-motion` |
+| 5. Objeção e fechamento | S7, S8, S9, S10, S11, S12, S13 | A tabela do comparativo vira blocos abaixo de 768px e o FAQ espelha o JSON-LD |
+| 6. Instrumentação e aceite | Eventos da seção 8.2, `robots.txt`, `sitemap.xml`, JSON-LD, `<noscript>` | Checklist 9.1 inteiro marcado |
+
+**Não faça na mesma etapa:** capturas de tela e código. As imagens da seção 4.6 podem ser
+produzidas em paralelo, com placeholders do tamanho final no lugar — assim o layout nunca é
+ajustado duas vezes.
