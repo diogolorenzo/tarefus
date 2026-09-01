@@ -14,8 +14,8 @@
     <script>
       // Aplica o tema salvo antes da primeira pintura, evitando o "flash" branco.
       try {
-        var t = localStorage.getItem('tarefus_theme_v1');
-        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Só o tema explicitamente salvo ativa o escuro; o padrão é claro.
+        if (localStorage.getItem('tarefus_theme_v1') === 'dark') {
           document.documentElement.classList.add('dark');
         }
       } catch (e) {}

@@ -63,6 +63,14 @@
 }
 
 @layer base {
+  html {
+    /* A barra de rolagem passa a ocupar espaço mesmo quando não há o que
+       rolar. Sem isto, trocar de filtro (11 tarefas -> 4) faz a barra sumir,
+       a largura útil da página aumenta ~15px e todo o texto dos cartões
+       reflui — a sensação de "travamento" ao trocar de aba. */
+    scrollbar-gutter: stable;
+  }
+
   body {
     @apply bg-app text-ink antialiased font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum" 0;

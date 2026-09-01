@@ -215,9 +215,9 @@ export const loadTheme = (): 'light' | 'dark' => {
     if (raw === 'light' || raw === 'dark') {
       return raw;
     }
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
+    // O padrão do produto é o tema claro. Antes seguíamos o
+    // prefers-color-scheme, então quem usa o sistema no escuro abria o app
+    // no escuro sem nunca ter escolhido isso.
     return 'light';
   } catch {
     return 'light';
