@@ -80,7 +80,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-1 flex flex-col gap-2.5 min-h-[140px] p-1 rounded-xl transition-all duration-200 ${
+            className={`flex-1 flex flex-col gap-2.5 min-h-[140px] p-1 rounded-xl transition-colors duration-200 ${
               snapshot.isDraggingOver ? config.dropActiveBg : ''
             }`}
           >

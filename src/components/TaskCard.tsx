@@ -41,11 +41,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => openTaskModal(task)}
-          className={`group relative bg-white dark:bg-[#151D2C] rounded-xl p-4 border transition-all duration-200 cursor-grab active:cursor-grabbing select-none overflow-hidden ${
+          className={`group relative bg-surface rounded-xl p-4 border transition-[color,background-color,border-color,box-shadow] duration-200 cursor-grab active:cursor-grabbing select-none overflow-hidden ${
             snapshot.isDragging
-              ? 'shadow-2xl ring-2 ring-indigo-500 border-indigo-400 rotate-1 scale-102 z-50 bg-white dark:bg-[#1E293B] dark:ring-indigo-400 dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)]'
-              : 'shadow-xs hover:shadow-lg dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.6),0_0_0_1px_rgba(99,102,241,0.25)] border-slate-200/90 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-indigo-500/40 dark:hover:bg-[#192336]'
-          } ${isDone ? 'bg-slate-50/70 dark:bg-[#101724]/60 border-slate-200 dark:border-white/[0.04]' : ''} ${
+              ? 'shadow-2xl ring-2 ring-indigo-500 border-indigo-400 z-50 bg-surface dark:ring-indigo-400 dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)]'
+              : 'shadow-xs hover:shadow-lg dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.6),0_0_0_1px_rgba(99,102,241,0.25)] border-line hover:border-line-strong'
+          } ${isDone ? 'bg-sunken/60 border-line' : ''} ${
             !isDone && dueInfo.isToday ? 'ring-1 ring-amber-400/40 dark:ring-amber-500/30' : ''
           }`}
         >
@@ -58,7 +58,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
           )}
 
           {/* Top Row: Board Tag & Quick Complete Checkbox */}
-          <div className="flex items-start justify-between gap-2 mb-2.5">
+          <div className="flex items-center justify-between gap-2 mb-2.5 h-6">
             <div className="flex items-center gap-1.5 flex-wrap">
               {showBoardBadge && board && (
                 <span
@@ -100,7 +100,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
           {/* Title */}
           <h4
             className={`text-sm font-semibold leading-snug break-words transition-colors ${
-              isDone ? 'line-through text-subtle' : 'text-ink group-hover:text-indigo-600 dark:group-hover:text-indigo-300'
+              isDone ? 'line-through text-muted' : 'text-ink group-hover:text-indigo-600 dark:group-hover:text-indigo-300'
             }`}
           >
             {task.title}
@@ -170,7 +170,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
                 {visibleAssignees.map((assignee) => (
                   <div
                     key={assignee.id}
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-2xs ring-2 ring-white dark:ring-[#151D2C] shrink-0 ${
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-2xs ring-2 ring-surface shrink-0 ${
                       assignee.avatarColor || 'bg-indigo-600'
                     }`}
                   >
@@ -178,7 +178,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
                   </div>
                 ))}
                 {extraAssigneesCount > 0 && (
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-700 dark:bg-slate-700 text-white shadow-2xs ring-2 ring-white dark:ring-[#151D2C] shrink-0">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-700 dark:bg-slate-700 text-white shadow-2xs ring-2 ring-surface shrink-0">
                     +{extraAssigneesCount}
                   </div>
                 )}

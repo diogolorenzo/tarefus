@@ -296,6 +296,15 @@ export const deleteTaskFromFirestore = async (taskId: string): Promise<void> => 
 
 export const subscribeToTasks = (onUpdate: (tasks: Task[]) => void) => {
   return onSnapshot(collection(db, COLLECTIONS.TASKS), (snapshot) => {
+    // O onSnapshot emite primeiro a partir do cache local. Estando offline,
+    // esse primeiro disparo vem vazio e sobrescreveria as tarefas já
+    // carregadas do armazenamento local — o quadro aparecia zerado. Um
+    // snapshot vazio vindo do servidor é legítimo (a última tarefa foi
+    // excluída) e continua sendo aplicado.
+    if (snapshot.empty && snapshot.metadata.fromCache) {
+      return;
+    }
+
     const tasks: Task[] = [];
     snapshot.forEach((d) => {
       const t = d.data() as Task;
