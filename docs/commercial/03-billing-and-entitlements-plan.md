@@ -638,7 +638,7 @@ Nenhuma fase abaixo está sendo implementada por este documento. Cada fase tem u
 11. O sandbox do provedor cobre cartão, Pix, boleto, cancelamento, falha, webhook duplicado e reconciliação antes de produção.
 12. O runbook operacional consegue localizar qualquer decisão comercial por correlationId, organização e referência externa mascarada.
 
-Nenhum teste foi executado nesta etapa, pois o entregável é exclusivamente de planejamento e nenhuma implementação foi autorizada.
+Na elaboração desta matriz, o entregável era exclusivamente de planejamento e nenhum teste de implementação havia sido executado. A execução posterior deve atualizar este documento e registrar as verificações realmente realizadas.
 
 ---
 
@@ -667,3 +667,110 @@ As decisões abaixo não bloqueiam este documento; a recomendação padrão perm
 | Processo de exceção operacional | Ajuste manual com motivo, ator e revisão; sem edição silenciosa. | Define equipe, SLA, alçadas e suporte. |
 
 Com essas decisões registradas, o Tarefus pode evoluir para cobrança por empresa sem transformar o provedor de pagamento, o frontend ou uma chave Gemini em autoridade comercial.
+
+---
+
+## 15. Roteiro de execução controlada
+
+Este roteiro transforma as fases acima em entregas técnicas pequenas, sequenciais e revisáveis. Ele não autoriza criação de conta, configuração de segredo, cobrança, webhook real, alteração de ambiente produtivo nem acesso a dados de clientes. As decisões comerciais da seção 14 continuam como parâmetros versionados e não como valores inventados no código.
+
+### Task 1 — Núcleo comercial puro e testável
+
+**Objetivo:** criar um domínio TypeScript independente de Firebase, Express, React e provedor que represente catálogo de planos, estado de assinatura/trial, assentos e resolvedor de entitlements.
+
+**Escopo obrigatório:**
+
+- Criar tipos explícitos para `PlanDefinition`, `SubscriptionSnapshot`, `SubscriptionState`, `AccessMode`, `EntitlementSnapshot`, `SeatUsage` e eventos de transição.
+- Implementar uma máquina de estados pura que rejeite transições inválidas e modele trial de 14 dias, ativa, pagamento pendente, cancelada e expirada.
+- Implementar um catálogo provisório versionado sem preço comercial definitivo, com limites técnicos de assentos e IA separados dos valores de venda.
+- Resolver entitlements somente a partir de dados de domínio confiáveis; o cliente não participa da decisão.
+- Criar testes automatizados de transições, expiração pelo relógio do servidor, upgrade/downgrade agendado, assentos e bloqueio de limites.
+- Adicionar uma forma reprodutível de executar esses testes sem introduzir serviço externo nem alterar comportamento visual existente.
+
+**Fora de escopo:** Firebase, banco, checkout, UI, secrets, cobrança ou preço real.
+
+**Critérios de aceite:** as regras do item 13 para estados, entitlements e assentos passam em testes locais; nenhuma função recebe preço ou papel comercial do frontend como autoridade.
+
+### Task 2 — Identidade de backend e fronteira de organização
+
+**Objetivo:** introduzir primitivas server-side que aceitem apenas Firebase ID tokens verificáveis, resolvam membership por `uid` e façam autorização por organização e papel comercial.
+
+**Escopo obrigatório:**
+
+- Adicionar a dependência de administração Firebase e uma inicialização que falhe fechada quando as credenciais não existirem.
+- Criar interfaces testáveis para verificador de token, repositório de membership e contexto autenticado; testes não podem exigir uma conta Firebase real.
+- Implementar middleware/guard para Bearer token, `orgId` de rota e regras `member`, `admin` e `billing_admin`.
+- Garantir que `orgId`, `uid` e papel venham do token e do repositório server-side, nunca de cabeçalho ou corpo controlado pelo cliente.
+- Expor somente uma rota de leitura de diagnóstico/entitlement protegida, sem abrir dados globais nem substituir silenciosamente as rotas legadas.
+- Criar testes de token ausente, inválido, revogado, sem membership e acesso cruzado entre organizações.
+
+**Fora de escopo:** migração de usuários existentes, mudança das credenciais Firebase de qualquer ambiente e remoção das rotas legadas antes da substituição segura.
+
+**Critérios de aceite:** a nova fronteira não tem fallback para sessão local, nega por padrão e o build/testes passam sem credenciais externas.
+
+### Task 3 — Persistência de tenancy e proteção Firestore em etapas
+
+**Objetivo:** materializar o esquema `organizations/{orgId}` para dados comerciais e preparar regras seguras e auditáveis sem quebrar dados legados por alteração prematura.
+
+**Escopo obrigatório:**
+
+- Implementar repositórios server-owned para organização, memberships, assinatura, entitlement, usage e audit append-only no caminho de organização.
+- Definir serialização e timestamps de servidor, transações para alterações concorrentes e invariantes de assentos.
+- Atualizar as Firestore Rules para negar escrita do cliente em billing, entitlements, usage, auditoria e demais documentos comerciais; permitir apenas as leituras mínimas de projeções próprias quando autenticadas e vinculadas.
+- Preservar explicitamente os caminhos legados até existir migração completa; documentar no código e no documento o bloqueio de rollout que impede alegar isolamento completo enquanto eles existirem.
+- Preparar uma migração seca/idempotente que apenas valida e planeja a conversão dos documentos atuais, sem executá-la contra projeto Firebase nem apagar dados.
+- Criar testes locais para invariantes de paths e repositórios; se o Emulator não estiver configurado, registrar a lacuna sem simular aprovação das Rules.
+
+**Fora de escopo:** aplicar Rules, rodar migração em Firebase, limpar dados globais ou ativar produção.
+
+**Critérios de aceite:** não há API de cliente que escreva autoridade comercial; paths novos têm isolamento por organização e a migração pode ser repetida sem duplicar estado.
+
+### Task 4 — IA protegida por entitlement e orçamento
+
+**Objetivo:** criar o fluxo seguro de geração de rascunho de tarefa que autentica, autoriza, reserva orçamento e liquida uso antes/depois de Gemini.
+
+**Escopo obrigatório:**
+
+- Criar ledger de uso e serviço de reserva/liquidação transacional com créditos, custo em microunits, limites de taxa, concorrência e idempotência por organização/usuário/operação.
+- Permitir apenas `operationKey` e modelo em allowlist server-side; não aceitar modelo, prompt de sistema, boards, usuários ou parâmetros de geração arbitrários do navegador.
+- Expor uma rota nova e protegida, mantendo a rota legada claramente marcada para remoção e sem conceder confiança comercial a ela.
+- Usar Gemini somente no backend e somente depois da reserva; não registrar prompt, resposta, token ou segredo em logs/ledger.
+- Tratar timeout ambíguo como `unknown` e não repetir automaticamente; retornar estado idempotente ao cliente.
+- Criar testes com cliente Gemini falso para excedente, simultaneidade, replay, falha antes do provedor, uso confirmado e acesso de outra organização.
+
+**Fora de escopo:** ativar Paid Tier, criar/rotacionar chave, mudar projeto Google, cobrança por excedente ou expor IA a usuários sem Firebase Auth.
+
+**Critérios de aceite:** nenhum request pode alcançar Gemini sem reserva, e os testes provam que concorrência e replays não ultrapassam os limites.
+
+### Task 5 — Adaptador de billing, inbox de eventos e webhook inerte
+
+**Objetivo:** deixar a integração com provedor substituível e auditável, sem credencial ou cobrança real.
+
+**Escopo obrigatório:**
+
+- Definir contrato `BillingProvider` e normalização de customer, checkout, subscription, invoice/charge e evento externo.
+- Implementar um adaptador de teste determinístico e uma inbox persistível de evento bruto mascarado, hash, referência e estado de processamento.
+- Criar verificação de assinatura HMAC/timestamp/replay como primitive isolada; corpo bruto precisa ser preservado na rota futura antes do JSON parser.
+- Implementar deduplicação por `provider + eventId`, ordenação/versão, worker puro idempotente e evento de auditoria compensatório.
+- Criar endpoints internos que apenas validam intenção e retornam indisponibilidade configurada se não houver provedor/segredo; eles não podem chamar Asaas, iugu, Mercado Pago ou Pagar.me.
+- Criar testes de assinatura válida/inválida, replay, payload alterado, duplicidade, evento fora de ordem e redirect de checkout sem webhook.
+
+**Fora de escopo:** SDK externo, conta sandbox, chave, URL pública, checkout hospedado, nota fiscal ou qualquer pagamento.
+
+**Critérios de aceite:** o domínio de entitlement recebe somente evento normalizado e confirmado; nenhum redirect ou payload do cliente ativa acesso.
+
+### Task 6 — Integração de produto, admissão e verificação final
+
+**Objetivo:** conectar as projeções seguras ao frontend e substituir gradualmente os pontos de uso que precisam de entitlement, sem mascarar as dependências externas ainda pendentes.
+
+**Escopo obrigatório:**
+
+- Exibir estado comercial e consumo de IA somente a partir de leitura autenticada server-side; manter uma experiência explícita de indisponibilidade durante a migração de identidade.
+- Adicionar portões de admissão para convites/assentos e geração de IA, com mensagens de produto que não revelem dados de outra organização.
+- Não permitir ao frontend gravar plano, assinatura, saldo, custo, eventos ou papel comercial.
+- Atualizar o documento com status de fases, evidências de testes e bloqueios externos remanescentes.
+- Executar lint, build, testes legados e novos; incluir uma revisão final de segurança e escopo antes de concluir.
+
+**Fora de escopo:** lançamento comercial, ativação de Rules em produção, migração real, integração de pagamento, nota fiscal e decisões de preço ainda abertas.
+
+**Critérios de aceite:** a aplicação compila, os fluxos novos falham fechados sem configuração externa, a UI não é autoridade comercial e a documentação separa o que foi implementado do que depende de produto/provedor.
