@@ -4,7 +4,9 @@ import { createServer } from 'node:http';
 import express from 'express';
 import {
   createCommercialAccessRouter,
+  FirebaseAdminTokenVerifier,
   type EntitlementReader,
+  type FirebaseAdminModuleLoader,
   type MembershipRepository,
   type TokenVerifier,
 } from '../src/server/commercial-access';
@@ -85,6 +87,29 @@ async function requestWithDefaultMount(path: string): Promise<{ status: number; 
   }
 }
 
+async function withFirebaseAdminEnvironment(
+  values: Record<'FIREBASE_ADMIN_PROJECT_ID' | 'FIREBASE_ADMIN_CLIENT_EMAIL' | 'FIREBASE_ADMIN_PRIVATE_KEY', string | undefined>,
+  execute: () => Promise<void>,
+): Promise<void> {
+  const keys = Object.keys(values) as Array<keyof typeof values>;
+  const previous = new Map(keys.map((key) => [key, process.env[key]]));
+
+  try {
+    for (const key of keys) {
+      const value = values[key];
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    await execute();
+  } finally {
+    for (const key of keys) {
+      const value = previous.get(key);
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
 await test('denies a request with no bearer token', async () => {
   const response = await request('/api/organizations/org-a/entitlements');
 
@@ -130,6 +155,114 @@ await test('reports authentication configuration as unavailable without acceptin
 
   assert.equal(response.status, 503);
   assert.deepEqual(response.body, { error: 'authentication_unavailable' });
+});
+
+await test('real Firebase verifier fails closed without credentials before loading Firebase Admin', async () => {
+  let moduleLoads = 0;
+  const modules: FirebaseAdminModuleLoader = {
+    loadAppModule: async () => {
+      moduleLoads += 1;
+      throw new Error('Firebase Admin must not load without credentials');
+    },
+    loadAuthModule: async () => {
+      moduleLoads += 1;
+      throw new Error('Firebase Admin must not load without credentials');
+    },
+  };
+
+  await withFirebaseAdminEnvironment(
+    {
+      FIREBASE_ADMIN_PROJECT_ID: undefined,
+      FIREBASE_ADMIN_CLIENT_EMAIL: undefined,
+      FIREBASE_ADMIN_PRIVATE_KEY: undefined,
+    },
+    async () => {
+      const result = await new FirebaseAdminTokenVerifier(modules).verifyIdToken('token');
+      assert.deepEqual(result, { ok: false, reason: 'unavailable' });
+    },
+  );
+
+  assert.equal(moduleLoads, 0);
+});
+
+await test('real Firebase verifier selects only its configured named app', async () => {
+  const otherProjectApp = { name: 'other-project-app' };
+  const configuredProjectApp = {
+    name: 'tarefus-admin:configured-project',
+    options: { projectId: 'configured-project' },
+  };
+  let initializedName: string | undefined;
+  let verifiedWithApp: unknown;
+  const modules: FirebaseAdminModuleLoader = {
+    loadAppModule: async () => ({
+      getApp(name: string) {
+        if (name === configuredProjectApp.name) return configuredProjectApp;
+        throw new Error(`Unexpected app lookup: ${name}`);
+      },
+      initializeApp(_options: unknown, name: string) {
+        initializedName = name;
+        return configuredProjectApp;
+      },
+      cert: () => ({ projectId: 'configured-project' }),
+    }),
+    loadAuthModule: async () => ({
+      getAuth(app: unknown) {
+        verifiedWithApp = app;
+        return { verifyIdToken: async () => ({ uid: 'user-1' }) };
+      },
+    }),
+  };
+
+  await withFirebaseAdminEnvironment(
+    {
+      FIREBASE_ADMIN_PROJECT_ID: 'configured-project',
+      FIREBASE_ADMIN_CLIENT_EMAIL: 'service@example.test',
+      FIREBASE_ADMIN_PRIVATE_KEY: 'not-a-real-private-key',
+    },
+    async () => {
+      const result = await new FirebaseAdminTokenVerifier(modules).verifyIdToken('token');
+      assert.deepEqual(result, { ok: true, identity: { uid: 'user-1' } });
+    },
+  );
+
+  assert.equal(initializedName, undefined);
+  assert.equal(verifiedWithApp, configuredProjectApp);
+  assert.notEqual(verifiedWithApp, otherProjectApp);
+});
+
+await test('real Firebase verifier rejects a configured app name bound to another project', async () => {
+  let verifyCalled = false;
+  const modules: FirebaseAdminModuleLoader = {
+    loadAppModule: async () => ({
+      getApp: () => ({ name: 'tarefus-admin:configured-project', options: { projectId: 'other-project' } }),
+      initializeApp: () => {
+        throw new Error('A mismatched named app must not be replaced implicitly');
+      },
+      cert: () => ({ projectId: 'configured-project' }),
+    }),
+    loadAuthModule: async () => ({
+      getAuth: () => ({
+        verifyIdToken: async () => {
+          verifyCalled = true;
+          return { uid: 'user-1' };
+        },
+      }),
+    }),
+  };
+
+  await withFirebaseAdminEnvironment(
+    {
+      FIREBASE_ADMIN_PROJECT_ID: 'configured-project',
+      FIREBASE_ADMIN_CLIENT_EMAIL: 'service@example.test',
+      FIREBASE_ADMIN_PRIVATE_KEY: 'not-a-real-private-key',
+    },
+    async () => {
+      const result = await new FirebaseAdminTokenVerifier(modules).verifyIdToken('token');
+      assert.deepEqual(result, { ok: false, reason: 'unavailable' });
+    },
+  );
+
+  assert.equal(verifyCalled, false);
 });
 
 await test('denies an authenticated user with no server-side membership', async () => {

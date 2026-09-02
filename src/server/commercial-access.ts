@@ -16,6 +16,11 @@ export interface TokenVerifier {
   verifyIdToken(token: string): Promise<TokenVerificationResult>;
 }
 
+export interface FirebaseAdminModuleLoader {
+  loadAppModule(): Promise<FirebaseAdminAppModule>;
+  loadAuthModule(): Promise<FirebaseAdminAuthModule>;
+}
+
 export interface OrganizationMembership {
   organizationId: string;
   uid: string;
@@ -94,10 +99,17 @@ export function createCommercialAccessRouter(dependencies: CommercialAccessDepen
 }
 
 export class FirebaseAdminTokenVerifier implements TokenVerifier {
+  private firebaseAdminAuth: Promise<FirebaseAdminAuth> | undefined;
+  private readonly modules: FirebaseAdminModuleLoader;
+
+  constructor(modules: FirebaseAdminModuleLoader = firebaseAdminModuleLoader) {
+    this.modules = modules;
+  }
+
   async verifyIdToken(token: string): Promise<TokenVerificationResult> {
     let auth: FirebaseAdminAuth;
     try {
-      auth = await getFirebaseAdminAuth();
+      auth = await this.getFirebaseAdminAuth();
     } catch {
       return { ok: false, reason: 'unavailable' };
     }
@@ -110,6 +122,13 @@ export class FirebaseAdminTokenVerifier implements TokenVerifier {
     } catch (error) {
       return { ok: false, reason: firebaseErrorCode(error) === 'auth/id-token-revoked' ? 'revoked' : 'invalid' };
     }
+  }
+
+  private async getFirebaseAdminAuth(): Promise<FirebaseAdminAuth> {
+    if (!this.firebaseAdminAuth) {
+      this.firebaseAdminAuth = initializeFirebaseAdminAuth(this.modules);
+    }
+    return this.firebaseAdminAuth;
   }
 }
 
@@ -133,14 +152,9 @@ interface FirebaseAdminAuth {
   verifyIdToken(token: string, checkRevoked: boolean): Promise<{ uid: string }>;
 }
 
-let firebaseAdminAuth: Promise<FirebaseAdminAuth> | undefined;
-
-async function getFirebaseAdminAuth(): Promise<FirebaseAdminAuth> {
-  if (!firebaseAdminAuth) firebaseAdminAuth = initializeFirebaseAdminAuth();
-  return firebaseAdminAuth;
-}
-
-async function initializeFirebaseAdminAuth(): Promise<FirebaseAdminAuth> {
+async function initializeFirebaseAdminAuth(
+  modules: FirebaseAdminModuleLoader,
+): Promise<FirebaseAdminAuth> {
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
@@ -148,11 +162,27 @@ async function initializeFirebaseAdminAuth(): Promise<FirebaseAdminAuth> {
     throw new Error('Firebase Admin credentials are not configured');
   }
 
-  const app = await loadFirebaseAdminAppModule();
-  const auth = await loadFirebaseAdminAuthModule();
-  const firebaseApp = app.getApps()[0] ?? app.initializeApp({
-    credential: app.cert({ projectId, clientEmail, privateKey }),
-  });
+  const app = await modules.loadAppModule();
+  const auth = await modules.loadAuthModule();
+  const name = firebaseAdminAppName(projectId);
+  let existingApp: FirebaseAdminApp | undefined;
+  try {
+    existingApp = app.getApp(name);
+  } catch {
+    existingApp = undefined;
+  }
+
+  if (existingApp && existingApp.options.projectId !== projectId) {
+    throw new Error('Named Firebase Admin app is bound to a different project');
+  }
+
+  const firebaseApp = existingApp ?? app.initializeApp(
+    {
+      projectId,
+      credential: app.cert({ projectId, clientEmail, privateKey }),
+    },
+    name,
+  );
   return auth.getAuth(firebaseApp);
 }
 
@@ -200,22 +230,28 @@ function respondToTokenFailure(response: Response, reason: TokenFailureReason): 
   response.status(401).json({ error: 'invalid_token' });
 }
 
-interface FirebaseAdminAppModule {
-  getApps(): unknown[];
-  initializeApp(options: { credential: unknown }): unknown;
+export interface FirebaseAdminAppModule {
+  getApp(name: string): FirebaseAdminApp;
+  initializeApp(options: { projectId: string; credential: unknown }, name: string): FirebaseAdminApp;
   cert(credentials: { projectId: string; clientEmail: string; privateKey: string }): unknown;
 }
 
-interface FirebaseAdminAuthModule {
+export interface FirebaseAdminApp {
+  name: string;
+  options: { projectId?: string };
+}
+
+export interface FirebaseAdminAuthModule {
   getAuth(app: unknown): FirebaseAdminAuth;
 }
 
-async function loadFirebaseAdminAppModule(): Promise<FirebaseAdminAppModule> {
-  return importFirebaseAdminModule('firebase-admin/app') as Promise<FirebaseAdminAppModule>;
-}
+const firebaseAdminModuleLoader: FirebaseAdminModuleLoader = {
+  loadAppModule: async () => importFirebaseAdminModule('firebase-admin/app') as Promise<FirebaseAdminAppModule>,
+  loadAuthModule: async () => importFirebaseAdminModule('firebase-admin/auth') as Promise<FirebaseAdminAuthModule>,
+};
 
-async function loadFirebaseAdminAuthModule(): Promise<FirebaseAdminAuthModule> {
-  return importFirebaseAdminModule('firebase-admin/auth') as Promise<FirebaseAdminAuthModule>;
+function firebaseAdminAppName(projectId: string): string {
+  return `tarefus-admin:${projectId}`;
 }
 
 function importFirebaseAdminModule(moduleName: string): Promise<unknown> {
