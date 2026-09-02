@@ -30,7 +30,11 @@ export const AuthPage: React.FC = () => {
     users,
   } = useTaskContext();
 
-  const [mode, setMode] = useState<AuthMode>('login');
+  // A homepage envia para /cadastro, que deve abrir já em "criar conta"
+  // (docs/commercial/01-homepage-plan.md, seção 6.4).
+  const [mode, setMode] = useState<AuthMode>(() =>
+    typeof window !== 'undefined' && window.location.pathname === '/cadastro' ? 'register' : 'login'
+  );
 
   // Form State - Login
   const [loginEmail, setLoginEmail] = useState('');

@@ -4,25 +4,133 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
-    <title>Tarefus</title>
-    <meta name="description" content="Gestão de tarefas e quadros Kanban com suporte a criação inteligente via IA e ditado por voz" />
-    <meta property="og:title" content="Tarefus" />
-    <meta property="og:description" content="Gestão de tarefas e quadros Kanban com suporte a criação inteligente via IA e ditado por voz" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+
+    <title>Tarefus — organize as tarefas da sua equipe com dono e prazo</title>
+    <meta name="description" content="Quadros por área, responsável e prazo em cada tarefa e criação por IA a partir de uma frase. Teste grátis por 14 dias, sem cartão de crédito." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <!-- Trocar SEU-DOMINIO pelo domínio real antes de publicar (pendência P6 do plano). -->
+    <link rel="canonical" href="https://SEU-DOMINIO/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0f17" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Tarefus" />
+    <meta property="og:title" content="Tarefus — tarefas da equipe com dono e prazo" />
+    <meta property="og:description" content="Quadros por área, responsável e prazo em cada tarefa e criação por IA a partir de uma frase. Teste grátis por 14 dias." />
+    <meta property="og:url" content="https://SEU-DOMINIO/" />
+    <meta property="og:image" content="https://SEU-DOMINIO/site/og-tarefus.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Quadro do Tarefus com cartões de tarefa mostrando responsável e prazo" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+
     <script>
       // Aplica o tema salvo antes da primeira pintura, evitando o "flash" branco.
       try {
-        // Só o tema explicitamente salvo ativa o escuro; o padrão é claro.
         if (localStorage.getItem('tarefus_theme_v1') === 'dark') {
           document.documentElement.classList.add('dark');
         }
       } catch (e) {}
     </script>
+
+    <!-- Dados estruturados. "offers" fica de fora: os preços ainda são hipótese
+         a validar e /planos é a fonte única (decisão D8 do plano). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://SEU-DOMINIO/#organizacao",
+            "name": "Tarefus",
+            "url": "https://SEU-DOMINIO/",
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "contactType": "customer support",
+                "email": "suporte@SEU-DOMINIO",
+                "availableLanguage": ["pt-BR"]
+              }
+            ]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "Tarefus",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "inLanguage": "pt-BR",
+            "url": "https://SEU-DOMINIO/",
+            "publisher": { "@id": "https://SEU-DOMINIO/#organizacao" },
+            "description": "Gestão de tarefas para pequenas empresas: quadros por área, responsável e prazo em cada tarefa e criação de tarefas por IA com aprovação humana."
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Preciso de cartão de crédito para testar?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Não. O teste de 14 dias começa com e-mail e senha ou com a sua conta Google, sem cartão. Ao final, você decide se quer continuar."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "O que acontece quando o teste de 14 dias termina?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Você escolhe um plano para continuar. Se não escolher, o seu espaço entra em modo somente leitura por 30 dias: dá para consultar e exportar tudo, mas não criar nem editar. Depois disso o acesso é bloqueado. Nada é cobrado sem a sua escolha."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Como funciona a criação de tarefas com IA?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Você descreve o que precisa ser feito, por texto ou por voz. A IA devolve um rascunho com título, descrição, responsável sugerido, prazo, etiquetas e checklist. Você revisa, edita se quiser e aprova. Nada é salvo sem a sua aprovação."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Onde ficam os dados da minha empresa?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Os dados ficam na infraestrutura de nuvem do Google (Firestore). O acesso é feito por e-mail e senha ou por conta Google, com três níveis de permissão, e as ações ficam registradas no histórico."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body class="selection:bg-indigo-500 selection:text-white">
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <noscript>
+      <h1>Cada tarefa da sua equipe com um dono e um prazo</h1>
+      <p>
+        O Tarefus organiza o trabalho da sua pequena empresa em quadros por área. Descreva a tarefa
+        por texto ou por voz: a IA sugere título, responsável, prazo e checklist — e nada é salvo
+        antes da sua aprovação.
+      </p>
+      <ul>
+        <li>Um quadro para cada área da empresa</li>
+        <li>Responsável e prazo em cada cartão</li>
+        <li>Alerta do que vence hoje e do que atrasou</li>
+        <li>Tela individual com as tarefas de cada pessoa</li>
+        <li>Três níveis de acesso e histórico de atividades</li>
+      </ul>
+      <p><a href="/cadastro">Começar teste grátis de 14 dias</a> — sem cartão de crédito.</p>
+    </noscript>
+
+    <script type="module" src="/src/site/main-site.tsx"></script>
   </body>
 </html>
