@@ -116,3 +116,36 @@ Nenhum push, PR, merge ou deploy foi feito.
 - Não houve teste de integração contra Firestore real, credencial, projeto, índice de collection-group ou semântica runtime de `FieldValue.serverTimestamp()`.
 - A futura composição real deve validar os índices necessários para a consulta collection-group de memberships, configurar o sentinel de timestamp e repetir os testes com Emulator antes de qualquer rollout.
 - A migração entregue é somente um plano. Falta, fora deste escopo, aprovar mapeamentos reais, criar um executor separado e validar reconciliação antes de gravar qualquer dado.
+
+## Fix de revisão — validação runtime de `LegacyCommercialUser.active`
+
+### Status
+
+O achado Important da revisão foi corrigido. O planner agora exige que `active` seja booleano em runtime antes de construir qualquer operação. Campo ausente e valor desserializado com outro tipo produzem plano `blocked`, `operations: []` e blocker `invalid_input` associado ao usuário legado.
+
+Os dois achados Minor registrados pela revisão não foram alterados nesta rodada.
+
+### TDD — RED → GREEN
+
+1. Foram adicionados primeiro dois testes reais em `tests/commercial-migration.test.ts`: `active` ausente e `active: "true"`.
+2. RED observado com a implementação anterior: os dois casos retornaram `ready` em vez de `blocked`; resultado `2/7 commercial migration tests failed`.
+3. Foi adicionada a validação mínima `typeof user.active !== 'boolean'` na coleta de blockers, antes da contagem e do planejamento.
+4. GREEN focal: `7/7 commercial migration tests passed`.
+
+### Verificação
+
+| Comando | Resultado |
+| --- | --- |
+| `npm.cmd run test:commercial-persistence` | Passou: repositório 8/8, migração 7/7 e Rules staged. |
+| `npx.cmd tsc --build` | Passou. |
+| `npx.cmd tsc --ignoreConfig --noEmit --target es2023 --module esnext --moduleResolution bundler --esModuleInterop --skipLibCheck src/server/commercial-migration.ts tests/commercial-migration.test.ts` | Passou. |
+| `git diff --check` | Passou; somente avisos de normalização LF→CRLF do ambiente Windows. |
+
+### Commit
+
+- `085836e fix(commercial): validate legacy active flags`
+
+### Concerns após o fix
+
+- Permanecem as lacunas staged já registradas: Rules sem Emulator/deploy, paths legados permissivos, composição padrão em `503` e nenhuma migração/Firebase real.
+- Nenhum dos dois achados Minor foi modificado, conforme o escopo desta rodada.
