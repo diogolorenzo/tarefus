@@ -171,7 +171,8 @@ export function transitionSubscription(
       return { ok: true, value: { ...snapshot, state: 'expired' } };
     case 'SCHEDULE_PLAN_CHANGE':
       if (snapshot.state !== 'trialing' && snapshot.state !== 'active') return invalidTransition();
-      if (toTimestamp(event.effectiveAt) === null || event.effectiveAt < event.occurredAt) {
+      const effectiveAt = toTimestamp(event.effectiveAt);
+      if (effectiveAt === null || effectiveAt < occurredAt) {
         return { ok: false, reason: 'invalid_timestamp' };
       }
       return {
@@ -243,7 +244,7 @@ function resolveAccessMode(snapshot: SubscriptionSnapshot, serverNow: string): A
     const trialEndsAt = toTimestamp(snapshot.trialEndsAt);
     return trialEndsAt !== null && now < trialEndsAt ? 'full' : 'blocked';
   }
-  if (snapshot.state === 'active') return 'full';
+  if (snapshot.state === 'active') return isWithinPeriod(snapshot, now) ? 'full' : 'blocked';
   if (snapshot.state === 'payment_pending') return isWithinPeriod(snapshot, now) ? 'read_only' : 'blocked';
   if (snapshot.state === 'canceled') return isWithinPeriod(snapshot, now) ? 'read_only' : 'blocked';
   return 'blocked';

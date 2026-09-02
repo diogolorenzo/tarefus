@@ -120,6 +120,17 @@ test('schedules a downgrade and applies it only at its effective server time', (
   equal(applied.scheduledPlanChange, undefined, 'schedule is consumed');
 });
 
+test('accepts a plan change scheduled later when valid offsets are not lexically ordered', () => {
+  const result = transitionSubscription(activeSubscription, {
+    type: 'SCHEDULE_PLAN_CHANGE',
+    occurredAt: '2026-09-02T12:00:00+00:00',
+    planId: 'draft-solo',
+    effectiveAt: '2026-09-02T11:30:00-01:00',
+  });
+
+  equal(result.ok, true, 'later instant must be accepted regardless of offset spelling');
+});
+
 test('blocks new seats while preserving current usage when the technical limit is reached', () => {
   const entitlements = resolveEntitlements({
     catalog,
@@ -160,6 +171,20 @@ test('only derives access from trusted domain snapshots', () => {
   });
 
   equal(entitlements.accessMode, 'blocked', 'expired snapshot is blocked');
+});
+
+test('blocks an active snapshot when the server sees its period already ended', () => {
+  const entitlements = resolveEntitlements({
+    catalog,
+    subscription: {
+      ...activeSubscription,
+      currentPeriodEndsAt: '2026-09-01T12:00:00.000Z',
+    },
+    seatUsage: { assignedSeats: 0 },
+    now,
+  });
+
+  equal(entitlements.accessMode, 'blocked', 'active state cannot outlive its server period');
 });
 
 test('keeps canceled and payment-pending workspaces read-only until their server period ends', () => {
