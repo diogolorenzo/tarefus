@@ -125,6 +125,50 @@ test('blocks instead of silently dropping a membership with an invalid commercia
   ]);
 });
 
+test('blocks a deserialized legacy user whose active field is missing', () => {
+  const plan = planLegacyCommercialMigration({
+    ...readyInput,
+    legacySnapshot: {
+      users: [
+        { legacyUserId: 'legacy-a' },
+        { legacyUserId: 'legacy-b', active: false },
+      ],
+    },
+  } as never);
+
+  assert.equal(plan.status, 'blocked');
+  assert.deepEqual(plan.operations, []);
+  assert.deepEqual(plan.blockers, [
+    {
+      code: 'invalid_input',
+      field: 'legacySnapshot.users[legacy-a].active',
+      message: 'legacySnapshot.users[legacy-a].active must be boolean.',
+    },
+  ]);
+});
+
+test('blocks a deserialized legacy user whose active field has a non-boolean type', () => {
+  const plan = planLegacyCommercialMigration({
+    ...readyInput,
+    legacySnapshot: {
+      users: [
+        { legacyUserId: 'legacy-a', active: 'true' },
+        { legacyUserId: 'legacy-b', active: false },
+      ],
+    },
+  } as never);
+
+  assert.equal(plan.status, 'blocked');
+  assert.deepEqual(plan.operations, []);
+  assert.deepEqual(plan.blockers, [
+    {
+      code: 'invalid_input',
+      field: 'legacySnapshot.users[legacy-a].active',
+      message: 'legacySnapshot.users[legacy-a].active must be boolean.',
+    },
+  ]);
+});
+
 const failures = results.filter((result) => result.error);
 if (failures.length > 0) {
   console.error(`\n${failures.length}/${results.length} commercial migration tests failed.`);

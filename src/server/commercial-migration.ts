@@ -92,6 +92,15 @@ export function planLegacyCommercialMigration(input: LegacyCommercialMigrationIn
     }
     seenLegacyUsers.add(legacyUserId);
 
+    if (typeof user.active !== 'boolean') {
+      const field = `legacySnapshot.users[${legacyUserId}].active`;
+      blockers.push({
+        code: 'invalid_input',
+        field,
+        message: `${field} must be boolean.`,
+      });
+    }
+
     const mappedRole = input.roleByLegacyUserId?.[legacyUserId];
     if (mappedRole !== undefined && !isCommercialRole(mappedRole)) {
       const field = `roleByLegacyUserId.${legacyUserId}`;
