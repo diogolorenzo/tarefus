@@ -41,7 +41,7 @@ Se você discordar de qualquer linha, muda só o ponto indicado; nada mais do pl
 | ID | Padrão adotado | Onde muda se você discordar |
 |---|---|---|
 | P2 | Exportação e exclusão de dados em até 30 dias | FAQ 2 e 9 (4.4) |
-| P3 | Suporte por e-mail com resposta em até 24 horas úteis — confirmado pelo Agente 2, com prazos menores nos planos superiores | FAQ e rodapé |
+| P3 | Suporte por e-mail com resposta em até 24 horas úteis — confirmado pelo Agente 2, com prazos menores nos planos superiores. Endereço provisório confirmado pelo responsável em 2026-09-02: `suporte@tarefus.com.br` | FAQ e rodapé |
 | P4 | Nada é afirmado sobre localização dos dados | S9 (4.5) |
 | P5 | Faixa de fatos no lugar de depoimentos, até haver três clientes identificados | S2 (4.5) |
 | P7 | Preços já definidos pelo Agente 2; a homepage continua sem exibir valores | S10 (4.5) |
@@ -54,10 +54,10 @@ Se você discordar de qualquer linha, muda só o ponto indicado; nada mais do pl
 
 | ID | O que falta | Por que trava | O que fazemos enquanto isso |
 |---|---|---|---|
-| P6 | Domínio definitivo | Canônica, OG e JSON-LD precisam da URL real | Marcador `SEU-DOMINIO` no código |
-| P1 | Razão social, CNPJ e endereço | Rodapé e dado estruturado `Organization` | Fase 0 publica o rodapé sem esses campos |
+| ~~P6~~ | ~~Domínio definitivo~~ — **resolvido provisoriamente em 2026-09-02.** Enquanto o domínio comercial não é comprado, canônica, OG e JSON-LD usam `https://tarefus.ai.studio` (hospedagem cortesia do Google AI Studio). Trocar quando o domínio definitivo estiver conectado | — | `index.html` já usa `tarefus.ai.studio` |
+| P1 | Razão social, CNPJ e endereço | Rodapé e dado estruturado `Organization`. Confirmado pelo responsável em 2026-09-02: o CNPJ ainda não existe | Fase 0 publica o rodapé sem esses campos; o rodapé hoje mostra literalmente "a definir" |
 | P2 | Política de Privacidade e Termos publicados | Obrigatórios para abrir cadastro | Fase 0 usa apenas a linha de privacidade da lista de espera |
-| R1–R4 | Isolamento por empresa, regras do Firestore, remoção das contas de demonstração e estado do teste de 14 dias | São de produto, não de comunicação | Fase 0 não abre cadastro, então nenhum desses riscos é exposto |
+| R1–R4 | Isolamento por empresa, regras do Firestore, remoção das contas de demonstração e estado do teste de 14 dias | São de produto, não de comunicação. O responsável confirmou a intenção de criar várias empresas de teste antes do lançamento — o que exercita exatamente o isolamento que falta (R1) | Fase 0 não abre cadastro, então nenhum desses riscos é exposto |
 
 ### Se você tiver dez minutos agora
 
