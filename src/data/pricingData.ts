@@ -355,7 +355,7 @@ export const PRICING_FAQS: PricingFaqItem[] = [
     category: 'payment',
     question: 'Quais são as formas de pagamento aceitas?',
     answer:
-      'Aceitamos Cartão de Crédito nacional e internacional (cobrado em Reais no plano mensal ou parcelado em até 12x no plano anual), PIX à vista com desconto especial e Boleto Bancário para contratos com faturamento anual.',
+      'Aceitamos Cartão de Crédito (cobrado em Reais no plano mensal ou parcelado em até 12x no plano anual) e PIX à vista com liberação imediata da sua conta.',
   },
   {
     id: 'faq-5',

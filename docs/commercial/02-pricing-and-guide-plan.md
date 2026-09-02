@@ -242,7 +242,7 @@ pie title "Custo Mensal para 12 Usuários (em R$)"
 3. **A cobrança é realmente por empresa ou por pessoa?**  
    *Por empresa! Ao assinar um plano, você tem direito à quantidade de membros contratada sem pagar um centavo a mais por cada pessoa convidada.*
 4. **Quais são as formas de pagamento aceitas?**  
-   *Aceitamos Cartão de Crédito (mensal ou parcelado em até 12x no plano anual), PIX à vista e Boleto Bancário para contratos anuais.*
+   *Aceitamos Cartão de Crédito (mensal ou parcelado em até 12x no plano anual) e PIX à vista.*
 5. **Posso cancelar a qualquer momento?**  
    *Sim. No plano mensal, você pode cancelar a renovação com 1 clique no painel a qualquer hora, sem multa ou fidelidade. Você continuará com acesso até o fim do período já pago.*
 6. **Como funciona a criação de tarefas com Inteligência Artificial?**  
@@ -427,7 +427,7 @@ graph LR
 | **Valores Exatos dos Planos** | R\$ 69 / R\$ 139 / R\$ 269 (Mensal) | **Sim (Validação com primeiros 20 clientes beta)** | Ajuste nos números da tabela e nas metas de faturamento. A arquitetura permanece idêntica. |
 | **Cotas de IA Gemini por Plano** | 100 / 400 / 1.200 criações por mês | **Sim (Monitoramento do custo real de API no beta)** | Simples ajuste numérico nos limites de cota sem impacto estrutural de UX. |
 | **Prazo de Preservação pós-Trial** | 30 dias em modo somente-leitura antes do bloqueio total | **Sim (Definição da política de retenção de dados)** | Ajuste nos termos de uso e nos avisos de expiração. |
-| **Formas de Pagamento no Anual** | Parcelamento em 12x no cartão ou PIX/Boleto à vista | **Sim (Alinhamento com gateway do Agente 3)** | Configuração de juros/taxas no gateway de pagamento. |
+| **Formas de Pagamento no Anual** | Parcelamento em 12x no cartão ou PIX à vista (sem boleto) | **Decidido pelo Dono do Produto** | Configuração no gateway para aceitar apenas Cartão e PIX. |
 
 ---
 *Fim do documento de planejamento comercial `02-pricing-and-guide-plan.md`.*
