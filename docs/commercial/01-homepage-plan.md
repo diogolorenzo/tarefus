@@ -8,7 +8,8 @@
 | Status | Pronto para execução em Fase 0 (9.3). A abertura do cadastro depende dos itens da seção 0.C |
 | Escopo | Estratégia de mensagem, arquitetura da homepage, copy inicial, componentes futuros, SEO, analytics, aceite e riscos |
 | Fora de escopo | Implementação de código, definição de preço, cobrança, infraestrutura, credenciais |
-| Documentos irmãos esperados | `02-pricing-plan.md` (preços e plano comercial), `03-guide-plan.md` (Guia público) |
+| Documento irmão | `02-pricing-and-guide-plan.md` (Agente 2 — planos, preços e Guia), na branch `plan_pricing_guide_strategy` |
+| Última revisão | 2026-09-01 — copy alinhada às regras comerciais confirmadas pelo Agente 2 (seção 0.D) |
 
 ## Como este documento foi construído
 
@@ -40,10 +41,10 @@ Se você discordar de qualquer linha, muda só o ponto indicado; nada mais do pl
 | ID | Padrão adotado | Onde muda se você discordar |
 |---|---|---|
 | P2 | Exportação e exclusão de dados em até 30 dias | FAQ 2 e 9 (4.4) |
-| P3 | Suporte por e-mail, resposta em até um dia útil | FAQ e rodapé |
+| P3 | Suporte por e-mail com resposta em até 24 horas úteis — confirmado pelo Agente 2, com prazos menores nos planos superiores | FAQ e rodapé |
 | P4 | Nada é afirmado sobre localização dos dados | S9 (4.5) |
 | P5 | Faixa de fatos no lugar de depoimentos, até haver três clientes identificados | S2 (4.5) |
-| P7 | Nenhum valor de preço na homepage | S10 (4.5) |
+| P7 | Preços já definidos pelo Agente 2; a homepage continua sem exibir valores | S10 (4.5) |
 | D1 | Site público como segunda entrada do Vite, sem dependência nova | 6.1 |
 | D3 | Demonstração da IA pré-computada, sem chamar a API | S3 (3) |
 | D9 | Analytics anônimo, sem cookies e sem banner de consentimento | 8.1 |
@@ -64,6 +65,34 @@ Responder **P6 (domínio)**, **P1 (razão social e CNPJ)** e **P3 (e-mail de sup
 destrava mais trabalho por minuto: com esses três, a homepage sai do marcador e vira página
 publicável. Pode responder editando a coluna "Padrão adotado" deste próprio arquivo.
 
+### D. Alinhamento com o plano de Planos e Guia (Agente 2)
+
+Confirmado em 2026-09-01 a partir de `02-pricing-and-guide-plan.md` (branch
+`plan_pricing_guide_strategy`). **Estas regras são a fonte de verdade da copy comercial desta
+página** e já estão aplicadas em todas as seções indicadas.
+
+| Regra confirmada | Como aparece na homepage | Onde |
+|---|---|---|
+| Página de planos em `/planos`, com o rótulo de menu "Planos" | Todos os links e rótulos usam `/planos`; "Preços" sai do menu | S0, 4.2, 6.4, 7.1 |
+| Teste de 14 dias, sem cartão, com acesso completo ao plano; o cadastro já inicia no Crescimento | "Plano completo durante o teste" — nunca "todos os recursos do produto" | S1, S10, FAQ 1 e 11 |
+| Três planos por faixa de membros (até 5, 15 e 35) | "Convide a equipe até o limite de membros do plano"; proibido dizer "pessoas ilimitadas" | S10, 1.5, FAQ 3 |
+| Cobrança por empresa, em reais, com nota fiscal | Vira fato na faixa S2 e linha de cobrança em S10 | S2, S10, FAQ 10 |
+| Sem fidelidade no mensal; anual parcelado em 12x ou à vista no PIX | Linha de cancelamento em S10; "cancele quando quiser" sai do herói | S10, 4.1, 1.5 |
+| Modo somente leitura por 30 dias após o teste, antes do bloqueio | Substitui "o acesso é encerrado" | S10, FAQ 2 e 9 |
+| Exportação em JSON ou CSV a qualquer momento | Resposta de exportação do FAQ | FAQ 9, S9 |
+| Cotas mensais de IA por plano (100, 400 e 1.200 criações) | Proibição de dizer "IA ilimitada" | 1.5, R8 |
+| Histórico de 30 dias, 180 dias ou completo, conforme o plano | Proibição de dizer "histórico completo" sem qualificar | 1.5, S7 |
+| Suporte por e-mail em até 24 horas úteis, com prazos menores nos planos superiores | Base do compromisso de suporte | P3, rodapé |
+| Guia em `/guia` e `/guia/[slug]`, com pauta de 12 artigos | Links "Ver o Guia" e estratégia de cauda longa | S9, S11, 7.6 |
+
+**Divergência consciente.** A matriz de recursos do Agente 2 lista "Conformidade com LGPD" como
+item de plano. Esta homepage continua sem exibir esse selo até a Política de Privacidade estar
+publicada e revisada (P2): descrever práticas é permitido, declarar conformidade não.
+
+**Os valores continuam fora da homepage.** Os preços existem, mas são hipóteses a validar com os
+primeiros clientes, e `/planos` é a fonte única (D8). Isso vale inclusive para o dado estruturado:
+`offers` fica de fora até os valores estarem validados.
+
 ---
 
 ## 1. Público e proposta de valor
@@ -75,7 +104,7 @@ nessa ordem.
 
 | Papel | Quem é | O que sente hoje | O que precisa ver na homepage |
 |---|---|---|---|
-| **Decisor** (dono, sócio, gerente) | Comanda uma empresa de 3 a 30 pessoas, acumula funções, decide sozinho e rápido | Não sabe o que está em andamento sem perguntar; descobre o atraso quando o cliente cobra; pede status por WhatsApp várias vezes ao dia | Que ele passa a enxergar tarefa, responsável e prazo sem cobrar ninguém |
+| **Decisor** (dono, sócio, gerente) | Comanda uma empresa de 3 a 35 pessoas, acumula funções, decide sozinho e rápido | Não sabe o que está em andamento sem perguntar; descobre o atraso quando o cliente cobra; pede status por WhatsApp várias vezes ao dia | Que ele passa a enxergar tarefa, responsável e prazo sem cobrar ninguém |
 | **Usuário** (vendas, operações, marketing, financeiro, atendimento) | Recebe demanda por WhatsApp, e-mail, telefone e corredor | Não sabe a prioridade do dia; recebe pedido sem prazo; refaz trabalho | Que a ferramenta é simples, abre no celular e mostra só o que é dele |
 | **Influenciador técnico** (quando existe) | Sócio mais ligado a tecnologia, estagiário de TI, contador ou agência parceira | Avalia se a empresa vai ficar refém da ferramenta | Onde os dados ficam, quem acessa o quê, como sair da ferramenta |
 
@@ -151,6 +180,10 @@ ser dito na homepage sobre cada item.
 | "Integra com WhatsApp, e-mail ou Google Agenda" | Não existe integração no código. |
 | "Funciona offline" | Existe persistência local como retaguarda, não um modo offline garantido. |
 | "Relatórios" ou "dashboards" | Existe contagem de prazos, não relatório. |
+| "Pessoas ilimitadas", "toda a equipe sem limite" | Os planos têm faixa de membros (até 5, 15 e 35). Ver 0.D. |
+| "IA ilimitada" | Cada plano tem cota mensal de criações por IA. |
+| "Histórico completo", sem qualificar | O período do histórico varia por plano. |
+| "Cancele quando quiser", isolado | Vale para o mensal; o anual é um compromisso de 12 meses, parcelado ou à vista. |
 
 ---
 
@@ -250,7 +283,7 @@ Regras de hierarquia aplicadas em toda a página:
 | S7 | Cada pessoa vê o que precisa | Remover risco | — |
 | S8 | Tarefus x planilha e grupo de WhatsApp | Remover risco | CTA primário |
 | S9 | Seus dados e seus acessos | Remover risco | Link para o Guia |
-| S10 | Teste 14 dias, depois escolha o plano | Remover risco | CTA primário + link para Preços |
+| S10 | Teste 14 dias, depois escolha o plano | Remover risco | CTA primário + link para Planos |
 | S11 | Perguntas frequentes | Fechar | Link para o Guia |
 | S12 | Chamada final | Fechar | CTA primário |
 | S13 | Rodapé | — | Links institucionais |
@@ -264,7 +297,7 @@ Regras de hierarquia aplicadas em toda a página:
 - **Mensagem.** A marca, quatro destinos e uma ação. Nada mais.
 - **CTA.** Primário compacto "Testar grátis"; ao lado, "Entrar" como link de texto — quem já é
   cliente não deve caçar o login.
-- **Evidência / visual.** Logotipo Tarefus à esquerda; itens: Recursos, Preços, Guia; à direita
+- **Evidência / visual.** Logotipo Tarefus à esquerda; itens: Recursos, Planos, Guia; à direita
   "Entrar" e o botão. Barra com fundo `--raised`, borda inferior `--line` de 1px, sem sombra. Fica
   fixa no topo somente após 120px de rolagem, para não roubar altura da primeira dobra.
 - **Comportamento mobile.** Colapsa em: logotipo + botão "Testar grátis" + ícone de menu. O menu
@@ -281,7 +314,8 @@ Regras de hierarquia aplicadas em toda a página:
   completa na seção 4.1.
 - **CTA.** Primário: **"Começar teste grátis de 14 dias"**. Secundário: **"Ver como funciona"**,
   rolagem suave até S3 (não abre vídeo, não abre modal).
-  Microcopy sob os botões: "14 dias grátis · Não pedimos cartão de crédito · Cancele quando quiser."
+  Microcopy sob os botões: "14 dias grátis · Não pedimos cartão de crédito · Plano completo durante
+  o teste."
 - **Evidência / visual.** Composição em duas partes, lado a lado no desktop:
   1. **campo de captura** reproduzindo o Assistente de IA do produto, com o efeito de digitação já
      existente (`TYPEWRITER_EXAMPLES` em `src/components/TaskAICreator.tsx`) e ícone de microfone;
@@ -302,7 +336,7 @@ Regras de hierarquia aplicadas em toda a página:
 - **Objetivo.** Substituir a prova social que ainda não existe por fatos verificáveis, reduzindo o
   risco percebido logo após a promessa. Decisão D6.
 - **Mensagem.** Quatro fatos curtos, em uma linha cada: "14 dias grátis", "Sem cartão de crédito",
-  "Em português, feito para pequenas empresas", "Entre com a conta Google".
+  "Preço por empresa, não por pessoa", "Entre com a conta Google". Texto canônico em 4.5.
 - **CTA.** Nenhum. É uma faixa de leitura, não de ação.
 - **Evidência / visual.** Faixa de baixa altura, fundo `--sunken`, quatro itens com ícone Lucide
   (já instalado) e texto curto. Sem números inventados, sem logotipos de empresas, sem selos que
@@ -361,7 +395,7 @@ Regras de hierarquia aplicadas em toda a página:
 - **Objetivo.** Mostrar o produto funcionando: quadro por área e visão individual.
 - **Mensagem.** "Cada área tem seu quadro. Cada pessoa tem sua lista." O gestor vê o todo, o
   colaborador vê o que é dele.
-- **CTA.** Secundário: "Ver todos os recursos" (âncora para S6/S7 ou, quando existir, para a página
+- **CTA.** Secundário: "Ver o Tarefus por dentro" (âncora para S6/S7 ou, quando existir, para a página
   de Recursos). O CTA primário não se repete aqui para não saturar.
 - **Evidência / visual.** Bloco duplo, alternando lado da imagem:
   - **Quadro por área** — Kanban com as três colunas e cartões reais, com avatares e prazos;
@@ -428,7 +462,7 @@ Regras de hierarquia aplicadas em toda a página:
 - **Objetivo.** Reduzir o risco percebido de confiar o trabalho da empresa a um produto novo.
 - **Mensagem.** Somente o que é verificável hoje: dados na infraestrutura do Google Cloud
   (Firestore); acesso por e-mail e senha ou conta Google; três níveis de permissão; histórico de
-  atividades; e o compromisso de exportação e exclusão dos dados a pedido.
+  atividades; exportação em JSON ou CSV a qualquer momento; e exclusão dos dados a pedido.
 - **CTA.** "Ler no Guia" e, no rodapé, Política de Privacidade e Termos.
 - **Evidência / visual.** Bloco sóbrio, três a quatro itens com ícone. Sem escudos, cadeados
   gigantes ou selos falsos de certificação.
@@ -440,14 +474,14 @@ Regras de hierarquia aplicadas em toda a página:
 
 ### S10 — Teste 14 dias, depois escolha o plano
 
-- **Objetivo.** Antecipar a pergunta do preço e conduzir para a página de Preços sem perder o
+- **Objetivo.** Antecipar a pergunta do preço e conduzir para a página de Planos sem perder o
   visitante.
-- **Mensagem.** "Comece com 14 dias grátis, com todos os recursos e sem cartão. No fim do teste,
-  você escolhe o plano — e se não quiser seguir, não é cobrado nada."
-- **CTA.** Primário "Começar teste grátis"; secundário "Ver planos e preços" → `/precos`.
+- **Mensagem.** "Comece com 14 dias grátis, sem cartão e com o plano completo. No fim do teste você
+  escolhe se continua — e o que já está no sistema fica visível por mais 30 dias."
+- **CTA.** Primário "Começar teste grátis"; secundário "Ver os planos" → `/planos`.
 - **Evidência / visual.** Bloco único, centralizado, com três marcadores: o que está incluso no
-  teste, o que acontece no 15º dia e como cancelar. **Sem valores nesta página** enquanto o preço
-  não estiver definido; a página de Preços é a fonte única (decisão D8).
+  teste, o que acontece no 15º dia e como cancelar. **Sem valores nesta página**, mesmo com os
+  preços já definidos: a página de Planos é a fonte única (decisão D8).
 - **Comportamento mobile.** Bloco em largura total, CTAs empilhados, primário acima.
 
 ---
@@ -455,7 +489,7 @@ Regras de hierarquia aplicadas em toda a página:
 ### S11 — Perguntas frequentes
 
 - **Objetivo.** Derrubar as últimas objeções e capturar busca de cauda longa.
-- **Mensagem.** Oito a dez perguntas, respondidas em no máximo três linhas. Copy na seção 4.4.
+- **Mensagem.** Onze perguntas, respondidas em no máximo três linhas. Copy na seção 4.4.
 - **CTA.** Ao final: "Não achou sua dúvida? Veja o Guia" → `/guia`.
 - **Evidência / visual.** Acordeão com o primeiro item aberto. Todas as respostas presentes no HTML
   desde o carregamento (ocultas por `hidden`, não por remoção do DOM), para que sejam indexadas e
@@ -480,7 +514,7 @@ Regras de hierarquia aplicadas em toda a página:
 
 - **Objetivo.** Fechar a navegação, sustentar credibilidade institucional e atender exigências
   legais.
-- **Mensagem.** Quatro colunas: Produto (Recursos, Preços, Guia), Empresa (Sobre, Contato),
+- **Mensagem.** Quatro colunas: Produto (Recursos, Planos, Guia), Empresa (Sobre, Contato),
   Legal (Política de Privacidade, Termos de Uso, Encarregado de dados/LGPD), Acesso (Entrar,
   Criar conta).
 - **CTA.** Nenhum destacado; links de texto.
@@ -545,7 +579,7 @@ variante — o que vier depois):
 
 **Microcopy sob os botões**
 
-> 14 dias grátis · Não pedimos cartão de crédito · Cancele quando quiser
+> 14 dias grátis · Não pedimos cartão de crédito · Plano completo durante o teste
 
 **Legenda do visual (acessível a leitores de tela, `alt`)**
 
@@ -564,17 +598,17 @@ eventos de analytics.
 |---|---|---|---|
 | Primário (herói, S3, S8, S10, S12, barra fixa) | **Começar teste grátis de 14 dias** | `/cadastro` | Em espaços estreitos (nav, barra fixa): **Testar grátis** |
 | Secundário do herói | **Ver como funciona** | âncora `#demonstracao` (S3) | Rolagem suave; sem modal |
-| Secundário de recursos | **Ver todos os recursos** | âncora `#dia-a-dia` | — |
-| Preço | **Ver planos e preços** | `/precos` | — |
+| Secundário de recursos | **Ver o Tarefus por dentro** | âncora `#dia-a-dia` | — |
+| Planos | **Ver os planos** | `/planos` | Rótulo do menu: **Planos** (alinhado ao Agente 2) |
 | Ajuda | **Ver o Guia** | `/guia` | — |
 | Login | **Entrar** | `/entrar` | Link de texto, nunca botão preenchido |
 
 **Microcopy de apoio reutilizável**
 
 - Curta: "Sem cartão de crédito."
-- Média: "14 dias grátis, com todos os recursos. Sem cartão de crédito."
-- Fechamento (S12): "Comece hoje. Se não for para a sua empresa, é só não continuar depois dos 14
-  dias — não cobramos nada."
+- Média: "14 dias grátis, com o plano completo. Sem cartão de crédito."
+- Fechamento (S12): "Comece hoje. Se não for para a sua empresa, é só não escolher um plano no fim
+  do teste — não cobramos nada."
 
 ---
 
@@ -604,20 +638,24 @@ Seis blocos. Cada título é um resultado; cada frase é verificável no invent�
 
 ### 4.4 Perguntas frequentes
 
-Dez perguntas. As respostas alimentam o dado estruturado `FAQPage` (seção 7) e devem ser idênticas
-ao texto exibido.
+Onze perguntas. As respostas alimentam o dado estruturado `FAQPage` (seção 7) e devem ser idênticas
+ao texto exibido. As regras comerciais citadas nas respostas 2, 3, 9, 10 e 11 vêm do plano do
+Agente 2 (seção 0.D).
 
 **1. Preciso de cartão de crédito para testar?**
 Não. O teste de 14 dias começa com e-mail e senha ou com a sua conta Google, sem cartão. Ao final,
 você decide se quer continuar.
 
 **2. O que acontece quando o teste de 14 dias termina?**
-Você escolhe um plano para continuar. Se não escolher, o acesso é encerrado e nada é cobrado. Seus
-dados ficam disponíveis para exportação por 30 dias após o fim do teste.
+Você escolhe um plano para continuar. Se não escolher, o seu espaço entra em modo somente leitura
+por 30 dias: dá para consultar e exportar tudo, mas não criar nem editar. Depois disso o acesso é
+bloqueado. Nada é cobrado sem a sua escolha.
 
 **3. Minha equipe é pequena. Compensa?**
-O Tarefus foi feito para equipes de 3 a 30 pessoas. Se hoje as tarefas vivem em planilha e em grupo
+O Tarefus foi feito para equipes de 3 a 35 pessoas. Se hoje as tarefas vivem em planilha e em grupo
 de mensagens, o ganho aparece já na primeira semana: cada demanda passa a ter dono, prazo e etapa.
+E como a cobrança é por empresa, colocar mais gente para colaborar não muda a fatura dentro do
+limite do plano.
 
 **4. Minha equipe vai conseguir usar?**
 São três etapas — a fazer, fazendo e concluído — e um cartão por tarefa. Quem entra pela primeira
@@ -640,11 +678,17 @@ Os dados ficam na infraestrutura de nuvem do Google (Firestore). O acesso é fei
 senha ou por conta Google, com três níveis de permissão, e as ações ficam registradas no histórico.
 
 **9. Consigo exportar ou apagar meus dados?**
-Sim. Você pode pedir a exportação dos dados da sua empresa ou a exclusão da conta a qualquer
-momento pelo e-mail de suporte; a exclusão é concluída em até 30 dias.
+Sim. A exportação em JSON ou CSV fica disponível a qualquer momento, inclusive durante os 30 dias
+de modo somente leitura depois do teste. Para excluir a conta e os dados, basta pedir pelo e-mail
+de suporte; a exclusão é concluída em até 30 dias.
 
 **10. Quanto custa depois do teste?**
-Os planos e valores ficam na página de Preços. Durante o teste, todos os recursos estão liberados.
+Os valores ficam na página de Planos. A cobrança é por empresa, não por pessoa: um valor fixo em
+reais pelo plano, com a equipe toda dentro do limite de membros dele.
+
+**11. Preciso escolher o plano antes de testar?**
+Não. O teste já começa com um plano completo liberado e você só decide qual assinar no fim dos 14
+dias. A troca de plano é feita pelo próprio painel.
 
 > **Nota de execução.** As respostas 2, 8 e 9 declaram compromissos operacionais (prazo de
 > exportação, exclusão e suporte). Elas só podem ir ao ar depois de confirmadas com o responsável
@@ -665,7 +709,7 @@ implementação.
 |---|---|
 | `CalendarClock` | 14 dias grátis |
 | `CreditCard` | Sem cartão de crédito |
-| `Users` | Para equipes de 3 a 30 pessoas |
+| `Building2` | Preço por empresa, não por pessoa |
 | `LogIn` | Entre com a conta Google |
 
 #### S4 — Comece em três passos (`StepsSectionProps`)
@@ -691,7 +735,7 @@ implementação.
   - Um quadro por área — ou todas as áreas em uma tela só.
   - Três etapas, a fazer, fazendo e concluído: o cartão muda de etapa arrastando, no computador ou no celular.
   - Em "Minhas Tarefas", cada pessoa vê apenas o que é dela.
-- **CTA:** Ver todos os recursos → `#prazos`
+- **CTA:** Ver o Tarefus por dentro → `#prazos`
 
 #### S6 — Prazos (`FeatureShowcaseProps`, `id: 'prazos'`, imagem à esquerda)
 
@@ -745,7 +789,7 @@ implementação.
 | `ShieldCheck` | Três níveis de permissão | Você define quem configura, quem organiza e quem executa. |
 | `History` | Histórico de atividades | Criação, movimentação e exclusão de tarefas ficam registradas. |
 | `Cloud` | Infraestrutura do Google Cloud | O Tarefus roda sobre a nuvem do Google. |
-| `Download` | Seus dados são seus | Você pode pedir a exportação ou a exclusão dos dados da empresa a qualquer momento. |
+| `Download` | Seus dados são seus | Exportação em JSON ou CSV a qualquer momento, e exclusão dos dados da empresa a pedido. |
 
 **Versão Fase 0** (enquanto não há cadastro aberto — não faz afirmação de segurança):
 
@@ -757,20 +801,25 @@ implementação.
 
 - **Título:** Teste 14 dias e depois escolha o plano
 - **Incluído no teste:**
-  - Todos os recursos liberados
-  - Você convida a sua equipe durante o teste
-  - Sem cartão de crédito
-- **Depois do teste:** No 15º dia, você escolhe um plano para continuar. Se não escolher, o acesso
-  é encerrado e nada é cobrado.
-- **Cancelamento:** Encerrar é simplesmente parar de usar.
-- **CTAs:** Começar teste grátis → `/cadastro` · Ver planos e preços → `/precos`
+  - Plano completo liberado durante os 14 dias, sem cartão de crédito
+  - Tarefas e checklists ilimitados, em qualquer plano
+  - Convide a equipe até o limite de membros do plano
+- **Depois do teste:** No 15º dia você escolhe um plano. Se não escolher, o seu espaço fica em modo
+  somente leitura por 30 dias — dá para consultar e exportar tudo — e só depois o acesso é
+  bloqueado. Nada é cobrado sem a sua escolha.
+- **Cancelamento:** No mensal não há fidelidade e o cancelamento é feito pelo painel. No anual, o
+  pagamento pode ser parcelado no cartão ou feito à vista por PIX.
+- **Preço:** A cobrança é por empresa, não por pessoa, em reais e com nota fiscal.
+- **CTAs:** Começar teste grátis → `/cadastro` · Ver os planos → `/planos`
 
-> **Depende do Agente 2.** Limite de pessoas no teste, existência de fidelidade e regras de
-> cancelamento são definições comerciais. Os textos acima assumem o cenário mais simples e devem
-> ser conferidos contra `02-pricing-plan.md` antes de publicar.
+> **Origem das regras.** Teste com plano completo, faixa de membros por plano, modo somente leitura
+> de 30 dias, ausência de fidelidade no mensal e parcelamento/PIX no anual vêm de
+> `02-pricing-and-guide-plan.md`. Nenhum valor aparece aqui (D8). "Nota fiscal" e "cancelamento
+> pelo painel" dependem da implementação de cobrança — se ela não estiver pronta no lançamento,
+> remova essas duas linhas em vez de reescrevê-las.
 
-**Versão Fase 0:** título "Vai começar com 14 dias grátis"; corpo: "Quando abrirmos, o teste terá
-todos os recursos e não vai pedir cartão de crédito. Quem estiver na lista entra primeiro."
+**Versão Fase 0:** título "Vai começar com 14 dias grátis"; corpo: "Quando abrirmos, o teste vai
+liberar o plano completo e não vai pedir cartão de crédito. Quem estiver na lista entra primeiro."
 
 #### S12 — Chamada final (`FinalCtaSectionProps`)
 
@@ -783,7 +832,7 @@ todos os recursos e não vai pedir cartão de crédito. Quem estiver na lista en
 
 | Coluna | Links |
 |---|---|
-| Produto | Recursos (`#dia-a-dia`) · Preços (`/precos`) · Guia (`/guia`) |
+| Produto | Recursos (`#dia-a-dia`) · Planos (`/planos`) · Guia (`/guia`) |
 | Acesso | Entrar (`/entrar`) · Criar conta (`/cadastro`) |
 | Legal | Política de Privacidade (`/politica-de-privacidade`) · Termos de Uso (`/termos`) |
 | Contato | E-mail de suporte (pendência P3) |
@@ -804,7 +853,7 @@ Só estes elementos mudam entre as fases; o resto da página é idêntico.
 |---|---|---|
 | Rótulo do CTA primário | Quero ser avisado quando abrir | Começar teste grátis de 14 dias |
 | Destino do CTA primário | `#lista-de-espera` | `/cadastro` |
-| Microcopy do herói | Estamos abrindo o acesso aos poucos. Deixe seu e-mail e avisamos quando chegar a sua vez. | 14 dias grátis · Não pedimos cartão de crédito · Cancele quando quiser |
+| Microcopy do herói | Estamos abrindo o acesso aos poucos. Deixe seu e-mail e avisamos quando chegar a sua vez. | 14 dias grátis · Não pedimos cartão de crédito · Plano completo durante o teste |
 | S9 | Versão reduzida | Versão completa |
 | S10 | "Vai começar com 14 dias grátis" | "Teste 14 dias e depois escolha o plano" |
 
@@ -867,7 +916,7 @@ do herói e dos títulos de seção).
 | Referência | Princípio a aprender | Como aplicamos no Tarefus | O que **não** copiar |
 |---|---|---|---|
 | **ElevenLabs** | Demonstrar o produto na própria página, antes de explicar | S3 entrega o "descreveu, virou tarefa" com exemplos prontos e resultado visível | Estética de laboratório de IA e vocabulário técnico de modelos |
-| **Superhuman** | Posicionamento afiado e uma promessa que exclui gente | Assumimos "pequenas empresas de 3 a 30 pessoas" e recusamos falar com todos | Tom de exclusividade e lista de espera; nosso público quer entrar hoje |
+| **Superhuman** | Posicionamento afiado e uma promessa que exclui gente | Assumimos "pequenas empresas de 3 a 35 pessoas" e recusamos falar com todos | Tom de exclusividade e lista de espera; nosso público quer entrar hoje |
 | **Tactiq** | Clareza sobre o que entra e o que sai, sem prometer mágica | Toda seção diz o que o software faz, não o que a empresa vai ganhar | Ênfase em integrações que não temos |
 | **Cursor** | A tela do produto é o herói; o visual mostra trabalho real | Herói com cartão de tarefa real e recortes reais em S4/S5/S6 | Estética escura de ferramenta para desenvolvedor |
 | **ChatGPT** | Um único campo de entrada como convite óbvio à ação | O campo do assistente organiza o herói e S3 | Interface de chat aberto; o Tarefus não é um chat |
@@ -897,7 +946,7 @@ deveria carregar `TaskProvider`, Firebase e o pacote de arrastar e soltar só pa
 
 | Entrada | Arquivo | Serve | Observação |
 |---|---|---|---|
-| Site público | `index.html` | `/`, `/precos`, `/guia`, páginas legais | `<head>` estático completo; sem Firebase no pacote |
+| Site público | `index.html` | `/`, `/planos`, `/guia`, páginas legais | `<head>` estático completo; sem Firebase no pacote |
 | Aplicação | `app.html` | `/app`, `/entrar`, `/cadastro` e o restante | `<meta name="robots" content="noindex">` |
 
 No Express, servir `dist/index.html` para as rotas públicas e `dist/app.html` como fallback das
@@ -1040,7 +1089,7 @@ export interface AccordionProps {
 export interface NavLink { label: string; href: string; }
 
 export interface SiteHeaderProps {
-  links: NavLink[];                 // Recursos, Preços, Guia
+  links: NavLink[];                 // Recursos, Planos, Guia
   loginHref: string;                // '/entrar'
   cta: { label: string; href: string };
   stickyAfterPx?: number;           // padrão: 120
@@ -1127,14 +1176,15 @@ export interface TrialTeaserSectionProps {
   included: string[];                     // o que entra no teste
   afterTrial: string;                     // o que acontece no 15º dia
   cancellation: string;
+  billingNote?: string;             // 'A cobrança é por empresa, não por pessoa...'
   primaryCta: { label: string; href: string };
   pricingCta: { label: string; href: string };
-  // Sem campo de preço por decisão: /precos é a fonte única de valores.
+  // Sem campo de preço por decisão: /planos é a fonte única de valores.
 }
 
 export interface FaqSectionProps {
   heading: SectionHeadingProps;
-  items: AccordionItemData[];             // 8 a 10
+  items: AccordionItemData[];             // 10 a 12
   guideLink: NavLink;
 }
 
@@ -1201,8 +1251,8 @@ export function track(event: AnalyticsEvent): void;
 |---|---|---|---|
 | Cadastro (CTA primário) | `/cadastro` | `AuthPage` deve abrir já em modo "criar conta". Hoje o modo inicial é fixo em `login` (`useState<AuthMode>('login')` em `src/components/auth/AuthPage.tsx`). Sugestão: ler o caminho ou um parâmetro e iniciar em `register`. | Agente de implementação |
 | Login | `/entrar` | Mesma tela, modo `login`. | Agente de implementação |
-| Preços | `/precos` | Página do documento `02-pricing-plan.md`. Enquanto não existir, o link do menu fica oculto — nunca aponta para página inexistente. | Agente 2 |
-| Guia | `/guia` | Versão pública do conteúdo de `src/data/helpData.ts`. Enquanto não existir, os links "Ver o Guia" são removidos, não desativados. | Agente 3 |
+| Planos | `/planos` | Estrutura, copy e tabela comparativa definidas em `02-pricing-and-guide-plan.md`. Enquanto a página não existir, o link do menu fica oculto. | Agente 2 |
+| Guia | `/guia` e `/guia/[slug]` | Arquitetura, taxonomia e pauta editorial definidas em `02-pricing-and-guide-plan.md`; conteúdo base em `src/data/helpData.ts`. Enquanto não existir, os links "Ver o Guia" são removidos, não desativados. | Agente 2 |
 | Legal | `/politica-de-privacidade`, `/termos` | Obrigatórios para o lançamento com cadastro aberto. | Responsável pelo produto |
 
 ---
@@ -1214,8 +1264,8 @@ export function track(event: AnalyticsEvent): void;
 | URL | Página | Indexação | Título |
 |---|---|---|---|
 | `/` | Homepage | Indexar | ver 7.2 |
-| `/precos` | Preços | Indexar | definido pelo Agente 2 |
-| `/guia` | Guia público | Indexar | definido pelo Agente 3 |
+| `/planos` | Planos | Indexar | definido pelo Agente 2 |
+| `/guia` | Guia público | Indexar | definido pelo Agente 2 |
 | `/politica-de-privacidade` | Legal | Indexar | — |
 | `/termos` | Legal | Indexar | — |
 | `/entrar`, `/cadastro` | Autenticação | `noindex, follow` | — |
@@ -1278,7 +1328,7 @@ h2  Comece hoje com a sua equipe                                 (S12)
 
 Três blocos na homepage: `Organization`, `SoftwareApplication` e `FAQPage`. **`offers` fica fora
 até haver preço publicado** — declarar preço falso em dado estruturado é motivo de penalização e
-gera desalinhamento com a página de Preços.
+gera desalinhamento com a página de Planos.
 
 ```jsonc
 {
@@ -1306,7 +1356,8 @@ gera desalinhamento com a página de Preços.
       "url": "https://SEU-DOMINIO/",
       "publisher": { "@id": "https://SEU-DOMINIO/#organizacao" },
       "description": "Gestão de tarefas para pequenas empresas: quadros por área, responsável e prazo em cada tarefa e criação de tarefas por IA com aprovação humana."
-      // "offers" será incluído pelo Agente 2 quando o preço for definido.
+      // "offers" fica fora mesmo com os preços já definidos: eles ainda são hipóteses a validar
+      // com os primeiros clientes, e a página de Planos é a fonte única (D8).
     },
     {
       "@type": "FAQPage",
@@ -1328,7 +1379,7 @@ gera desalinhamento com a página de Preços.
 
 ### 7.5 SEO técnico
 
-- `robots.txt` liberando `/`, `/precos`, `/guia` e as páginas legais; bloqueando `/app`, `/entrar`
+- `robots.txt` liberando `/`, `/planos`, `/guia` e as páginas legais; bloqueando `/app`, `/entrar`
   e `/cadastro`; apontando o `sitemap.xml`.
 - `sitemap.xml` com as páginas públicas e `lastmod` real.
 - Imagens com `width`/`height`, `loading="lazy"` abaixo da dobra e `decoding="async"`; somente o
@@ -1347,7 +1398,7 @@ Uso natural, sem repetição forçada, distribuídos entre título, subtítulo, 
 "organizar tarefas da equipe", "gestão de tarefas para pequenas empresas", "quadro kanban para
 equipe", "controlar prazos e responsáveis", "aplicativo de tarefas em português". Termos de cauda
 longa entram pelo FAQ e, principalmente, pelo Guia — que é o ativo de conteúdo com maior potencial
-orgânico e deve ser priorizado pelo Agente 3.
+orgânico. A pauta editorial de doze artigos já está definida em `02-pricing-and-guide-plan.md`.
 
 ---
 
@@ -1381,7 +1432,7 @@ nunca reescritos, um evento por intenção (não um evento por botão).
 | `ai_demo_run` | Visitante escolhe um exemplo em S3 | `example_id` | Medir se a demonstração é usada |
 | `ai_demo_result_view` | Resultado da demonstração exibido | `example_id` | Separar curiosidade de leitura efetiva |
 | `faq_open` | Abertura de uma pergunta | `question_id` | Mapear objeções reais |
-| `pricing_link_click` | Clique para `/precos` | `section_id` | Medir a pressão por preço |
+| `pricing_link_click` | Clique para `/planos` | `section_id` | Medir a pressão por preço |
 | `guide_link_click` | Clique para `/guia` | `section_id` | Medir a demanda por aprofundamento |
 | `outbound_click` | Clique para fora do domínio | `href` | Detectar vazamento de tráfego |
 | `web_vitals` | Coleta de LCP, CLS e INP | `metric`, `value`, `device` | Guardar a performance real, não só a de laboratório |
@@ -1389,11 +1440,13 @@ nunca reescritos, um evento por intenção (não um evento por botão).
 | `signup_submit` | Envio do formulário | `method` (`email` \| `google`) | Medir fricção do formulário |
 | `signup_success` | Conta criada | `method` | Conversão principal da homepage |
 | `signup_error` | Falha no cadastro | `reason` (código, nunca a mensagem bruta) | Detectar quebra silenciosa |
-| `trial_started` | Início efetivo do teste de 14 dias | `plan_hint` | Só existe quando o teste for implementado (R4) |
+| `trial_started` | Início efetivo do teste de 14 dias | `plan` (plano em que o teste começou) | Só existe quando o teste for implementado (R4) |
 | `activation_first_board_created` | Primeiro quadro criado | — | Ativação |
 | `activation_first_task_created` | Primeira tarefa criada | `origin` (`ai` \| `manual`) | Ativação, e mede o peso real da IA |
 | `activation_first_ai_task_approved` | Primeira tarefa da IA aprovada | — | Prova de valor do diferencial |
 | `activation_second_member_joined` | Segundo membro entra na empresa | — | Sinal mais forte de retenção em equipe |
+| `trial_readonly_entered` | Espaço entra em modo somente leitura no 15º dia | `plan` | Mede quantas contas seguem recuperáveis depois do teste |
+| `subscription_started` | Assinatura de um plano | `plan`, `cycle` (`mensal` \| `anual`) | Conversão comercial de fato |
 
 Os eventos de `signup_*` e `activation_*` ficam fora da homepage, mas **precisam existir antes do
 lançamento**: sem eles, a homepage não tem denominador nem numerador, e qualquer otimização vira
@@ -1403,11 +1456,12 @@ palpite.
 
 ```
 home_view
-  → cta_click            (interesse)
-    → signup_start       (intenção)
-      → signup_success   (conversão da homepage)
-        → trial_started  (conversão comercial)
+  → cta_click                              (interesse)
+    → signup_start                         (intenção)
+      → signup_success                     (conversão da homepage)
+        → trial_started                    (teste iniciado)
           → activation_first_task_created  (valor entregue)
+            → subscription_started         (conversão comercial)
 ```
 
 | Indicador | Definição | Como usar |
@@ -1416,6 +1470,8 @@ home_view
 | Intenção | `cta_click` ÷ `home_view` | Separa problema de mensagem de problema de formulário |
 | Perda no cadastro | 1 − (`signup_success` ÷ `signup_start`) | Se alta, o problema não é a homepage |
 | Ativação em 24h | `activation_first_task_created` ÷ `trial_started` | Qualidade do tráfego que a página traz |
+| Teste para assinatura | `subscription_started` ÷ `trial_started` | Fecha o ciclo; é o número que a estratégia de planos precisa acompanhar |
+| Recuperáveis | `trial_readonly_entered` ÷ `trial_started` | Tamanho da base ainda reconquistável nos 30 dias de leitura |
 | Profundidade de leitura | `section_view` por seção | Diz qual seção cortar ou reescrever |
 
 **Sobre metas.** Não há histórico próprio nem base para citar números de mercado como se fossem
@@ -1449,7 +1505,7 @@ depois.
 **Funcionamento**
 
 - [ ] Todos os CTAs primários levam a `/cadastro` e a página abre em modo "criar conta".
-- [ ] Nenhum link aponta para página inexistente; links de `/precos` e `/guia` ficam ocultos até as
+- [ ] Nenhum link aponta para página inexistente; links de `/planos` e `/guia` ficam ocultos até as
       páginas existirem.
 - [ ] A demonstração de S3 funciona sem rede após o carregamento e sem chamar a API.
 - [ ] A barra fixa do celular aparece e some conforme especificado e não cobre conteúdo.
@@ -1511,13 +1567,13 @@ Ordenados por gravidade. A coluna "Impede o lançamento?" é a que importa para 
 | **R1** | **Sistema single-tenant.** `firestoreService.ts` usa um documento único de empresa (`single_tenant_company`) e `initialData.ts` traz `company-single-tenant`. Um cadastro público colocaria empresas diferentes no mesmo espaço de dados. | Crítico: exposição de dados entre clientes, incidente de LGPD, perda de confiança irreversível | **Sim** | Isolamento por empresa antes de qualquer cadastro público. Enquanto não existir, a homepage vai ao ar em modo pré-lançamento (9.3) |
 | **R2** | **Regras do Firestore abertas.** `firestore.rules` está com `allow read, write: if true` em todas as coleções. | Crítico: qualquer pessoa com a configuração pública do Firebase lê e escreve a base | **Sim** | Regras por autenticação e por empresa. A seção S9 não pode ir ao ar antes disso |
 | **R3** | **Contas de demonstração com senha fixa** exibidas na tela de acesso (`handleQuickLogin` com `123456` em `AuthPage.tsx`). | Alto: qualquer visitante entra na base compartilhada; contradiz a seção de segurança | **Sim** | Remover o bloco de acesso rápido do fluxo público ou restringi-lo a um ambiente de demonstração isolado |
-| **R4** | **O teste de 14 dias não existe no produto.** Não há estado de teste, contagem de dias, aviso de expiração nem bloqueio ao fim. | Alto: a promessa central da homepage não tem contrapartida no sistema | **Sim** | Estado mínimo de teste (data de início, data de fim, aviso e bloqueio). Escopo do Agente 2 |
+| **R4** | **O teste de 14 dias não existe no produto.** As regras já estão definidas (0.D), mas não há estado de teste, contagem de dias, aviso de expiração, modo somente leitura nem limite de membros por plano. | Alto: a promessa central da homepage não tem contrapartida no sistema | **Sim** | Implementar o estado do teste conforme `02-pricing-and-guide-plan.md`: início, fim, avisos dos dias 10 a 14, modo somente leitura por 30 dias e bloqueio |
 | **R5** | **A IA depende de chave externa.** Sem `GEMINI_API_KEY`, `server.ts` cai em um analisador local mais simples. | Médio: quem chega pela promessa de IA pode ter resultado inferior ao demonstrado | Não | Monitorar a taxa de uso do fallback; manter a copy em "sugere" e "rascunho"; nunca prometer precisão |
 | **R6** | **Ditado por voz só em Chrome e Edge** (`useSpeechRecognition.ts`). | Médio: frustração de quem chega pela promessa de voz | Não | A ressalva do navegador acompanha toda menção a voz, inclusive no FAQ (pergunta 6) |
 | **R7** | **Ausência de prova social.** Sem clientes, depoimentos ou casos. | Médio: menor conversão | Não | Faixa de fatos (S2) no lugar; substituir por depoimentos reais assim que houver três clientes dispostos a se identificar |
-| **R8** | **Custo de IA durante o teste.** Contas de teste consumindo a API sem limite. | Médio: custo variável imprevisível e vetor de abuso | Não | Limite por conta e por dia no endpoint de geração, antes da campanha de aquisição |
+| **R8** | **Custo de IA durante o teste.** Contas de teste consumindo a API sem limite. | Médio: custo variável imprevisível e vetor de abuso | Não | Cotas mensais por plano já definidas pelo Agente 2 (100, 400 e 1.200 criações); aplicá-las também durante o teste, somadas a um teto diário por conta no endpoint de geração |
 | **R9** | **SEO limitado por renderização no cliente**, mesmo com o `<head>` estático. | Médio: indexação mais lenta e ranqueamento pior em conteúdo longo | Não | Metatags e `<noscript>` já resolvem o básico; pré-renderizar `/` se o orgânico virar canal principal |
-| **R10** | **Dependência das páginas de Preços e Guia.** A homepage referencia as duas. | Médio: links quebrados ou seções órfãs | Não | Ocultar o link enquanto a página não existir; nunca publicar link para página inexistente |
+| **R10** | **As páginas `/planos` e `/guia` ainda não existem.** O planejamento das duas está pronto (Agente 2), mas nenhuma foi construída. | Médio: links quebrados ou seções órfãs | Não | Ocultar o link enquanto a página não existir; nunca publicar link para página inexistente (D13) |
 | **R11** | **Semelhança excessiva com as referências.** | Baixo/Médio: risco de imagem e de marca | Não | Regra de originalidade da seção 5 e verificação no aceite |
 | **R12** | **Promessas operacionais no FAQ** (exportação em 30 dias, suporte, exclusão). | Médio: promessa sem processo por trás vira reclamação | Não | Confirmar cada compromisso com o responsável antes de publicar (P2, P3) |
 
@@ -1558,12 +1614,12 @@ Decisões tomadas dentro da autonomia deste planejamento, com a alternativa desc
 | **D5** | Comparativo contra planilha e grupo de mensagens, sem citar marcas de software | É o concorrente real do público e evita comparação de recursos que hoje perderíamos, além de risco de marca | Tabela "Tarefus x Trello x ClickUp" |
 | **D6** | Faixa de fatos verificáveis no lugar de prova social | Não há clientes; prova social inventada é o erro mais caro para um produto novo | Depoimentos genéricos, logotipos ilustrativos, "mais de X empresas" |
 | **D7** | Posicionamento: clareza (dono e prazo) como espinha dorsal, IA como diferencial, simplicidade como resposta à objeção | É o que o decisor paga, o que prende a atenção e o que destrava o sim, nessa ordem | IA como promessa central; simplicidade como promessa central |
-| **D8** | Nenhum valor de preço na homepage; `/precos` é a fonte única | O preço não está definido e duplicar valores gera divergência entre páginas | "A partir de R$ X" no herói ou em S10 |
+| **D8** | Nenhum valor de preço na homepage; `/planos` é a fonte única | O preço não está definido e duplicar valores gera divergência entre páginas | "A partir de R$ X" no herói ou em S10 |
 | **D9** | Analytics anônimo e sem cookies, atrás de uma camada `track()` própria | Dispensa banner de consentimento, simplifica a LGPD, permite trocar de fornecedor sem tocar em componente | GA4 como ferramenta principal (exige consentimento e muda a base legal do tratamento) |
 | **D10** | Lançamento em duas fases: pré-lançamento com lista de espera, depois teste aberto | Permite publicar, indexar e testar a mensagem sem esperar o isolamento de dados, que é o bloqueio real | Segurar a homepage até o produto estar multiempresa; abrir cadastro com o produto no estado atual |
 | **D11** | Toda a copy centralizada em `src/content/home.ts`, tipada | Permite revisar texto sem mexer em componente e trocar o modo de lançamento sem alterar código de interface | Texto embutido em cada componente |
 | **D12** | Capturas de tela em tema claro por padrão, com variante escura via `<picture>` | O produto abre no claro (`index.html`), então a captura corresponde ao que a pessoa verá | Capturas só em tema escuro, por estética |
-| **D13** | Links para páginas ainda inexistentes ficam ocultos, não desativados | Link morto ou botão inerte destrói confiança e polui o funil | Publicar `/precos` e `/guia` como "em breve" |
+| **D13** | Links para páginas ainda inexistentes ficam ocultos, não desativados | Link morto ou botão inerte destrói confiança e polui o funil | Publicar `/planos` e `/guia` como "em breve" |
 
 ---
 
@@ -1576,11 +1632,11 @@ vem. A leitura rápida — o que trava o quê — está na **seção 0**.
 |---|---|---|
 | **P1** | Razão social, CNPJ e endereço para o rodapé e para o dado estruturado `Organization` | Publicar o rodapé sem esses campos apenas na Fase 0; na Fase 1, com cadastro aberto, eles são obrigatórios |
 | **P2** | Política de Privacidade e Termos de Uso (quem redige, prazos de exclusão e de exportação) | Assumir exclusão e exportação em até 30 dias, como consta no FAQ, e confirmar antes de publicar a Fase 1 |
-| **P3** | Canal e horário de suporte durante o teste | Assumir e-mail de suporte com resposta em até um dia útil; não prometer WhatsApp nem atendimento imediato |
+| **P3** | Endereço de e-mail de suporte (o prazo já está definido) | O Agente 2 fixou e-mail com resposta em até 24 horas úteis no plano de entrada, com prazos menores nos superiores e WhatsApp apenas no plano Escala. Falta só o endereço, que depende do domínio (P6) |
 | **P4** | Região do Firestore e o que pode ser dito sobre localização dos dados | Não afirmar nada sobre localização; dizer apenas "infraestrutura de nuvem do Google" |
 | **P5** | Existência de clientes-piloto dispostos a depoimento identificado | Manter a faixa de fatos (S2) até haver pelo menos três depoimentos com nome, cargo e empresa |
 | **P6** | Domínio definitivo e e-mail de contato | Deixar `SEU-DOMINIO` como marcador nos metadados; a canônica e o JSON-LD precisam do domínio real antes de publicar |
-| **P7** | Faixa de preço pretendida (não o preço final) | Não citar valores na homepage; S10 fala apenas de teste, não de preço |
+| **P7** | ~~Faixa de preço pretendida~~ — **resolvido.** Planos e valores definidos pelo Agente 2, ainda como hipótese a validar com os primeiros clientes | A homepage continua sem citar valores (D8); S10 fala de teste e modelo de cobrança, nunca de preço |
 
 ---
 
@@ -1588,18 +1644,18 @@ vem. A leitura rápida — o que trava o quê — está na **seção 0**.
 
 **Ordem de execução recomendada**
 
-1. **Agente 2 (Preços)** define planos, valores e o estado do teste de 14 dias no produto — é a
-   dependência de R4 e de `offers` no dado estruturado.
-2. **Agente 3 (Guia)** publica a versão pública do conteúdo de ajuda — destino de S9, S11 e do
-   tráfego orgânico de cauda longa.
-3. **Agente de implementação** constrói a homepage conforme as seções 3 a 7, em modo Fase 0.
-4. **Correções de produto** (R1, R2, R3) liberam a virada para a Fase 1.
+1. ~~Agente 2~~ — **concluído.** Planos, preços, regras do teste e arquitetura do Guia entregues em
+   `02-pricing-and-guide-plan.md`. A copy desta homepage já está alinhada (0.D).
+2. **Agente de implementação** constrói a homepage conforme as seções 3 a 7, em modo Fase 0.
+3. **Páginas `/planos` e `/guia`** entram no ar a partir do plano do Agente 2; até lá, os links
+   ficam ocultos (D13).
+4. **Correções de produto** (R1 a R4) liberam a virada para a Fase 1 — checklist no Anexo B.
 
 **O que este documento entrega para os próximos**
 
 - Inventário verificado de afirmações permitidas (1.4) e proibidas (1.5) — vale para todas as
   páginas comerciais, não só para a homepage.
-- Biblioteca de CTAs e regras de tom de voz (4.0 e 4.2), reutilizáveis em Preços e Guia.
+- Biblioteca de CTAs e regras de tom de voz (4.0 e 4.2), reutilizáveis em Planos e Guia.
 - Contratos de props e mapa de arquivos (6.2 e 6.3), prontos para implementação.
 - Catálogo de eventos (8.2) que precisa existir antes de qualquer investimento em aquisição.
 - Copy final de todas as seções (4.5), incluindo as variantes da Fase 0, e a especificação das
@@ -1646,8 +1702,8 @@ Incluir apenas páginas que já existem; `lastmod` com a data real da última pu
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  <!-- Adicionar /precos quando o Agente 2 publicar -->
-  <!-- Adicionar /guia quando o Agente 3 publicar -->
+  <!-- Adicionar /planos quando a página for publicada -->
+  <!-- Adicionar /guia e cada /guia/[slug] conforme os artigos forem ao ar -->
   <!-- Adicionar /politica-de-privacidade e /termos quando publicados -->
 </urlset>
 ```
@@ -1704,8 +1760,13 @@ são as que realmente travam.
       testado com uma conta de outra empresa.
 - [ ] **R3** — Bloco de acesso rápido de demonstração removido do fluxo público, e as contas de
       exemplo sem senha padrão.
-- [ ] **R4** — Estado do teste de 14 dias no produto: data de início, data de término, aviso de
-      proximidade e bloqueio ao fim.
+- [ ] **R4** — Estado do teste de 14 dias no produto: data de início, data de término, avisos dos
+      dias 10 a 14 e encerramento.
+- [ ] **R4** — Modo somente leitura por 30 dias após o teste, com consulta e exportação liberadas
+      e criação bloqueada.
+- [ ] **R4** — Limite de membros por plano aplicado, já que a copy promete faixa e não pessoas
+      ilimitadas.
+- [ ] **R8** — Cotas mensais de criação por IA por plano aplicadas, inclusive durante o teste.
 - [ ] **R8** — Limite de uso da geração por IA por conta e por dia.
 - [ ] **P2** — Política de Privacidade e Termos de Uso publicados e enlaçados no rodapé.
 - [ ] **P1** — Razão social, CNPJ e e-mail de contato no rodapé e no JSON-LD `Organization`.
