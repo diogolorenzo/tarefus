@@ -3,6 +3,7 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { mountCommercialAccessRouter } from './src/server/commercial-access-default';
 import {
   INITIAL_BOARDS,
   INITIAL_COMPANY,
@@ -41,6 +42,7 @@ async function startServer() {
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
+  mountCommercialAccessRouter(app);
 
   // Health check
   app.get('/api/health', (req, res) => {
