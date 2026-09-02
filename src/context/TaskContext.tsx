@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ActiveTab, Board, CompanyInfo, PermissionRole, Task, TaskStatus, User, ActivityLog } from '../types';
 import {
   loadBoards,
@@ -226,70 +226,76 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [theme]);
 
-  const setTheme = (newTheme: 'light' | 'dark') => {
-    setThemeState(newTheme);
-    saveTheme(newTheme);
-  };
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    showToast(nextTheme === 'dark' ? 'Modo escuro ativado' : 'Modo claro ativado', 'info');
-  };
-
-  const currentUser = isAuthenticated
-    ? (users.find((u) => u.id === currentUserId) || users[0] || null)
-    : null;
-
-  const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
+  const showToast = useCallback((message: string, type: 'success' | 'info' | 'error' = 'success') => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       removeToast(id);
     }, 3500);
-  };
+  }, [removeToast]);
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  const setTheme = useCallback((newTheme: 'light' | 'dark') => {
+    setThemeState(newTheme);
+    saveTheme(newTheme);
+  }, []);
 
-  const openTaskModal = (task: Task | null = null, defaultStatus: TaskStatus = 'todo', defaultBoardId?: string) => {
+  const toggleTheme = useCallback(() => {
+    setThemeState((prev) => {
+      const nextTheme = prev === 'dark' ? 'light' : 'dark';
+      saveTheme(nextTheme);
+      showToast(nextTheme === 'dark' ? 'Modo escuro ativado' : 'Modo claro ativado', 'info');
+      return nextTheme;
+    });
+  }, [showToast]);
+
+  const currentUser = isAuthenticated
+    ? (users.find((u) => u.id === currentUserId) || users[0] || null)
+    : null;
+
+  const openTaskModal = useCallback((task: Task | null = null, defaultStatus: TaskStatus = 'todo', defaultBoardId?: string) => {
     setTaskModal({
       isOpen: true,
       task,
       defaultStatus,
       defaultBoardId: defaultBoardId || (selectedBoardId !== 'all' ? selectedBoardId : boards[0]?.id),
     });
-  };
+  }, [selectedBoardId, boards]);
 
-  const closeTaskModal = () => {
+  const closeTaskModal = useCallback(() => {
     setTaskModal({ isOpen: false, task: null });
-  };
+  }, []);
 
-  const markTourAsCompleted = async (userId?: string) => {
+  const markTourAsCompleted = useCallback(async (userId?: string) => {
     const targetId = userId || currentUser?.id;
     if (!targetId) return;
     try {
       localStorage.setItem(`tarefus_tour_seen_${targetId}`, 'true');
-      await updateUser(targetId, { hasSeenTour: true });
+      const targetUser = users.find((u) => u.id === targetId);
+      if (targetUser) {
+        setUsersState((prev) => prev.map((u) => (u.id === targetId ? { ...u, hasSeenTour: true } : u)));
+      }
     } catch {
       // ignore
     }
-  };
+  }, [currentUser?.id, users]);
 
-  const startTour = () => {
+  const startTour = useCallback(() => {
     setActiveTab('board');
     setIsHelpCenterOpen(false);
     setTourStep(0);
     setIsTourActive(true);
-  };
+  }, [setActiveTab]);
 
-  const endTour = (markAsCompleted = true) => {
+  const endTour = useCallback((markAsCompleted = true) => {
     setIsTourActive(false);
     if (markAsCompleted && currentUser?.id) {
       markTourAsCompleted(currentUser.id);
     }
-  };
+  }, [currentUser?.id, markTourAsCompleted]);
 
   // Auto trigger tour on user's first login
   useEffect(() => {
@@ -304,7 +310,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => clearTimeout(timer);
       }
     }
-  }, [isAuthenticated, currentUser?.id, currentUser?.hasSeenTour]);
+  }, [isAuthenticated, currentUser]);
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -389,7 +395,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     window.addEventListener('keydown', handleGlobalShortcuts);
     return () => window.removeEventListener('keydown', handleGlobalShortcuts);
-  }, [isTourActive, isHelpCenterOpen, taskModal.isOpen, isBoardModalOpen, toggleTheme, openTaskModal, setActiveTab]);
+  }, [isTourActive, isHelpCenterOpen, taskModal.isOpen, isBoardModalOpen, toggleTheme, openTaskModal, closeTaskModal, endTour, setActiveTab]);
 
   // ==========================================
   // TASKS ACTIONS

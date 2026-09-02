@@ -16,6 +16,8 @@
     "test:ai-service": "tsx tests/ai-task-draft-service.test.ts",
     "test:ai-router": "tsx tests/ai-task-draft-router.test.ts",
     "test:gemini-client": "tsx tests/gemini-task-draft-client.test.ts",
+    "test:commercial-billing": "tsx tests/commercial-billing.test.ts",
+    "test:commercial-e2e": "tsx tests/commercial-e2e-scenarios.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

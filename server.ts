@@ -4,6 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import { mountCommercialAccessRouter } from './src/server/commercial-access-default';
 import { mountAiTaskDraftRouter } from './src/server/ai-task-draft-default';
+import { mountBillingRouter } from './src/server/billing-default';
 import { createRetiredLegacyAiRouter } from './src/server/legacy-ai-router';
 import {
   INITIAL_BOARDS,
@@ -29,9 +30,16 @@ async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
-  app.use(express.json());
+  app.use(
+    express.json({
+      verify: (req, _res, buf) => {
+        (req as unknown as { rawBody: Buffer }).rawBody = buf;
+      },
+    }),
+  );
   mountCommercialAccessRouter(app);
   mountAiTaskDraftRouter(app);
+  mountBillingRouter(app);
   app.use(createRetiredLegacyAiRouter());
 
   // Health check
