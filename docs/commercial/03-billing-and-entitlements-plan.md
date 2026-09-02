@@ -774,3 +774,54 @@ Este roteiro transforma as fases acima em entregas técnicas pequenas, sequencia
 **Fora de escopo:** lançamento comercial, ativação de Rules em produção, migração real, integração de pagamento, nota fiscal e decisões de preço ainda abertas.
 
 **Critérios de aceite:** a aplicação compila, os fluxos novos falham fechados sem configuração externa, a UI não é autoridade comercial e a documentação separa o que foi implementado do que depende de produto/provedor.
+
+---
+
+## 16. Status de Execução e Registro de Dependências Externas (Tasks 1 a 6)
+
+### 16.1 Status Consolidado das Tarefas
+
+| Tarefa | Status | Escopo Entregue | Testes Automatizados |
+|---|---|---|---|
+| **Task 1: Catálogo, estado e entitlement puro** | **Concluído** | Catálogo `COMMERCIAL_CATALOG_DRAFT`, snapshot de assinatura, cálculo puro de entitlements com `resolveEntitlements`, máquina de estados de transição de assinatura (`transitionSubscription`). | `npm run test:commercial` (15 testes) |
+| **Task 2: Autenticação, RBAC e contexto de organização** | **Concluído** | Verificação de token Firebase Admin, extração de identidade segura, verificação de membership por organização, isolamento de rotas e fail-closed para serviços unconfigured/offline. | `npm run test:commercial-access` (10 testes) |
+| **Task 3: Repositório Firestore, regras de segurança e migração** | **Concluído** | Repositório `FirestoreCommercialRepository` com paths `/organizations/{orgId}/...`, transações para limite de assentos, `firestore.rules` estagiadas bloqueando escrita do cliente, script de migração dry-run idempotente. | `npm run test:commercial-persistence` (19 testes) |
+| **Task 4: IA protegida por entitlement e orçamento** | **Concluído** | Ledger transacional `InMemoryAiUsageLedger`, limites de taxa por janela e concorrência, reserva/liquidação atômica, allowlist server-side (payload estrito `{ description }`), rota protegida `POST /api/organizations/:orgId/ai/task-drafts`. | `npm run test:ai` (20 testes) |
+| **Task 5: Adaptador de billing, inbox de eventos e webhook inerte** | **Concluído** | Interface `BillingProvider`, `FakeBillingProvider`, verificação HMAC com tempo constante `crypto.timingSafeEqual`, inbox de eventos brutos persistíveis com hash SHA-256 e mascaramento de PAN/CVV, worker idempotente e webhooks inertes (503). | `npm run test:commercial-billing` (11 testes) |
+| **Task 6: Integração de produto, portões de admissão e fallbacks** | **Concluído** | Portão de admissão de assentos em `MembersSettings` e `InviteMemberModal` (bloqueio quando cheio, política não-destrutiva em downgrade), portão de admissão de IA em `TaskAICreator` com quota bar e mapeamento amigável de erros (401, 403, 429, 503, 410), banner gracioso de fallback `CommercialStatusBanner` em `App.tsx`, isolamento total de autoridade do cliente. | `npm run test:commercial-gates` (11 testes) & `npm run test:commercial-e2e` (4 cenários) |
+
+### 16.2 Registro Formal de Dependências Externas (External Dependencies Register)
+
+1. **Firebase Admin & Produção (Emulator / Cloud Firestore)**:
+   - *Status*: Código e regras preparados com fail-closed.
+   - *Dependência*: Configuração das variáveis de ambiente (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`) e deploy das `firestore.rules` estagiadas no console Firebase.
+2. **Execução de Migração Live**:
+   - *Status*: Script dry-run idempotente testado e validado.
+   - *Dependência*: Execução controlada da migração com runner real em ambiente de staging/produção para transferir documentos legados de membros e quadros para a estrutura `/organizations/{orgId}/...`.
+3. **Gemini API Paid Tier (Google Cloud Platform)**:
+   - *Status*: Cliente e serviço protegidos contra timeout, replay e concorrência.
+   - *Dependência*: Provisionamento de chave `GEMINI_API_KEY` vinculada a projeto GCP com faturamento ativo e cotas comerciais adequadas para a carga projetada.
+4. **Gateway de Pagamento & Webhook Externo (Sandbox / Produção)**:
+   - *Status*: Abstração `BillingProvider`, inbox de eventos com HMAC e endpoints inertes implementados.
+   - *Dependência*: Escolha comercial do provedor definitivo (ex.: Asaas, iugu, Mercado Pago, Pagar.me), credenciamento de conta jurídica, configuração de webhook público e provisionamento do segredo HMAC `BILLING_WEBHOOK_SECRET`.
+5. **NFS-e Municipal / Módulo Fiscal**:
+   - *Status*: Estrutura de dados preparada para emissão em eventos de cobrança quitada.
+   - *Dependência*: Integração com webservice municipal ou agregador de notas fiscais (ex.: Focus NFe, PlugNotas, e-Notas) de acordo com o CNPJ e município emissor da empresa operadora do Tarefus.
+6. **Tabela de Preços Final & Políticas Comerciais**:
+   - *Status*: Catálogo inicial de rascunho `COMMERCIAL_CATALOG_DRAFT` implementado com planos Solo e Team.
+   - *Dependência*: Validação da tabela oficial de preços, regras de desconto anual e limites de assentos/IA com os stakeholders de negócios antes do lançamento público.
+
+### 16.3 Resumo Geral de Verificação da Suíte de Testes
+
+| Comando | Descrição | Status |
+|---|---|---|
+| `npm run test:commercial` | Testes do domínio comercial e cálculo de entitlements | **PASSOU** (15/15) |
+| `npm run test:commercial-access` | Testes de autenticação, RBAC e fail-closed | **PASSOU** (10/10) |
+| `npm run test:commercial-persistence` | Testes de repositório Firestore, migração e regras | **PASSOU** (19/19) |
+| `npm run test:ai` | Testes do ledger de IA, serviço de rascunhos e router | **PASSOU** (20/20) |
+| `npm run test:commercial-billing` | Testes de billing provider, HMAC, inbox e worker | **PASSOU** (11/11) |
+| `npm run test:commercial-gates` | Testes dos portões de admissão de assentos, IA e fallback | **PASSOU** (11/11) |
+| `npm run test:commercial-e2e` | Testes end-to-end de cenários completos | **PASSOU** (4/4) |
+| `npx tsc --noEmit` | Verificação estática de tipos TypeScript | **PASSOU** (0 erros) |
+| `npm run lint` | Análise estática com linter | **PASSOU** (0 erros) |
+| `npm run build` | Compilação de frontend e backend em modo produção | **PASSOU** (0 erros) |

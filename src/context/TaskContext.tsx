@@ -20,6 +20,12 @@ import {
 } from '../services/storage';
 import { logoutFirebase } from '../lib/firebase';
 import {
+  COMMERCIAL_CATALOG_DRAFT,
+  createTrialSubscription,
+  resolveEntitlements,
+  type EntitlementSnapshot,
+} from '../domain/commercial';
+import {
   ensureDatabaseSeeded,
   saveTaskToFirestore,
   batchSaveTasksToFirestore,
@@ -129,6 +135,12 @@ export interface TaskContextType {
   toasts: Toast[];
   showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
   removeToast: (id: string) => void;
+
+  // Commercial Entitlements & Product Projections
+  entitlements: EntitlementSnapshot | null;
+  isCommercialUnavailable: boolean;
+  organizationId: string;
+  refetchEntitlements: () => Promise<void>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -162,6 +174,70 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tourStep, setTourStep] = useState(0);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [theme, setThemeState] = useState<'light' | 'dark'>(() => loadTheme());
+
+  // Commercial Entitlements & Tenancy State
+  const organizationId = company.id || 'org-tarefus-default';
+  const [entitlements, setEntitlements] = useState<EntitlementSnapshot | null>(() => {
+    const activeSeats = loadUsers().filter((u) => u.status !== 'inactive').length;
+    const defaultSub = createTrialSubscription({
+      subscriptionId: 'sub-local-trial',
+      workspaceId: 'org-tarefus-default',
+      planId: 'draft-team',
+      startedAt: new Date().toISOString(),
+    });
+    return resolveEntitlements({
+      catalog: COMMERCIAL_CATALOG_DRAFT,
+      subscription: defaultSub,
+      seatUsage: { assignedSeats: activeSeats },
+      aiUsage: { usedActions: 0 },
+      now: new Date().toISOString(),
+    });
+  });
+  const [isCommercialUnavailable, setIsCommercialUnavailable] = useState<boolean>(false);
+
+  const refetchEntitlements = useCallback(async () => {
+    const activeSeats = users.filter((u) => u.status !== 'inactive').length;
+    if (sessionToken) {
+      try {
+        const res = await fetch(`/api/organizations/${organizationId}/entitlements`, {
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.entitlements) {
+            setEntitlements(data.entitlements);
+            setIsCommercialUnavailable(false);
+            return;
+          }
+        } else if (res.status === 503) {
+          setIsCommercialUnavailable(true);
+        }
+      } catch {
+        setIsCommercialUnavailable(true);
+      }
+    }
+
+    const defaultSub = createTrialSubscription({
+      subscriptionId: 'sub-local-trial',
+      workspaceId: organizationId,
+      planId: 'draft-team',
+      startedAt: new Date().toISOString(),
+    });
+    const local = resolveEntitlements({
+      catalog: COMMERCIAL_CATALOG_DRAFT,
+      subscription: defaultSub,
+      seatUsage: { assignedSeats: activeSeats },
+      aiUsage: { usedActions: 0 },
+      now: new Date().toISOString(),
+    });
+    setEntitlements(local);
+  }, [organizationId, sessionToken, users]);
+
+  useEffect(() => {
+    refetchEntitlements();
+  }, [refetchEntitlements]);
 
   // Initialize and Sync with Firestore
   useEffect(() => {
@@ -276,7 +352,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem(`tarefus_tour_seen_${targetId}`, 'true');
       const targetUser = users.find((u) => u.id === targetId);
       if (targetUser) {
-        setUsersState((prev) => prev.map((u) => (u.id === targetId ? { ...u, hasSeenTour: true } : u)));
+        setUsers((prev) => prev.map((u) => (u.id === targetId ? { ...u, hasSeenTour: true } : u)));
       }
     } catch {
       // ignore
@@ -1090,6 +1166,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     password = '123456'
   ): Promise<User> => {
     const trimmedEmail = email.trim().toLowerCase();
+    // Seat Capacity Admission Gate
+    if (entitlements && !entitlements.seats.canAssignSeat) {
+      const msg = 'O limite de membros do plano atual foi atingido. Para adicionar novos colaboradores, solicite um upgrade de plano.';
+      showToast(msg, 'error');
+      throw new Error(msg);
+    }
     const exists = users.some(
       (u) => u.email.trim().toLowerCase() === trimmedEmail
     );
@@ -1247,6 +1329,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toasts,
         showToast,
         removeToast,
+        entitlements,
+        isCommercialUnavailable,
+        organizationId,
+        refetchEntitlements,
       }}
     >
       {children}
