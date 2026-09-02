@@ -18,8 +18,10 @@ export interface AiPolicySnapshot {
   periodId: string;
   maxCostMicrounitsPerPeriod: number;
   maxOperationsPerWindow: number;
+  maxOperationsPerUserPerWindow: number;
   rateWindowMs: number;
   maxConcurrentOperations: number;
+  maxConcurrentOperationsPerUser: number;
   taskDraftWorstCaseCostMicrounits: number;
 }
 
@@ -126,14 +128,6 @@ export class InMemoryAiUsageLedger implements AiUsageLedger {
   async reserve(command: ReserveAiOperationCommand): Promise<ReserveAiOperationResult> {
     return this.inTransaction(() => {
       validateReserveCommand(command);
-      const priorId = this.operationIdsByFingerprint.get(command.idempotencyFingerprint);
-      if (priorId) {
-        const prior = requireOperation(this.operations, priorId);
-        return prior.bodyHash === command.bodyHash
-          ? { kind: 'replay', operation: cloneOperation(prior) }
-          : { kind: 'conflict', operationId: prior.operationId };
-      }
-
       const organization = this.organizations.get(command.organizationId);
       if (!organization || !organization.memberships.includes(command.uid)) {
         return { kind: 'forbidden' };
@@ -143,6 +137,14 @@ export class InMemoryAiUsageLedger implements AiUsageLedger {
       validateOrganizationState(organization);
       if (entitlement.accessMode !== 'full') {
         return { kind: 'blocked', reason: 'entitlement' };
+      }
+
+      const priorId = this.operationIdsByFingerprint.get(command.idempotencyFingerprint);
+      if (priorId) {
+        const prior = requireOperation(this.operations, priorId);
+        return prior.bodyHash === command.bodyHash
+          ? { kind: 'replay', operation: cloneOperation(prior) }
+          : { kind: 'conflict', operationId: prior.operationId };
       }
 
       const organizationOperations = [...this.operations.values()].filter(
@@ -185,11 +187,30 @@ export class InMemoryAiUsageLedger implements AiUsageLedger {
       if (operationsInWindow >= policy.maxOperationsPerWindow) {
         return { kind: 'blocked', reason: 'rate' };
       }
+      const userOperationsInWindow = organizationOperations.filter(
+        (operation) =>
+          operation.uid === command.uid &&
+          operation.operationKey === command.operationKey &&
+          operation.createdAtMs > rateWindowStart &&
+          operation.createdAtMs <= command.nowMs,
+      ).length;
+      if (userOperationsInWindow >= policy.maxOperationsPerUserPerWindow) {
+        return { kind: 'blocked', reason: 'rate' };
+      }
 
       const concurrentOperations = organizationOperations.filter(
         (operation) => operation.status === 'reserved',
       ).length;
       if (concurrentOperations >= policy.maxConcurrentOperations) {
+        return { kind: 'blocked', reason: 'concurrency' };
+      }
+      const concurrentUserOperations = organizationOperations.filter(
+        (operation) =>
+          operation.uid === command.uid &&
+          operation.operationKey === command.operationKey &&
+          operation.status === 'reserved',
+      ).length;
+      if (concurrentUserOperations >= policy.maxConcurrentOperationsPerUser) {
         return { kind: 'blocked', reason: 'concurrency' };
       }
 
@@ -325,8 +346,10 @@ function validateOrganizationState(organization: InMemoryAiOrganizationState): v
   nonNegativeInteger(organization.usedCostMicrounits ?? 0, 'usedCostMicrounits');
   positiveInteger(policy.maxCostMicrounitsPerPeriod, 'policy.maxCostMicrounitsPerPeriod');
   positiveInteger(policy.maxOperationsPerWindow, 'policy.maxOperationsPerWindow');
+  positiveInteger(policy.maxOperationsPerUserPerWindow, 'policy.maxOperationsPerUserPerWindow');
   positiveInteger(policy.rateWindowMs, 'policy.rateWindowMs');
   positiveInteger(policy.maxConcurrentOperations, 'policy.maxConcurrentOperations');
+  positiveInteger(policy.maxConcurrentOperationsPerUser, 'policy.maxConcurrentOperationsPerUser');
   positiveInteger(policy.taskDraftWorstCaseCostMicrounits, 'policy.taskDraftWorstCaseCostMicrounits');
   boundedIdentifier(policy.periodId, 'policy.periodId');
 }

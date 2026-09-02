@@ -87,6 +87,26 @@ export class AiTaskDraftService {
       });
       return { kind: 'unknown', operationId, errorCode: providerResult.errorCode };
     }
+    if (
+      !positiveSafeInteger(providerResult.usage.inputTokens) ||
+      !positiveSafeInteger(providerResult.usage.outputTokens) ||
+      !positiveSafeInteger(providerResult.usage.costMicrounits)
+    ) {
+      await this.dependencies.ledger.markUnknown({
+        operationId,
+        failureCode: 'provider_usage_invalid',
+        nowMs: this.now(),
+      });
+      return { kind: 'unknown', operationId, errorCode: 'provider_usage_invalid' };
+    }
+    if (providerResult.usage.costMicrounits > reservation.operation.reservedCostMicrounits) {
+      await this.dependencies.ledger.markUnknown({
+        operationId,
+        failureCode: 'provider_cost_exceeds_reservation',
+        nowMs: this.now(),
+      });
+      return { kind: 'unknown', operationId, errorCode: 'provider_cost_exceeds_reservation' };
+    }
 
     const result: Extract<AiTaskDraftServiceResult, { kind: 'succeeded' }> = {
       kind: 'succeeded',
@@ -157,4 +177,8 @@ export function createUnavailableAiOperationResultStore(): AiOperationResultStor
     throw new Error('A durable server-owned AI result store is not configured');
   };
   return { read: unavailable, write: unavailable };
+}
+
+function positiveSafeInteger(value: number): boolean {
+  return Number.isSafeInteger(value) && value > 0;
 }

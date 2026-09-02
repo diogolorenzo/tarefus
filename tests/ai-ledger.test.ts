@@ -43,8 +43,10 @@ function organization(
       periodId: '2026-09',
       maxCostMicrounitsPerPeriod: 10_000,
       maxOperationsPerWindow: 10,
+      maxOperationsPerUserPerWindow: 10,
       rateWindowMs: 60_000,
       maxConcurrentOperations: 2,
+      maxConcurrentOperationsPerUser: 2,
       taskDraftWorstCaseCostMicrounits: 1_000,
     },
     ...overrides,
@@ -63,6 +65,17 @@ function reservation(
     nowMs: 1_000_000,
     ...overrides,
   };
+}
+
+function replaceTrustedOrganizationState(
+  ledger: InMemoryAiUsageLedger,
+  organizationId: string,
+  state: InMemoryAiOrganizationState,
+): void {
+  const mutableFake = ledger as unknown as {
+    organizations: Map<string, InMemoryAiOrganizationState>;
+  };
+  mutableFake.organizations.set(organizationId, structuredClone(state));
 }
 
 await test('blocks an exhausted AI action allowance before creating a reservation', async () => {
@@ -113,6 +126,66 @@ await test('serializes concurrent reservations so only one reaches a concurrency
   assert.equal(ledger.snapshot().operations.length, 1);
 });
 
+await test('blocks one user at their rate limit while the organization still has capacity', async () => {
+  const state = organization({ memberships: ['user-1', 'user-2'] });
+  Object.assign(state.policy, {
+    maxOperationsPerWindow: 4,
+    maxOperationsPerUserPerWindow: 1,
+    maxConcurrentOperations: 4,
+    maxConcurrentOperationsPerUser: 2,
+  });
+  const ledger = new InMemoryAiUsageLedger({ organizations: { 'org-a': state } });
+  const first = await ledger.reserve(reservation());
+  assert.equal(first.kind, 'reserved');
+  if (first.kind !== 'reserved') return;
+  await ledger.releaseBeforeProvider({
+    operationId: first.operation.operationId,
+    failureCode: 'provider_unavailable',
+    nowMs: 1_000_010,
+  });
+
+  const sameUser = await ledger.reserve(reservation({
+    idempotencyFingerprint: hash('c'),
+    bodyHash: hash('d'),
+    nowMs: 1_000_020,
+  }));
+  const otherUser = await ledger.reserve(reservation({
+    uid: 'user-2',
+    idempotencyFingerprint: hash('e'),
+    bodyHash: hash('f'),
+    nowMs: 1_000_020,
+  }));
+
+  assert.deepEqual(sameUser, { kind: 'blocked', reason: 'rate' });
+  assert.equal(otherUser.kind, 'reserved');
+});
+
+await test('blocks one user at their concurrency limit while the organization still has capacity', async () => {
+  const state = organization({ memberships: ['user-1', 'user-2'] });
+  Object.assign(state.policy, {
+    maxOperationsPerWindow: 10,
+    maxOperationsPerUserPerWindow: 10,
+    maxConcurrentOperations: 3,
+    maxConcurrentOperationsPerUser: 1,
+  });
+  const ledger = new InMemoryAiUsageLedger({ organizations: { 'org-a': state } });
+  const first = await ledger.reserve(reservation());
+
+  const sameUser = await ledger.reserve(reservation({
+    idempotencyFingerprint: hash('c'),
+    bodyHash: hash('d'),
+  }));
+  const otherUser = await ledger.reserve(reservation({
+    uid: 'user-2',
+    idempotencyFingerprint: hash('e'),
+    bodyHash: hash('f'),
+  }));
+
+  assert.equal(first.kind, 'reserved');
+  assert.deepEqual(sameUser, { kind: 'blocked', reason: 'concurrency' });
+  assert.equal(otherUser.kind, 'reserved');
+});
+
 await test('replays the same body and conflicts without another reservation for a changed body', async () => {
   const ledger = new InMemoryAiUsageLedger({
     organizations: { 'org-a': organization() },
@@ -129,6 +202,60 @@ await test('replays the same body and conflicts without another reservation for 
   assert.equal(replay.operation.operationId, first.operation.operationId);
   assert.equal(replay.operation.status, 'reserved');
   assert.deepEqual(conflict, { kind: 'conflict', operationId: 'operation-1' });
+  assert.equal(ledger.snapshot().operations.length, 1);
+});
+
+await test('denies replay after the user membership is removed', async () => {
+  const ledger = new InMemoryAiUsageLedger({
+    organizations: { 'org-a': organization() },
+    operationId: () => 'operation-1',
+  });
+  await ledger.reserve(reservation());
+  await ledger.settle({
+    operationId: 'operation-1',
+    actualCostMicrounits: 640,
+    inputTokens: 120,
+    outputTokens: 45,
+    resultHash: hash('f'),
+    nowMs: 1_000_100,
+  });
+  replaceTrustedOrganizationState(ledger, 'org-a', organization({ memberships: [] }));
+
+  const replay = await ledger.reserve(reservation({ nowMs: 1_000_200 }));
+
+  assert.deepEqual(replay, { kind: 'forbidden' });
+  assert.equal(ledger.snapshot().operations.length, 1);
+});
+
+await test('denies replay after the organization entitlement becomes blocked', async () => {
+  const ledger = new InMemoryAiUsageLedger({
+    organizations: { 'org-a': organization() },
+    operationId: () => 'operation-1',
+  });
+  await ledger.reserve(reservation());
+  await ledger.settle({
+    operationId: 'operation-1',
+    actualCostMicrounits: 640,
+    inputTokens: 120,
+    outputTokens: 45,
+    resultHash: hash('f'),
+    nowMs: 1_000_100,
+  });
+  replaceTrustedOrganizationState(ledger, 'org-a', organization({
+    entitlement: {
+      accessMode: 'blocked',
+      ai: {
+        usedActions: 1,
+        maxActionsPerMonth: 10,
+        remainingActions: 9,
+        canUseAction: false,
+      },
+    },
+  }));
+
+  const replay = await ledger.reserve(reservation({ nowMs: 1_000_200 }));
+
+  assert.deepEqual(replay, { kind: 'blocked', reason: 'entitlement' });
   assert.equal(ledger.snapshot().operations.length, 1);
 });
 

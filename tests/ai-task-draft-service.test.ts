@@ -46,12 +46,25 @@ function organization(
       periodId: '2026-09',
       maxCostMicrounitsPerPeriod: 10_000,
       maxOperationsPerWindow: 10,
+      maxOperationsPerUserPerWindow: 10,
       rateWindowMs: 60_000,
       maxConcurrentOperations: 2,
+      maxConcurrentOperationsPerUser: 2,
       taskDraftWorstCaseCostMicrounits: 1_000,
     },
     ...overrides,
   };
+}
+
+function replaceTrustedOrganizationState(
+  ledger: InMemoryAiUsageLedger,
+  organizationId: string,
+  state: InMemoryAiOrganizationState,
+): void {
+  const mutableFake = ledger as unknown as {
+    organizations: Map<string, InMemoryAiOrganizationState>;
+  };
+  mutableFake.organizations.set(organizationId, structuredClone(state));
 }
 
 function successfulResult(title = 'Preparar proposta'): GeminiTaskDraftClientResult {
@@ -95,13 +108,15 @@ function service(input: {
     organizations: { 'org-a': input.organization ?? organization() },
     operationId: input.operationId ?? (() => 'operation-1'),
   });
+  const results = new InMemoryAiOperationResultStore();
   return {
     client,
     ledger,
+    results,
     service: new AiTaskDraftService({
       ledger,
       client,
-      results: new InMemoryAiOperationResultStore(),
+      results,
       now: () => 1_000_000,
     }),
   };
@@ -181,6 +196,40 @@ await test('returns the stored result for the same idempotency key and body', as
   assert.equal(fixture.client.calls, 1);
 });
 
+await test('denies replay after membership removal without a new operation or Gemini call', async () => {
+  const fixture = service();
+  await fixture.service.generate(command);
+  replaceTrustedOrganizationState(fixture.ledger, 'org-a', organization({ memberships: [] }));
+
+  const replay = await fixture.service.generate(command);
+
+  assert.deepEqual(replay, { kind: 'forbidden' });
+  assert.equal(fixture.client.calls, 1);
+  assert.equal(fixture.ledger.snapshot().operations.length, 1);
+});
+
+await test('denies replay after entitlement blocking without a new operation or Gemini call', async () => {
+  const fixture = service();
+  await fixture.service.generate(command);
+  replaceTrustedOrganizationState(fixture.ledger, 'org-a', organization({
+    entitlement: {
+      accessMode: 'blocked',
+      ai: {
+        usedActions: 1,
+        maxActionsPerMonth: 10,
+        remainingActions: 9,
+        canUseAction: false,
+      },
+    },
+  }));
+
+  const replay = await fixture.service.generate(command);
+
+  assert.deepEqual(replay, { kind: 'blocked', reason: 'entitlement' });
+  assert.equal(fixture.client.calls, 1);
+  assert.equal(fixture.ledger.snapshot().operations.length, 1);
+});
+
 await test('returns conflict for the same idempotency key with a different body', async () => {
   const fixture = service();
   await fixture.service.generate(command);
@@ -242,6 +291,73 @@ await test('settles confirmed provider usage and returns the structured result',
     confirmedCostMicrounits: 640,
     reservedActions: 0,
     reservedCostMicrounits: 0,
+  });
+});
+
+await test('settles a confirmed cost exactly equal to the reserved hard cap', async () => {
+  const result = successfulResult();
+  if (result.kind !== 'success') throw new Error('invalid test fixture');
+  result.usage.costMicrounits = 1_000;
+  const fixture = service({
+    client: new FakeGeminiClient(async () => result),
+  });
+
+  const response = await fixture.service.generate(command);
+
+  assert.equal(response.kind, 'succeeded');
+  assert.deepEqual(fixture.ledger.snapshot().totalsByOrganization['org-a'], {
+    confirmedActions: 1,
+    confirmedCostMicrounits: 1_000,
+    reservedActions: 0,
+    reservedCostMicrounits: 0,
+  });
+});
+
+await test('keeps the worst-case reservation when a client reports zero confirmed cost', async () => {
+  const result = successfulResult();
+  if (result.kind !== 'success') throw new Error('invalid test fixture');
+  result.usage.costMicrounits = 0;
+  const fixture = service({
+    client: new FakeGeminiClient(async () => result),
+  });
+
+  const response = await fixture.service.generate(command);
+
+  assert.deepEqual(response, {
+    kind: 'unknown',
+    operationId: 'operation-1',
+    errorCode: 'provider_usage_invalid',
+  });
+  assert.equal(await fixture.results.read('operation-1'), null);
+  assert.deepEqual(fixture.ledger.snapshot().totalsByOrganization['org-a'], {
+    confirmedActions: 0,
+    confirmedCostMicrounits: 0,
+    reservedActions: 1,
+    reservedCostMicrounits: 1_000,
+  });
+});
+
+await test('keeps the hard cap reserved when confirmed cost exceeds the reservation', async () => {
+  const result = successfulResult();
+  if (result.kind !== 'success') throw new Error('invalid test fixture');
+  result.usage.costMicrounits = 1_001;
+  const fixture = service({
+    client: new FakeGeminiClient(async () => result),
+  });
+
+  const response = await fixture.service.generate(command);
+
+  assert.deepEqual(response, {
+    kind: 'unknown',
+    operationId: 'operation-1',
+    errorCode: 'provider_cost_exceeds_reservation',
+  });
+  assert.equal(await fixture.results.read('operation-1'), null);
+  assert.deepEqual(fixture.ledger.snapshot().totalsByOrganization['org-a'], {
+    confirmedActions: 0,
+    confirmedCostMicrounits: 0,
+    reservedActions: 1,
+    reservedCostMicrounits: 1_000,
   });
 });
 

@@ -91,6 +91,9 @@ export class GoogleGeminiTaskDraftClient implements GeminiTaskDraftClient {
       }
       const inputTokens = tokenCount(response.usageMetadata?.promptTokenCount);
       const outputTokens = tokenCount(response.usageMetadata?.candidatesTokenCount);
+      if (inputTokens === null || outputTokens === null || inputTokens === 0 || outputTokens === 0) {
+        return { kind: 'unknown', errorCode: 'provider_usage_unavailable' };
+      }
       return {
         kind: 'success',
         draft,
@@ -113,8 +116,8 @@ export function createUnavailableGeminiTaskDraftClient(): GeminiTaskDraftClient 
   return new GoogleGeminiTaskDraftClient();
 }
 
-function tokenCount(value: number | undefined): number {
-  return Number.isSafeInteger(value) && (value ?? -1) >= 0 ? value as number : 0;
+function tokenCount(value: number | undefined): number | null {
+  return Number.isSafeInteger(value) && (value ?? -1) >= 0 ? value as number : null;
 }
 
 function calculateCostMicrounits(inputTokens: number, outputTokens: number): number {
