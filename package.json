@@ -10,6 +10,7 @@
     "lint": "oxlint",
     "test:commercial": "tsx tests/commercial-domain.test.ts",
     "test:commercial-access": "tsx tests/commercial-access.test.ts",
+    "test:commercial-persistence": "tsx tests/commercial-repository.test.ts && tsx tests/commercial-migration.test.ts && tsx tests/firestore-rules-staged.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
