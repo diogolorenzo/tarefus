@@ -320,6 +320,55 @@ async function runExperienceHygieneTests() {
       assert(!html.includes('Tabela comparativa, economia em reais'), 'Rendered HelpCenterModal must not have pricing card');
       assert(!html.includes('12 artigos estratégicos cobrindo métodos ágeis'), 'Rendered HelpCenterModal must not have guide card');
     });
+
+    await test('7.6 Navbar renders responsive mobile bar without marketing links in DOM', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(Navbar, null))
+      );
+      assert(html.includes('Quadros'), 'Rendered Navbar must include mobile Quadros tab');
+      assert(html.includes('Tarefas'), 'Rendered Navbar must include mobile Tarefas tab');
+      assert(html.includes('Ajustes'), 'Rendered Navbar must include mobile Ajustes tab');
+      assert(!html.includes('Planos'), 'Rendered Navbar must not contain Planos link');
+      assert(!html.includes('Guia'), 'Rendered Navbar must not contain Guia link');
+      assert(!html.includes('Restaurar Dados'), 'Rendered Navbar must not contain Restaurar Dados trigger');
+    });
+
+    await test('7.7 AuthPage across all modes never leaks demo profiles in DOM', () => {
+      const modes: Array<'login' | 'register' | 'forgot_password'> = ['login', 'register', 'forgot_password'];
+      for (const mode of modes) {
+        const html = renderToStaticMarkup(
+          React.createElement(TaskProvider, null, React.createElement(AuthPage, { initialMode: mode, allowRegistration: true }))
+        );
+        assert(!html.includes('Acesso rápido para demonstração'), `AuthPage in ${mode} mode must not contain demo profile banner`);
+        assert(!html.includes('handleQuickLogin'), `AuthPage in ${mode} mode must not contain quick demo login handler`);
+        assert(!html.includes('>Diretora</'), `AuthPage in ${mode} mode must not contain Ana Silva demo profile`);
+        assert(!html.includes('>Operações</'), `AuthPage in ${mode} mode must not contain Carlos Mendes demo profile`);
+      }
+    });
+
+    await test('7.8 AuditLogsSettings renders search and filter controls without seed triggers in DOM', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(AuditLogsSettings, null))
+      );
+      assert(html.includes('placeholder="Filtrar por responsável, tarefa ou ação..."'), 'AuditLogsSettings must render audit search input');
+      assert(html.includes('Todos ('), 'AuditLogsSettings must render filter buttons');
+      assert(html.includes('Criações'), 'AuditLogsSettings must render Criações filter');
+      assert(html.includes('Movimentações'), 'AuditLogsSettings must render Movimentações filter');
+      assert(!html.includes('Repovoar Banco'), 'AuditLogsSettings must never render seed button');
+      assert(!html.includes('Firestore (Single-Tenant)'), 'AuditLogsSettings must never render Firestore tech banner');
+    });
+
+    await test('7.9 HelpCenterModal renders all 4 functional tabs without commercial links in DOM', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(HelpCenterModal, { isOpen: true, onClose: () => {} }))
+      );
+      assert(html.includes('Perguntas Frequentes (FAQ)'), 'HelpCenterModal must render FAQ tab button');
+      assert(html.includes('Atalhos de Teclado'), 'HelpCenterModal must render shortcuts tab button');
+      assert(html.includes('Guia de IA &amp; Boas Práticas') || html.includes('Guia de IA & Boas Práticas'), 'HelpCenterModal must render AI guide tab button');
+      assert(html.includes('Tour Interativo'), 'HelpCenterModal must render interactive tour tab button');
+      assert(!html.includes('Ver Planos &amp; Preços') && !html.includes('Ver Planos & Preços'), 'HelpCenterModal must not have Planos CTA button');
+      assert(!html.includes('Explorar o Guia de Boas Práticas (12 Artigos)'), 'HelpCenterModal must not have marketing guide CTA button');
+    });
   });
 
   // SUMMARY REPORT
