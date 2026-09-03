@@ -8,7 +8,6 @@ import { MyTasksView } from './components/MyTasksView';
 import { SettingsView } from './components/settings/SettingsView';
 import { TaskModal } from './components/TaskModal';
 import { BoardModal } from './components/BoardModal';
-import { LoginModal } from './components/LoginModal';
 import { HelpCenterModal } from './components/help/HelpCenterModal';
 import { GuidedTour } from './components/tour/GuidedTour';
 import { AuthPage } from './components/auth/AuthPage';
@@ -219,7 +218,6 @@ const MainContent: React.FC = () => {
       {/* Modals & Overlays */}
       <TaskModal />
       <BoardModal />
-      <LoginModal />
       <HelpCenterModal
         isOpen={isHelpCenterOpen}
         onClose={() => setIsHelpCenterOpen(false)}

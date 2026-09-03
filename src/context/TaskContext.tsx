@@ -153,8 +153,6 @@ export interface TaskContextType {
   closeTaskModal: () => void;
   isBoardModalOpen: boolean;
   setIsBoardModalOpen: (open: boolean) => void;
-  isLoginModalOpen: boolean;
-  setIsLoginModalOpen: (open: boolean) => void;
   isHelpCenterOpen: boolean;
   setIsHelpCenterOpen: (open: boolean) => void;
   isTourActive: boolean;
@@ -289,7 +287,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [taskModal, setTaskModal] = useState<TaskModalState>({ isOpen: false, task: null });
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
   const [isTourActive, setIsTourActive] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -1428,8 +1425,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         closeTaskModal,
         isBoardModalOpen,
         setIsBoardModalOpen,
-        isLoginModalOpen,
-        setIsLoginModalOpen,
         isHelpCenterOpen,
         setIsHelpCenterOpen,
         isTourActive,

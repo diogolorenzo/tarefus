@@ -10,7 +10,6 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  UserCheck,
   ArrowRight,
   KeyRound,
   AlertCircle,
@@ -97,14 +96,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-
-  // Pre-fill quick demo account
-  const handleQuickLogin = (email: string) => {
-    setLoginEmail(email);
-    setLoginPassword('123456');
-    setFormError(null);
-    login(email, '123456', rememberMe);
-  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -316,59 +307,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
-
-              {/* Quick Access Demo Profiles */}
-              <div className="mt-6 pt-5 border-t border-line">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2.5 text-center">
-                  Acesso rápido para demonstração (1 clique)
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('ana.silva@empresa.com')}
-                    className="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-left transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-300 uppercase">
-                      <ShieldCheck className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                      <span>Admin</span>
-                    </div>
-                    <p className="text-xs font-bold text-ink truncate mt-0.5">
-                      Ana Silva
-                    </p>
-                    <p className="text-[10px] text-muted truncate">Diretora</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('carlos.mendes@empresa.com')}
-                    className="p-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-left transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">
-                      <Briefcase className="w-3 h-3 text-purple-600 dark:text-purple-400" />
-                      <span>Gestor</span>
-                    </div>
-                    <p className="text-xs font-bold text-ink truncate mt-0.5">
-                      Carlos M.
-                    </p>
-                    <p className="text-[10px] text-muted truncate">Operações</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('beatriz.lima@empresa.com')}
-                    className="p-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-left transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase">
-                      <UserCheck className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                      <span>Membro</span>
-                    </div>
-                    <p className="text-xs font-bold text-ink truncate mt-0.5">
-                      Beatriz L.
-                    </p>
-                    <p className="text-[10px] text-muted truncate">Marketing</p>
-                  </button>
-                </div>
-              </div>
 
               {/* Toggle to Register */}
               {allowRegistration && <div className="mt-6 text-center">
