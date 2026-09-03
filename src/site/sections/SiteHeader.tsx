@@ -12,8 +12,9 @@ import { home } from '../../content/home';
  * passa a cobrir conteúdo e o contorno vira função, não enfeite.
  *
  * "Recursos" é um menu suspenso que abre no clique — não no hover, que no
- * celular não existe e no desktop dispara sem intenção. Fecha com Esc, com
- * clique fora e quando o foco sai do bloco.
+ * celular não existe e no desktop dispara sem intenção. Fecha por três
+ * caminhos, um para cada forma de sair dele: Esc, clique fora (ponteiro) e
+ * perda de foco (teclado).
  */
 export const SiteHeader: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -93,7 +94,17 @@ export const SiteHeader: React.FC = () => {
           </a>
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Navegação principal">
-            <div ref={menuRef} className="relative">
+            <div
+              ref={menuRef}
+              className="relative"
+              // `pointerdown` fora só cobre mouse e toque. Quem abre o menu
+              // pelo teclado e passa do último item com Tab não gera evento de
+              // ponteiro nenhum: sem isto, o painel fica aberto por cima do
+              // conteúdo com o foco já em outro lugar da página.
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setMenuOpen(false);
+              }}
+            >
               <button
                 ref={menuButtonRef}
                 type="button"
