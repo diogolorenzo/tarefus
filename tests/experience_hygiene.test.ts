@@ -369,6 +369,32 @@ async function runExperienceHygieneTests() {
       assert(!html.includes('Ver Planos &amp; Preços') && !html.includes('Ver Planos & Preços'), 'HelpCenterModal must not have Planos CTA button');
       assert(!html.includes('Explorar o Guia de Boas Práticas (12 Artigos)'), 'HelpCenterModal must not have marketing guide CTA button');
     });
+
+    await test('7.10 SettingsView hides Auditoria de Atividades for non-admin members', () => {
+      globalThis.localStorage.setItem(
+        'tarefus_auth_session_v1',
+        JSON.stringify({ userId: 'user-3', token: 'token-member', rememberMe: true, loggedInAt: new Date().toISOString() })
+      );
+      globalThis.localStorage.setItem('tarefus_current_user_id_v1', 'user-3');
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(SettingsView, null))
+      );
+      assert(!html.includes('Auditoria de Atividades'), 'SettingsView must not show Auditoria de Atividades for regular members');
+      assert(!html.includes('Auditoria &amp; Banco'), 'SettingsView must not show old tab name');
+    });
+
+    await test('7.11 SettingsView shows Auditoria de Atividades tab for admin users', () => {
+      globalThis.localStorage.setItem(
+        'tarefus_auth_session_v1',
+        JSON.stringify({ userId: 'user-1', token: 'token-admin', rememberMe: true, loggedInAt: new Date().toISOString() })
+      );
+      globalThis.localStorage.setItem('tarefus_current_user_id_v1', 'user-1');
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(SettingsView, null))
+      );
+      assert(html.includes('Auditoria de Atividades'), 'SettingsView must show Auditoria de Atividades for admins');
+      assert(!html.includes('Auditoria &amp; Banco') && !html.includes('Auditoria & Banco'), 'SettingsView must not show old tab name');
+    });
   });
 
   // SUMMARY REPORT
