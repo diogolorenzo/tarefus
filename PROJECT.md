@@ -1,59 +1,77 @@
-# Project: Tarefus — Codebase Inspection, Architectural Audit & Remediation
+# Project: Tarefus Pricing & Guide Public Strategy
 
-## Architecture Overview
-- **Frontend Stack**: React 19 + TypeScript + Vite + Tailwind CSS v4 + `@hello-pangea/dnd` + Lucide Icons
-- **Backend & Persistence**:
-  - Hybrid persistence: LocalStorage (primary offline fallback) + Firebase Cloud Firestore BaaS
-  - Express server (`server.ts`) for Gemini AI task creation proxy and static assets
-- **Security & RBAC**:
-  - Role-Based Access Control matrix (`admin`, `manager`, `member`)
-  - Session tokens persisted in `localStorage` (rememberMe: true) or `sessionStorage` (rememberMe: false)
-  - Last-Admin safety invariant: system must always have >= 1 active admin
-- **Onboarding & Usability**:
-  - 5-step interactive Guided Tour with SVG spotlight mask and localStorage/Firestore completion flag
-  - Central de Ajuda (Help Center) with FAQ search, keyboard shortcuts, and AI guide
-  - Due today / overdue notification banners and drawer
+## Architecture
+- **Framework & Runtime**: React 19.2 + TypeScript 6 + Vite 8 + Tailwind CSS v4.
+- **Routing & State**: Zero-dependency client-side routing synchronized with HTML5 History API (`window.location.pathname`, `pushState`, `popstate`), integrated into `TaskContext` and `App.tsx`.
+- **Theme System**: Tailwind v4 with CSS native tokens (`var(--app)`, `var(--raised)`, `var(--text)`, `var(--line)`, etc.) supporting both Light Mode and Dark Mode (`.dark` class on `document.documentElement`).
+- **Data Layer**: Strongly-typed static TypeScript modules (`src/data/pricingData.ts` and `src/data/guideArticles.ts`) delivering zero-latency, SEO-friendly, and offline-capable public content.
 
-## Feature Inventory & Defect Catalog
-| # | Feature / Defect | Description | Milestone | Source |
-|---|------------------|-------------|-----------|--------|
-| 1 | D1: Auth Session & Auto-Login Bypass | Fix login bypass on refresh and ensure clean logout in `storage.ts` & `TaskContext.tsx` | M1 (Auth & Session) | DONE |
-| 2 | D2: Firestore `undefined` Values on Password Reset | Sanitize Firestore objects and eliminate `undefined` fields in `firestoreService.ts` / `TaskContext.tsx` | M1 (Auth & Session) | DONE |
-| 3 | D3: Password Reset Code Expiration | Enforce 15-min expiration on reset code in `TaskContext.tsx` | M1 (Auth & Session) | DONE |
-| 4 | D4: Email Uniqueness in `addUser` | Validate duplicate email before adding user in `TaskContext.tsx` | M1 (Auth & Session) | DONE |
-| 5 | D5: Firebase Auth Session Cleanup | Call `logoutFirebase` during `logout()` in `TaskContext.tsx` | M1 (Auth & Session) | DONE |
-| 6 | D6: RBAC `canEditBoard` Logic Bug | Remove `|| true` short-circuit in `src/utils/rbac.ts` | M2 (RBAC & Security) | DONE |
-| 7 | D7: Task Deletion Permission Enforcement | Guard "Excluir" button in `TaskModal.tsx` with `canDeleteTask` | M2 (RBAC & Security) | DONE |
-| 8 | D8: Company Settings Admin Restriction | Guard `company` tab in `SettingsView.tsx` and form in `CompanyGeneralSettings.tsx` | M2 (RBAC & Security) | DONE |
-| 9 | D9: Member Promotion & Deletion RBAC | Restrict role selector and user delete in `MembersSettings.tsx` to Admins only | M2 (RBAC & Security) | DONE |
-| 10 | D10: Board Deletion RBAC in Areas Settings | Check `canDeleteBoard` in `AreasSettings.tsx` | M2 (RBAC & Security) | DONE |
-| 11 | D11: Audit Logs & Reseed Protection | Restrict `audit` tab in `SettingsView.tsx` and reseed in `AuditLogsSettings.tsx` to Admins | M2 (RBAC & Security) | DONE |
-| 12 | D12: Async `addBoard` `await` Fix | Add `await` to `addBoard` calls in `BoardModal.tsx` and `BoardEditModal.tsx` | M3 (Usability & Modals) | DONE |
-| 13 | D13: Help Center 5-step Preview Card | Render 5th card in Tour preview of `HelpCenterModal.tsx` | M3 (Usability & Modals) | DONE |
-| 14 | D14: Audit Log Filter Mapping | Map `status_change` under `move` filter in `AuditLogsSettings.tsx` | M3 (Usability & Modals) | DONE |
-| 15 | D15: Empty Collection Handling & Seed Metadata | Support empty task lists in `subscribeToTasks` and use metadata marker for seeding in `firestoreService.ts` | M4 (Data Sync & Backend) | DONE |
-| 16 | D16: Cloud Cascade on Board/User Delete | Batch update tasks in Firestore when deleting board or user in `TaskContext.tsx` | M4 (Data Sync & Backend) | DONE |
-| 17 | D17: Gemini Model Names Fix | Update candidate models to valid IDs in `server.ts` | M4 (Data Sync & Backend) | DONE |
-| 18 | D18: Build, Lint & Type Safety Verification | Ensure zero TypeScript errors, clean oxlint, and clean production build | M5 (Final Verification) | DONE |
+## Feature Inventory
+| # | Feature | Description | Milestone | Source |
+|---|---------|-------------|-----------|--------|
+| 1 | Data Types & Interfaces | TypeScript definitions for plans, comparisons, FAQ, categories, 12 articles, TOC, and calculator | M1 | `02-pricing-and-guide-plan.md` |
+| 2 | Pricing Data & Formulas | Constants for 3 plans (Equipe, Crescimento ⭐, Escala), comparison table, FAQ, and savings calculator math | M1 | `02-pricing-and-guide-plan.md` §3, §4, §5 |
+| 3 | 12 Strategic Articles Catalog | Full 12 articles with rich content sections, practical tip callouts, TOC anchors, tags, authors, CTAs | M1 | `02-pricing-and-guide-plan.md` §8 |
+| 4 | Pricing Header & Billing Toggle | Interactive Monthly vs Annual billing switch (~20-22% savings, 12x installments notice) | M2 | `02-pricing-and-guide-plan.md` §3.1 |
+| 5 | 3 Plan Pricing Cards | Responsive tier cards with R$ pricing, seat limits, AI quotas, highlight on Crescimento, and 14-day trial CTAs | M2 | `02-pricing-and-guide-plan.md` §3.1 |
+| 6 | Interactive Savings Calculator | Dynamic slider (3 to 35+ seats), USD/IOF competitor benchmark comparison, real-time savings display | M2 | `02-pricing-and-guide-plan.md` §3.2 |
+| 7 | Feature Comparison Table | Detailed category matrix (Users, Boards, AI Gemini, Security, Support) with expandable accordion | M2 | `02-pricing-and-guide-plan.md` §4 |
+| 8 | Pricing FAQ Accordion | 7 interactive objection-handling Q&As with smooth expand/collapse transitions | M2 | `02-pricing-and-guide-plan.md` §5.2 |
+| 9 | Guide Landing Hub | Hero with instant live search, 5 category filter pills, featured article card, responsive article grid | M3 | `02-pricing-and-guide-plan.md` §7.1 |
+| 10 | Guide Article Reader | Full article page with breadcrumb, estimated read time, floating TOC, rich formatting, tip callouts | M3 | `02-pricing-and-guide-plan.md` §7.2 |
+| 11 | Related Articles & CTAs | 3 related article recommendations by category + inline & footer 14-day trial conversion banners | M3 | `02-pricing-and-guide-plan.md` §7.2, §7.4 |
+| 12 | Public Layout & Navigation | `PublicNavbar` (brand, links, theme switch, trial CTA) and `PublicFooter` (brand, compliance, links) | M4 | `02-pricing-and-guide-plan.md` §6 |
+| 13 | App & Help Center Links | Navigation links to `/planos` and `/guia` in app Navbar, user menu, and HelpCenterModal | M4 | `ORIGINAL_REQUEST.md` §R4 |
+| 14 | Responsive UI & Theme Engine | 100% Mobile/Tablet/Desktop responsiveness and flawless Dark/Light mode styling across all views | M4 | `ORIGINAL_REQUEST.md` §R4 |
+| 15 | E2E & Adversarial Verification | 100% passing test suite across Tiers 1-5, adversarial fuzzing, build & typecheck validation | M5 | `TEST_INFRA.md` |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Auth & Session Integrity | D1, D2, D3, D4, D5 in `storage.ts`, `TaskContext.tsx`, `firestoreService.ts` | none | DONE |
-| M2 | RBAC Permissions Hardening | D6, D7, D8, D9, D10, D11 in `rbac.ts`, `TaskModal.tsx`, `SettingsView.tsx`, `CompanyGeneralSettings.tsx`, `MembersSettings.tsx`, `AreasSettings.tsx`, `AuditLogsSettings.tsx` | M1 | DONE |
-| M3 | Usability, Modals & Help Center | D12, D13, D14 in `BoardModal.tsx`, `BoardEditModal.tsx`, `HelpCenterModal.tsx`, `AuditLogsSettings.tsx` | M1 | DONE |
-| M4 | Persistence Sync & AI Backend | D15, D16, D17 in `firestoreService.ts`, `TaskContext.tsx`, `server.ts` | M1 | DONE |
-| M5 | Quality Gate & Usability Verification | Build, lint, 2 Reviewers, 2 Challengers, 1 Forensic Auditor | M1, M2, M3, M4 | DONE |
+| M1 | Data Models & 12 Articles Catalog | `src/types/pricing.ts`, `src/types/guide.ts`, `src/data/pricingData.ts`, `src/data/guideArticles.ts`, unit tests | none | DONE |
+| M2 | Pricing Page & Calculator UI | `src/components/pricing/*` (PricingPage, PricingCard, SavingsCalculator, FeatureComparisonTable, PricingFAQ) | M1 | DONE |
+| M3 | Guide Landing & Article Reader UI | `src/components/guide/*` (GuideLandingPage, GuideArticlePage, TableOfContents, RelatedArticles) | M1 | DONE |
+| M4 | Navigation, Routing & Theme Integration | `PublicNavbar`, `PublicFooter`, `App.tsx`, `Navbar.tsx`, `HelpCenterModal.tsx`, URL history routing | M2, M3 | DONE |
+| M5 | E2E Test Pass & Adversarial Hardening | Full 5-tier test validation, fuzzing, forensic audit, build verification | M1, M2, M3, M4 | DONE |
 
 ## Code Layout
-- `src/types/index.ts`: Core domain interfaces (`User`, `Task`, `Board`, `CompanyInfo`, `ActivityLog`, `PermissionRole`)
-- `src/utils/rbac.ts`: Pure RBAC authorization predicates
-- `src/services/storage.ts`: LocalStorage and SessionStorage serialization
-- `src/services/firestoreService.ts`: Firestore BaaS CRUD and subscriptions
-- `src/context/TaskContext.tsx`: Global React Context provider for state management
-- `src/components/auth/AuthPage.tsx`: Login, Register, Password Reset views
-- `src/components/help/HelpCenterModal.tsx`: FAQ, Shortcuts, AI guide, Tour trigger
-- `src/components/tour/GuidedTour.tsx`: 5-step spotlight onboarding
-- `src/components/settings/*`: Settings sub-views with RBAC guards
-- `src/components/BoardView.tsx`, `KanbanBoard.tsx`, `TaskModal.tsx`: Kanban workflows
-- `server.ts`: Node/Express backend with Gemini AI endpoint
+```
+src/
+├── types/
+│   ├── index.ts               # Core app types & routing definitions
+│   ├── pricing.ts             # Pricing and calculator types
+│   └── guide.ts               # Guide articles, categories and TOC types
+├── data/
+│   ├── pricingData.ts         # Plans, feature comparisons, FAQs, calculator engine
+│   └── guideArticles.ts       # 12 comprehensive strategic articles & search utilities
+├── components/
+│   ├── public/
+│   │   ├── PublicNavbar.tsx   # Public header with branding, theme switcher and trial CTAs
+│   │   └── PublicFooter.tsx   # Public footer with links, security badges and compliance info
+│   ├── pricing/
+│   │   ├── PricingPage.tsx    # Main Pricing landing page
+│   │   ├── PricingCard.tsx    # Tier card component with monthly/annual switch
+│   │   ├── SavingsCalculator.tsx # Interactive seat slider & savings visualizer
+│   │   ├── FeatureComparisonTable.tsx # Full feature matrix breakdown
+│   │   └── PricingFAQ.tsx     # Accordion FAQ component
+│   ├── guide/
+│   │   ├── GuideLandingPage.tsx  # Hub with instant search, filters, featured & grid
+│   │   ├── GuideArticlePage.tsx  # Full reader with breadcrumbs, TOC, rich body, CTAs
+│   │   ├── TableOfContents.tsx   # Floating/collapsible TOC navigation
+│   │   └── RelatedArticles.tsx   # Recommended articles widget
+│   ├── help/
+│   │   └── HelpCenterModal.tsx   # Integrated with direct links to /planos and /guia
+│   ├── Navbar.tsx             # Integrated with public page navigation links
+│   └── ...
+├── context/
+│   └── TaskContext.tsx        # Active route / navigation state integration
+├── App.tsx                    # Client-side URL router & view orchestrator
+└── index.css                  # Tailwind CSS v4 design tokens and utilities
+tests/
+├── pricing_unit.test.ts       # Unit tests for pricing calculations and limits (15 tests)
+├── guide_catalog.test.ts      # Catalog integrity tests for all 12 articles and search (16 tests)
+├── routing_theme_integration.test.ts # Routing, theme switching, and layout tests (10 tests)
+├── adversarial_e2e_suite.test.ts # Fuzzing, boundary checks, and error resilience tests (9 tests)
+├── pricing_components.test.ts # Component UI tests (49 tests)
+└── guide_components_ui.test.ts # Guide component rendering tests (10 tests)
+```

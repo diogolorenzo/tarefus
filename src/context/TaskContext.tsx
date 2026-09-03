@@ -1,5 +1,47 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ActiveTab, Board, CompanyInfo, PermissionRole, Task, TaskStatus, User, ActivityLog } from '../types';
+import type { ActiveTab, AppRoute, Board, CompanyInfo, PermissionRole, Task, TaskStatus, User, ActivityLog } from '../types';
+
+export function resolveClientRoute(pathname: string): AppRoute {
+  // Normalize pathname: remove duplicate slashes, trailing slash (unless root), strip query/hash
+  let normalized = pathname.split('?')[0].split('#')[0].replace(/\/+/g, '/');
+  if (normalized.length > 1 && normalized.endsWith('/')) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  if (normalized === '' || normalized === '/') {
+    return { type: 'app', tab: 'board' };
+  }
+
+  if (normalized === '/planos' || normalized === '/pricing') {
+    return { type: 'pricing' };
+  }
+
+  if (normalized === '/guia' || normalized === '/guide') {
+    return { type: 'guide-landing' };
+  }
+
+  if (normalized.startsWith('/guia/')) {
+    const slug = normalized.replace('/guia/', '').trim();
+    if (slug) {
+      return { type: 'guide-article', slug };
+    }
+    return { type: 'guide-landing' };
+  }
+
+  if (normalized === '/my-tasks' || normalized === '/minhas-tarefas') {
+    return { type: 'app', tab: 'my-tasks' };
+  }
+
+  if (normalized === '/settings' || normalized === '/configuracoes') {
+    return { type: 'app', tab: 'settings' };
+  }
+
+  return { type: 'not-found' };
+}
+
+export function isPublicRoute(route: AppRoute): boolean {
+  return route.type === 'pricing' || route.type === 'guide-landing' || route.type === 'guide-article';
+}
 import {
   loadBoards,
   loadCompany,
@@ -68,6 +110,13 @@ export interface TaskContextType {
   setSearchQuery: (query: string) => void;
   filterAssignee: string; // 'all' or user id
   setFilterAssignee: (userId: string) => void;
+
+  // Routing & URL History
+  currentPath: string;
+  currentRoute: AppRoute;
+  navigateTo: (path: string, options?: { replace?: boolean }) => void;
+  authMode: 'login' | 'register' | 'forgot_password';
+  setAuthMode: (mode: 'login' | 'register' | 'forgot_password') => void;
 
   // Auth & Session
   isAuthenticated: boolean;
@@ -149,7 +198,71 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [sessionToken, setSessionToken] = useState<string | null>(() => initialSession?.token || null);
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('board');
+  // Routing & URL History State
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname + window.location.search + window.location.hash;
+    }
+    return '/';
+  });
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot_password'>('login');
+
+  const initialRoute = resolveClientRoute(currentPath);
+  const [activeTab, setActiveTabState] = useState<ActiveTab>(() => {
+    if (initialRoute.type === 'app') {
+      return initialRoute.tab;
+    }
+    return 'board';
+  });
+
+  const currentRoute = resolveClientRoute(currentPath);
+
+  const navigateTo = (path: string, options?: { replace?: boolean }) => {
+    if (typeof window !== 'undefined') {
+      if (options?.replace) {
+        window.history.replaceState({}, '', path);
+      } else {
+        window.history.pushState({}, '', path);
+      }
+    }
+    setCurrentPath(path);
+
+    if (path === '/register') {
+      setAuthMode('register');
+    } else if (path === '/login') {
+      setAuthMode('login');
+    }
+
+    const route = resolveClientRoute(path);
+    if (route.type === 'app') {
+      setActiveTabState(route.tab);
+    }
+  };
+
+  const setActiveTab = (tab: ActiveTab) => {
+    setActiveTabState(tab);
+    const targetPath = tab === 'board' ? '/' : tab === 'my-tasks' ? '/my-tasks' : '/settings';
+    if (typeof window !== 'undefined' && window.location.pathname !== targetPath) {
+      window.history.pushState({}, '', targetPath);
+    }
+    setCurrentPath(targetPath);
+  };
+
+  // Sync route on popstate (browser back/forward)
+  useEffect(() => {
+    const handlePopState = () => {
+      const newPath = window.location.pathname + window.location.search + window.location.hash;
+      setCurrentPath(newPath);
+      const route = resolveClientRoute(newPath);
+      if (route.type === 'app') {
+        setActiveTabState(route.tab);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [selectedBoardId, setSelectedBoardId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterAssignee, setFilterAssignee] = useState<string>('all');
@@ -1194,6 +1307,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSearchQuery,
         filterAssignee,
         setFilterAssignee,
+        currentPath,
+        currentRoute,
+        navigateTo,
+        authMode,
+        setAuthMode,
         isAuthenticated,
         sessionToken,
         login,
