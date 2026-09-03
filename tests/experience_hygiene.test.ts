@@ -7,6 +7,34 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { TaskProvider } from '../src/context/TaskContext';
+import { AuthPage } from '../src/components/auth/AuthPage';
+import { AuditLogsSettings } from '../src/components/settings/AuditLogsSettings';
+import { SettingsView } from '../src/components/settings/SettingsView';
+import { Navbar } from '../src/components/Navbar';
+import { HelpCenterModal } from '../src/components/help/HelpCenterModal';
+
+if (typeof (globalThis as any).localStorage === 'undefined') {
+  const store: Record<string, string> = {};
+  (globalThis as any).localStorage = {
+    getItem: (k: string) => store[k] ?? null,
+    setItem: (k: string, v: string) => { store[k] = String(v); },
+    removeItem: (k: string) => { delete store[k]; },
+    clear: () => { Object.keys(store).forEach((k) => delete store[k]); },
+  };
+}
+
+if (typeof (globalThis as any).sessionStorage === 'undefined') {
+  const store: Record<string, string> = {};
+  (globalThis as any).sessionStorage = {
+    getItem: (k: string) => store[k] ?? null,
+    setItem: (k: string, v: string) => { store[k] = String(v); },
+    removeItem: (k: string) => { delete store[k]; },
+    clear: () => { Object.keys(store).forEach((k) => delete store[k]); },
+  };
+}
 
 interface TestResult {
   suite: string;
@@ -236,6 +264,61 @@ async function runExperienceHygieneTests() {
       assert(fs.existsSync(siteDir), 'src/site/ directory must exist');
       const files = fs.readdirSync(siteDir);
       assert(files.length > 0, 'src/site/ must contain marketing site files');
+    });
+  });
+
+  // Suite 7: UI Static Rendering & Markup Verification
+  await suite('7. UI Static Rendering & DOM Markup Verification', async () => {
+    await test('7.1 AuthPage renders corporate form without demo profiles in DOM', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(AuthPage, null))
+      );
+      assert(html.includes('Tarefus Corporativo'), 'Rendered AuthPage must include branding');
+      assert(html.includes('Entrar na Plataforma'), 'Rendered AuthPage must include submit button');
+      assert(!html.includes('Acesso rápido para demonstração'), 'Rendered AuthPage must not contain quick demo profile banner');
+      assert(!html.includes('Diretora'), 'Rendered AuthPage must not contain Ana Silva demo profile');
+      assert(!html.includes('Marketing'), 'Rendered AuthPage must not contain Beatriz demo profile');
+    });
+
+    await test('7.2 AuditLogsSettings renders clean header without seed button or banner in DOM', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(AuditLogsSettings, null))
+      );
+      assert(html.includes('Auditoria de Atividades'), 'Rendered AuditLogsSettings must have new title');
+      assert(html.includes('Histórico e logs de eventos operacionais'), 'Rendered AuditLogsSettings must have new subtitle');
+      assert(!html.includes('Repovoar Banco'), 'Rendered AuditLogsSettings must not contain seed button');
+      assert(!html.includes('Google Cloud Firestore (Single-Tenant)'), 'Rendered AuditLogsSettings must not contain Firestore banner');
+    });
+
+    await test('7.3 SettingsView renders Auditoria de Atividades navigation tab in DOM', () => {
+      globalThis.localStorage.setItem(
+        'tarefus_auth_session_v1',
+        JSON.stringify({ userId: 'user-1', token: 'token-admin', rememberMe: true, loggedInAt: new Date().toISOString() })
+      );
+      globalThis.localStorage.setItem('tarefus_current_user_id_v1', 'user-1');
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(SettingsView, null))
+      );
+      assert(html.includes('Auditoria de Atividades'), 'Rendered SettingsView must contain "Auditoria de Atividades" tab');
+      assert(!html.includes('Auditoria &amp; Banco') && !html.includes('Auditoria & Banco'), 'Rendered SettingsView must not contain old tab name');
+    });
+
+    await test('7.4 Navbar renders Quadros and Minhas Tarefas without desktop Planos/Guia in DOM', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(Navbar, null))
+      );
+      assert(html.includes('Quadros por Área'), 'Rendered Navbar must include Quadros por Área');
+      assert(html.includes('Minhas Tarefas'), 'Rendered Navbar must include Minhas Tarefas');
+      assert(!html.includes('Conheça os Planos &amp; Preços') && !html.includes('Conheça os Planos & Preços'), 'Rendered Navbar must not have Planos button tooltip');
+    });
+
+    await test('7.5 HelpCenterModal renders without promotional cards in DOM', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(HelpCenterModal, { isOpen: true, onClose: () => {} }))
+      );
+      assert(html.includes('Central de Ajuda &amp; Conhecimento') || html.includes('Central de Ajuda & Conhecimento'), 'Rendered HelpCenterModal must have header');
+      assert(!html.includes('Tabela comparativa, economia em reais'), 'Rendered HelpCenterModal must not have pricing card');
+      assert(!html.includes('12 artigos estratégicos cobrindo métodos ágeis'), 'Rendered HelpCenterModal must not have guide card');
     });
   });
 
