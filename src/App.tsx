@@ -2,6 +2,7 @@ import React from 'react';
 import { TaskProvider, useTaskContext } from './context/TaskContext';
 import { Navbar } from './components/Navbar';
 import { DueTodayAlertBanner } from './components/DueTodayAlertBanner';
+import { CommercialStatusBanner } from './components/CommercialStatusBanner';
 import { BoardView } from './components/BoardView';
 import { MyTasksView } from './components/MyTasksView';
 import { SettingsView } from './components/settings/SettingsView';
@@ -18,6 +19,7 @@ import { PricingPage } from './components/pricing/PricingPage';
 import { GuideLandingPage } from './components/guide/GuideLandingPage';
 import { GuideArticlePage } from './components/guide/GuideArticlePage';
 import { FileQuestion, ArrowLeft } from 'lucide-react';
+import { PHASE } from './content/home';
 
 const MainContent: React.FC = () => {
   const {
@@ -34,6 +36,10 @@ const MainContent: React.FC = () => {
   } = useTaskContext();
 
   const handleStartTrial = () => {
+    if (PHASE === 'waitlist') {
+      window.location.href = 'mailto:suporte@tarefus.com.br?subject=Quero%20acesso%20antecipado%20ao%20Tarefus';
+      return;
+    }
     if (isAuthenticated && currentUser) {
       showToast('Você já possui uma conta corporativa ativa no Tarefus!', 'info');
       navigateTo('/');
@@ -91,6 +97,7 @@ const MainContent: React.FC = () => {
         />
         <main className="flex-1 flex flex-col">
           <GuideLandingPage
+            currentPath={currentPath}
             onArticleClick={(slug) => navigateTo(`/guia/${slug}`)}
             onNavigate={navigateTo}
             onStartTrial={handleStartTrial}
@@ -134,6 +141,16 @@ const MainContent: React.FC = () => {
           onClose={() => setIsHelpCenterOpen(false)}
         />
       </div>
+    );
+  }
+
+  if (currentRoute.type === 'auth') {
+    return (
+      <AuthPage
+        initialMode={PHASE === 'trial' ? currentRoute.mode : 'login'}
+        allowRegistration={PHASE === 'trial'}
+        onNavigate={navigateTo}
+      />
     );
   }
 
@@ -184,13 +201,14 @@ const MainContent: React.FC = () => {
 
   // 5. PROTECTED APP ROUTE: If not authenticated, render AuthPage
   if (!isAuthenticated || !currentUser) {
-    return <AuthPage onNavigate={navigateTo} />;
+    return <AuthPage allowRegistration={PHASE === 'trial'} onNavigate={navigateTo} />;
   }
 
   // 6. PROTECTED APP ROUTE: Authenticated Workspace View
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white dark:selection:bg-indigo-500/30 dark:selection:text-indigo-200 transition-colors duration-200 relative">
       <Navbar />
+      <CommercialStatusBanner />
       <DueTodayAlertBanner />
       <main className="flex-1 flex flex-col">
         {activeTab === 'board' && <BoardView />}

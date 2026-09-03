@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { GuideCategoryKey } from '../../types/guide';
 import {
   GUIDE_CATEGORIES,
@@ -33,6 +33,7 @@ export interface GuideLandingPageProps {
   onNavigatePricing?: () => void;
   initialCategory?: GuideCategoryKey | 'all';
   initialQuery?: string;
+  currentPath?: string;
   className?: string;
 }
 
@@ -121,6 +122,7 @@ export const GuideLandingPage: React.FC<GuideLandingPageProps> = ({
   onNavigatePricing,
   initialCategory = 'all',
   initialQuery = '',
+  currentPath = '',
   className = '',
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<GuideCategoryKey | 'all'>(
@@ -128,6 +130,18 @@ export const GuideLandingPage: React.FC<GuideLandingPageProps> = ({
   );
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(currentPath.split('?')[1] || '');
+    const category = params.get('category');
+    const query = params.get('q');
+    const validCategory = GUIDE_CATEGORIES.some((item) => item.key === category)
+      ? (category as GuideCategoryKey)
+      : 'all';
+    setSelectedCategory(validCategory);
+    setSelectedTag(null);
+    setSearchQuery(query || '');
+  }, [currentPath]);
 
   const featuredArticle = useMemo(() => getFeaturedArticle(), []);
   const allPopularTags = useMemo(() => getAllTags().slice(0, 10), []);
@@ -276,7 +290,7 @@ export const GuideLandingPage: React.FC<GuideLandingPageProps> = ({
       {/* ========================================================================= */}
       {/* 2. CATEGORY PILLS & POPULAR TAGS FILTER */}
       {/* ========================================================================= */}
-      <section className="py-6 border-b border-line bg-surface/50 sticky top-0 z-20 backdrop-blur-md">
+      <section className="py-6 border-b border-line bg-surface/50 sticky top-16 z-20 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Category Filter Pills (Horizontal Scrolling on mobile) */}
           <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none custom-scrollbar">

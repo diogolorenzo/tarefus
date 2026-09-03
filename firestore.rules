@@ -1,40 +1,71 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Allow read and write to all single-tenant collections
-    match /{document=**} {
-      allow read, write: if true;
+    function hasActiveMembership(orgId) {
+      return request.auth != null
+        && get(/databases/$(database)/documents/organizations/$(orgId)/memberships/$(request.auth.uid)).data.status == 'active';
     }
 
-    // Users Collection
+    // New commercial authority is server-owned. Client writes are denied for
+    // the organization root and every explicitly modeled commercial path.
+    match /organizations/{orgId} {
+      allow read, write: if false;
+
+      match /memberships/{uid} {
+        allow read, write: if false;
+      }
+
+      match /subscriptions/{subscriptionId} {
+        allow read, write: if false;
+      }
+
+      match /entitlements/{entitlementId} {
+        allow read: if entitlementId == 'current' && hasActiveMembership(orgId);
+        allow write: if false;
+      }
+
+      match /usagePeriods/{periodId} {
+        allow read, write: if false;
+      }
+
+      match /auditEvents/{eventId} {
+        allow read, write: if false;
+      }
+
+      match /{commercialDocument=**} {
+        allow read, write: if false;
+      }
+    }
+
+    // ROLLOUT BLOCKER: these single-tenant paths remain permissive only for
+    // temporary legacy compatibility. Do not claim complete tenant isolation
+    // or deploy a removal until the staged migration is validated and applied.
     match /users/{userId} {
       allow read, write: if true;
     }
 
-    // Boards Collection
     match /boards/{boardId} {
       allow read, write: if true;
     }
 
-    // Kanban Columns Collection
     match /columns/{columnId} {
       allow read, write: if true;
     }
 
-    // Tasks Collection
     match /tasks/{taskId} {
       allow read, write: if true;
     }
 
-    // Activity Logs Collection
     match /activity_logs/{logId} {
       allow read, write: if true;
     }
 
-    // Company Information
     match /company/{companyId} {
       allow read, write: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

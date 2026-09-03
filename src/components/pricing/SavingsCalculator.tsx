@@ -29,6 +29,8 @@ export const SavingsCalculator: React.FC<SavingsCalculatorProps> = ({
   const calc = calculateSavings(seats);
   const isAnnual = billingInterval === 'annual';
   const tarefusActiveCost = isAnnual ? calc.tarefusAnnualMonthly : calc.tarefusMonthly;
+  const activeMonthlySavings = isAnnual ? Math.round(calc.annualSavings / 12) : calc.monthlySavings;
+  const activeAnnualSavings = isAnnual ? calc.annualSavings : calc.monthlySavings * 12;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSeats(parseInt(e.target.value, 10) || 1);
@@ -210,14 +212,14 @@ export const SavingsCalculator: React.FC<SavingsCalculatorProps> = ({
               <div className="flex items-baseline gap-1.5 mt-1">
                 <span className="text-2xl sm:text-3xl font-bold text-emerald-400">R$</span>
                 <span className="text-4xl sm:text-5xl lg:text-6xl font-black text-emerald-400 tracking-tight tnum">
-                  {calc.annualSavings.toLocaleString('pt-BR')}
+                  {activeAnnualSavings.toLocaleString('pt-BR')}
                 </span>
                 <span className="text-xs sm:text-sm text-slate-300">/ano</span>
               </div>
               <p className="text-xs text-slate-300 mt-1">
                 Equivalente a uma economia de {' '}
                 <strong className="text-emerald-300">
-                  R$ {calc.monthlySavings.toLocaleString('pt-BR')}/més
+                  R$ {activeMonthlySavings.toLocaleString('pt-BR')}/mês
                 </strong>{' '}
                 para a sua empresa.
               </p>

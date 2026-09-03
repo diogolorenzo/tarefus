@@ -260,7 +260,7 @@ export const GuideArticlePage: React.FC<GuideArticlePageProps> = ({
       {/* ========================================================================= */}
       {/* 1. TOP BREADCRUMB & BACK NAVIGATION */}
       {/* ========================================================================= */}
-      <div className="border-b border-line bg-surface/60 backdrop-blur-md sticky top-0 z-20">
+      <div className="border-b border-line bg-surface/60 backdrop-blur-md sticky top-16 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
           {/* Breadcrumbs */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs sm:text-sm text-muted overflow-x-auto scrollbar-none">

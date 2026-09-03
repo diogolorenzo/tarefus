@@ -23,11 +23,13 @@ export type AuthMode = 'login' | 'register' | 'forgot_password';
 export interface AuthPageProps {
   initialMode?: AuthMode;
   onNavigate?: (path: string) => void;
+  allowRegistration?: boolean;
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({
   initialMode,
   onNavigate,
+  allowRegistration = true,
 }) => {
   const {
     login,
@@ -48,7 +50,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({
         ? 'login'
         : null;
 
-  const [mode, setModeState] = useState<AuthMode>(initialMode || pathMode || contextAuthMode || 'login');
+  const [mode, setModeState] = useState<AuthMode>(
+    !allowRegistration && (initialMode === 'register' || pathMode === 'register')
+      ? 'login'
+      : initialMode || pathMode || contextAuthMode || 'login',
+  );
 
   const setMode = (newMode: AuthMode) => {
     setModeState(newMode);
@@ -365,7 +371,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
               </div>
 
               {/* Toggle to Register */}
-              <div className="mt-6 text-center">
+              {allowRegistration && <div className="mt-6 text-center">
                 <p className="text-xs text-muted">
                   Novo colaborador na empresa?{' '}
                   <button
@@ -379,7 +385,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     Criar conta corporativa
                   </button>
                 </p>
-              </div>
+              </div>}
             </div>
           )}
 

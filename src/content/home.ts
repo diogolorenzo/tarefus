@@ -11,7 +11,9 @@ export type Phase = 'waitlist' | 'trial';
  * Fase 0 = lista de espera (recomendada para o lançamento, ver 9.3 do plano).
  * Fase 1 = teste aberto. Só pode ser ligada depois de R1 a R4 resolvidos.
  */
-export const PHASE: Phase = 'trial';
+// O lançamento permanece fechado por padrão. A ativação do trial exige a
+// configuração explícita da variável de ambiente após a migração multiempresa.
+export const PHASE: Phase = import.meta.env.VITE_TAREFUS_LAUNCH_PHASE === 'trial' ? 'trial' : 'waitlist';
 
 export type SectionId =
   | 'hero'
@@ -52,8 +54,11 @@ export const home = {
   },
 
   header: {
-    // Planos e Guia ficam ocultos até as páginas existirem (decisão D13 do plano).
-    links: [{ label: 'Recursos', href: '#dia-a-dia' }],
+    links: [
+      { label: 'Recursos', href: '#dia-a-dia' },
+      { label: 'Planos', href: '/planos' },
+      { label: 'Guia', href: '/guia' },
+    ],
     loginHref: '/entrar',
     cta: CTA_PRIMARY_SHORT,
   },
@@ -444,10 +449,7 @@ export const home = {
       },
       {
         title: 'Acesso',
-        links: [
-          { label: 'Entrar', href: '/entrar' },
-          { label: 'Criar conta', href: '/cadastro' },
-        ],
+        links: [{ label: 'Entrar', href: '/entrar' }],
       },
     ],
     contactEmail: 'suporte@tarefus.com.br',
