@@ -19,7 +19,6 @@ import {
   BookOpen,
   Keyboard,
   Play,
-  CreditCard,
 } from 'lucide-react';
 import { AiMark } from '../ui/AiMark';
 
@@ -32,7 +31,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { startTour, openTaskModal, navigateTo } = useTaskContext();
+  const { startTour, openTaskModal } = useTaskContext();
   const [activeTab, setActiveTab] = useState<'faq' | 'shortcuts' | 'ai-guide' | 'tour'>('faq');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -184,65 +183,6 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
           {/* TAB 1: FAQ Pesquisável */}
           {activeTab === 'faq' && (
             <div className="space-y-5">
-              {/* Quick Strategy Action Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pb-1">
-                {/* Card 1: Planos & Preços */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border border-indigo-200/80 dark:border-indigo-500/20 flex flex-col justify-between gap-3 shadow-2xs">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <CreditCard className="w-4.5 h-4.5" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-ink">
-                        Planos & Preços (R$)
-                      </h4>
-                      <p className="text-xs text-muted mt-0.5 leading-relaxed">
-                        Tabela comparativa, economia em reais vs ferramentas em dólar e detalhes dos 3 planos.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      navigateTo('/planos');
-                    }}
-                    className="self-start inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer"
-                  >
-                    <span>Ver Planos & Preços</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Card 2: Guia de Boas Práticas */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent border border-purple-200/80 dark:border-purple-500/20 flex flex-col justify-between gap-3 shadow-2xs">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <BookOpen className="w-4.5 h-4.5" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-ink">
-                        Guia de Boas Práticas
-                      </h4>
-                      <p className="text-xs text-muted mt-0.5 leading-relaxed">
-                        12 artigos estratégicos cobrindo métodos ágeis, Kanban, delegação e comandos com IA.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      navigateTo('/guia');
-                    }}
-                    className="self-start inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer"
-                  >
-                    <span>Explorar o Guia de Boas Práticas (12 Artigos)</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
               {/* Search Bar & Category Filter */}
               <div className="space-y-3">
                 <div className="relative">
