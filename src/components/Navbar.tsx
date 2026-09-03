@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   UserCheck,
   Plus,
-  RotateCcw,
   ChevronDown,
   Moon,
   Sun,
@@ -20,8 +19,6 @@ import {
   Lock,
   HelpCircle,
   Compass,
-  BookOpen,
-  CreditCard,
 } from 'lucide-react';
 import { getBoardColorStyles } from '../utils/helpers';
 import { getEffectiveRole, getRoleBadgeInfo, canCreateBoard } from '../utils/rbac';
@@ -40,13 +37,10 @@ export const Navbar: React.FC = () => {
     setIsBoardModalOpen,
     setIsHelpCenterOpen,
     startTour,
-    resetDemoData,
     theme,
     toggleTheme,
     logout,
     showToast,
-    navigateTo,
-    currentPath,
   } = useTaskContext();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -159,36 +153,6 @@ export const Navbar: React.FC = () => {
                       {myPendingTasksCount}
                     </span>
                   )}
-                </button>
-
-                <div className="h-4 w-px bg-line mx-1 hidden xl:block" />
-
-                <button
-                  type="button"
-                  onClick={() => navigateTo('/planos')}
-                  className={`hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    currentPath === '/planos'
-                      ? 'bg-surface text-indigo-600 dark:text-indigo-400 shadow-xs border border-line'
-                      : 'text-muted hover:text-ink'
-                  }`}
-                  title="Conheça os Planos & Preços"
-                >
-                  <CreditCard className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                  <span>Planos</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => navigateTo('/guia')}
-                  className={`hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    currentPath?.startsWith('/guia')
-                      ? 'bg-surface text-purple-600 dark:text-purple-400 shadow-xs border border-line'
-                      : 'text-muted hover:text-ink'
-                  }`}
-                  title="Explorar o Guia de Boas Práticas (12 Artigos)"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  <span>Guia</span>
                 </button>
               </nav>
             </div>
@@ -357,42 +321,6 @@ export const Navbar: React.FC = () => {
                           </div>
                         </button>
 
-                        {/* Planos & Preços */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            navigateTo('/planos');
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-ink hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
-                        >
-                          <CreditCard className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <span className="font-bold">Planos & Preços (R$)</span>
-                            <p className="text-[10px] text-muted truncate">
-                              Calculadora de economia e recursos
-                            </p>
-                          </div>
-                        </button>
-
-                        {/* Guia de Boas Práticas */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            navigateTo('/guia');
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-ink hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white transition-all text-left cursor-pointer"
-                        >
-                          <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <span className="font-bold">Guia de Boas Práticas</span>
-                            <p className="text-[10px] text-muted truncate">
-                              12 artigos e estratégias para equipes
-                            </p>
-                          </div>
-                        </button>
-
                         {/* Meu Perfil & Configurações */}
                         <button
                           type="button"
@@ -434,31 +362,8 @@ export const Navbar: React.FC = () => {
                         </button>
                       </div>
 
-                      {/* Ações de consequência: restaurar dados e sair */}
+                      {/* Ações de encerramento da sessão */}
                       <div className="p-1.5 space-y-0.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            if (
-                              window.confirm(
-                                'Isto apaga as tarefas, quadros e membros atuais e recarrega os dados de exemplo. Deseja continuar?'
-                              )
-                            ) {
-                              resetDemoData();
-                            }
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-muted hover:bg-sunken hover:text-ink transition-all text-left cursor-pointer"
-                        >
-                          <RotateCcw className="w-4 h-4 text-subtle shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <span className="font-bold">Restaurar Dados de Exemplo</span>
-                            <p className="text-[10px] text-subtle truncate">
-                              Substitui o conteúdo atual pelo seed inicial
-                            </p>
-                          </div>
-                        </button>
-
                         <button
                           type="button"
                           onClick={() => {

@@ -64,8 +64,8 @@ const NAV_ITEMS: { group: string; adminOnly?: boolean; items: NavItem[] }[] = [
       },
       {
         id: 'audit',
-        label: 'Auditoria & Banco',
-        description: 'Logs de atividades e status do Firestore',
+        label: 'Auditoria de Atividades',
+        description: 'Histórico e logs de eventos operacionais',
         icon: History,
         adminOnly: true,
       },

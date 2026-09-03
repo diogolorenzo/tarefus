@@ -68,7 +68,7 @@ import {
   saveTheme,
   saveUsers,
 } from '../services/storage';
-import { logoutFirebase } from '../lib/firebase';
+import { logoutFirebase, signInWithGoogle } from '../lib/firebase';
 import {
   COMMERCIAL_CATALOG_DRAFT,
   createTrialSubscription,
@@ -136,6 +136,7 @@ export interface TaskContextType {
   isAuthenticated: boolean;
   sessionToken: string | null;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   register: (data: { name: string; email: string; password: string; role: string; permissionRole?: PermissionRole }) => Promise<{ success: boolean; error?: string }>;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; code?: string; error?: string }>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -153,8 +154,6 @@ export interface TaskContextType {
   closeTaskModal: () => void;
   isBoardModalOpen: boolean;
   setIsBoardModalOpen: (open: boolean) => void;
-  isLoginModalOpen: boolean;
-  setIsLoginModalOpen: (open: boolean) => void;
   isHelpCenterOpen: boolean;
   setIsHelpCenterOpen: (open: boolean) => void;
   isTourActive: boolean;
@@ -289,7 +288,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [taskModal, setTaskModal] = useState<TaskModalState>({ isOpen: false, task: null });
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
   const [isTourActive, setIsTourActive] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -1136,6 +1134,45 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
+  const loginWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const googleUser = await signInWithGoogle();
+      if (!googleUser || !googleUser.email) {
+        return { success: false, error: 'Não foi possível autenticar com o Google.' };
+      }
+      const email = googleUser.email.toLowerCase().trim();
+      let matchedUser = users.find((u) => u.email.toLowerCase().trim() === email);
+      if (!matchedUser) {
+        const displayName = googleUser.displayName || email.split('@')[0];
+        matchedUser = await addUser(
+          displayName,
+          'Administrador & Fundador',
+          email,
+          'admin',
+          true
+        );
+      }
+      const token = `tok_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const session = {
+        userId: matchedUser.id,
+        token,
+        rememberMe: true,
+        loggedInAt: new Date().toISOString(),
+      };
+      saveAuthSession(session);
+      setCurrentUserId(matchedUser.id);
+      setIsAuthenticated(true);
+      setSessionToken(token);
+      showToast(`Bem-vindo(a), ${matchedUser.name}!`, 'success');
+      return { success: true };
+    } catch (err: any) {
+      if (err?.code === 'auth/popup-closed-by-user') {
+        return { success: false, error: 'Janela de autenticação com Google fechada.' };
+      }
+      return { success: false, error: err?.message || 'Falha ao autenticar com o Google.' };
+    }
+  };
+
   const register = async (data: {
     name: string;
     email: string;
@@ -1415,6 +1452,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated,
         sessionToken,
         login,
+        loginWithGoogle,
         register,
         requestPasswordReset,
         resetPassword,
@@ -1428,8 +1466,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         closeTaskModal,
         isBoardModalOpen,
         setIsBoardModalOpen,
-        isLoginModalOpen,
-        setIsLoginModalOpen,
         isHelpCenterOpen,
         setIsHelpCenterOpen,
         isTourActive,

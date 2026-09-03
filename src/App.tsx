@@ -2,13 +2,11 @@ import React from 'react';
 import { TaskProvider, useTaskContext } from './context/TaskContext';
 import { Navbar } from './components/Navbar';
 import { DueTodayAlertBanner } from './components/DueTodayAlertBanner';
-import { CommercialStatusBanner } from './components/CommercialStatusBanner';
 import { BoardView } from './components/BoardView';
 import { MyTasksView } from './components/MyTasksView';
 import { SettingsView } from './components/settings/SettingsView';
 import { TaskModal } from './components/TaskModal';
 import { BoardModal } from './components/BoardModal';
-import { LoginModal } from './components/LoginModal';
 import { HelpCenterModal } from './components/help/HelpCenterModal';
 import { GuidedTour } from './components/tour/GuidedTour';
 import { AuthPage } from './components/auth/AuthPage';
@@ -145,13 +143,19 @@ const MainContent: React.FC = () => {
   }
 
   if (currentRoute.type === 'auth') {
-    return (
-      <AuthPage
-        initialMode={PHASE === 'trial' ? currentRoute.mode : 'login'}
-        allowRegistration={PHASE === 'trial'}
-        onNavigate={navigateTo}
-      />
-    );
+    if (isAuthenticated && currentUser) {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.history.replaceState({}, '', '/');
+      }
+    } else {
+      return (
+        <AuthPage
+          initialMode={PHASE === 'trial' ? currentRoute.mode : 'login'}
+          allowRegistration={PHASE === 'trial'}
+          onNavigate={navigateTo}
+        />
+      );
+    }
   }
 
   // 4. UNKNOWN 404 ROUTE (Not Found)
@@ -208,7 +212,6 @@ const MainContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white dark:selection:bg-indigo-500/30 dark:selection:text-indigo-200 transition-colors duration-200 relative">
       <Navbar />
-      <CommercialStatusBanner />
       <DueTodayAlertBanner />
       <main className="flex-1 flex flex-col">
         {activeTab === 'board' && <BoardView />}
@@ -219,7 +222,6 @@ const MainContent: React.FC = () => {
       {/* Modals & Overlays */}
       <TaskModal />
       <BoardModal />
-      <LoginModal />
       <HelpCenterModal
         isOpen={isHelpCenterOpen}
         onClose={() => setIsHelpCenterOpen(false)}
