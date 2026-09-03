@@ -16,7 +16,35 @@ export interface BillingRouterOptions {
   webhookSecret?: string;
   inboxStore?: BillingInboxStore;
   worker?: BillingWorker;
+  checkoutAuthorizer?: CheckoutAuthorizer;
 }
+
+/**
+ * Resolves a checkout request to server-authorized organization and plan IDs.
+ * Implementations must verify the Firebase token, require a billing_admin role
+ * for the organization, and validate the requested plan against the server-side
+ * plan catalog. The browser-supplied IDs are never passed to a provider directly.
+ */
+export interface CheckoutAuthorizer {
+  authorize(input: CheckoutAuthorizationInput): Promise<CheckoutAuthorizationResult>;
+}
+
+export interface CheckoutAuthorizationInput {
+  token: string;
+  requestedOrganizationId: string;
+  requestedPlanId: string;
+}
+
+export type CheckoutAuthorizationResult =
+  | {
+    ok: true;
+    organizationId: string;
+    planId: string;
+  }
+  | {
+    ok: false;
+    reason: 'forbidden' | 'invalid_token' | 'unavailable';
+  };
 
 /**
  * Creates the inert webhook router for billing providers.
@@ -90,11 +118,10 @@ export function createBillingWebhookRouter(options: BillingWebhookRouterOptions 
     let event;
     try {
       event = options.provider.parseWebhookEvent(rawBodyBuffer, req.headers);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+    } catch {
       res.status(400).json({
         error: 'invalid_webhook_payload',
-        message: `Failed to parse webhook event: ${msg}`,
+        message: 'Webhook payload could not be processed.',
       });
       return;
     }
@@ -153,7 +180,7 @@ export function createBillingWebhookRouter(options: BillingWebhookRouterOptions 
       res.status(400).json({
         success: false,
         error: result.reason,
-        message: result.error,
+        message: 'Webhook event processing failed.',
       });
       return;
     }
@@ -215,21 +242,63 @@ export function createBillingRouter(options: BillingRouterOptions = {}): Router 
       return;
     }
 
+    if (!options.checkoutAuthorizer) {
+      res.status(503).json({
+        error: 'billing_authorization_unavailable',
+        message: 'Checkout authorization is not configured.',
+      });
+      return;
+    }
+
+    const token = bearerToken(req);
+    if (!token) {
+      res.status(401).json({ error: 'authentication_required' });
+      return;
+    }
+
+    let authorization: CheckoutAuthorizationResult;
+    try {
+      authorization = await options.checkoutAuthorizer.authorize({
+        token,
+        requestedOrganizationId: organizationId,
+        requestedPlanId: planId,
+      });
+    } catch {
+      authorization = { ok: false, reason: 'unavailable' };
+    }
+
+    if (!authorization.ok) {
+      const status = authorization.reason === 'unavailable' ? 503 : authorization.reason === 'forbidden' ? 403 : 401;
+      res.status(status).json({
+        error: authorization.reason === 'unavailable'
+          ? 'billing_authorization_unavailable'
+          : authorization.reason === 'forbidden'
+            ? 'organization_forbidden'
+            : 'invalid_token',
+      });
+      return;
+    }
+
     try {
       const session = await options.provider.createCheckoutSession({
-        organizationId,
-        planId,
+        organizationId: authorization.organizationId,
+        planId: authorization.planId,
         returnUrl: returnUrl || 'https://tarefus.local/billing/return',
         customerId,
       });
       res.status(200).json({ success: true, session });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      res.status(500).json({ error: 'checkout_session_failed', message: msg });
+    } catch {
+      res.status(503).json({ error: 'checkout_session_failed' });
     }
   });
 
   return router;
+}
+
+function bearerToken(request: Request): string | null {
+  const authorization = request.header('authorization');
+  const match = authorization?.match(/^Bearer ([^\s]+)$/i);
+  return match?.[1] ?? null;
 }
 
 function getRawBodyBuffer(req: Request): Buffer | null {

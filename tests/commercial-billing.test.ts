@@ -791,4 +791,3 @@ if (failed > 0) {
   console.log('\nALL COMMERCIAL BILLING & INBOX TESTS PASSED.');
   // clean exit
 }
-

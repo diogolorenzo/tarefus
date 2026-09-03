@@ -304,4 +304,3 @@ function invalidTransition(): TransitionResult {
 }
 
 export * from './billing-types';
-

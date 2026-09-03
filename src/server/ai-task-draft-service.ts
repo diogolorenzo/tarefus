@@ -37,9 +37,11 @@ export interface GenerateTaskDraftCommand {
 }
 
 export class AiTaskDraftService {
+  private readonly dependencies: AiTaskDraftServiceDependencies;
   private readonly now: () => number;
 
-  constructor(private readonly dependencies: AiTaskDraftServiceDependencies) {
+  constructor(dependencies: AiTaskDraftServiceDependencies) {
+    this.dependencies = dependencies;
     this.now = dependencies.now ?? Date.now;
   }
 

@@ -371,20 +371,20 @@ await runSection('3. Guided Tour Metadata, DOM Targets & Persistence', () => {
 });
 
 // ============================================================================
-// SUITE 4: GEMINI AI BACKEND MODEL CONFIGURATION IN SERVER.TS
+// SUITE 4: LEGACY GEMINI AI ROUTE RETIREMENT IN SERVER.TS
 // ============================================================================
-await runSection('4. Gemini AI Backend Model Configuration in server.ts', () => {
+await runSection('4. Legacy Gemini AI Route Retirement in server.ts', () => {
   const serverSource = fs.readFileSync(path.resolve(process.cwd(), 'server.ts'), 'utf-8');
 
-  // Test 4.1: Valid candidate models list
+  // The historical public endpoint is intentionally retired in favor of the
+  // entitlement-aware route. Do not restore an unmetered fallback here.
   assert(
-    serverSource.includes("const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];"),
-    'server.ts configures candidateModels with valid fallback list'
+    serverSource.includes('app.use(createRetiredLegacyAiRouter());'),
+    'server.ts mounts the explicitly retired legacy AI route'
   );
   assert(!serverSource.includes('gemini-1.5-flash-latest'), 'server.ts does not use deprecated -latest alias');
 
-  // Test 4.2: Fallback heuristic draft generator
-  assert(serverSource.includes('function generateHeuristicDraft('), 'server.ts defines generateHeuristicDraft fallback');
+  assert(!serverSource.includes('function generateHeuristicDraft('), 'server.ts does not retain an unmetered heuristic AI fallback');
 
   // Extract and test heuristic logic directly
   const mockBoards = [

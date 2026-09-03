@@ -19,6 +19,7 @@
     "test:commercial-billing": "tsx tests/commercial-billing.test.ts",
     "test:commercial-gates": "tsx tests/commercial-gates.test.ts",
     "test:commercial-e2e": "tsx tests/commercial-e2e-scenarios.test.ts",
+    "test:commercial-adversarial": "tsx tests/adversarial-tasks-4-6.test.ts && tsx tests/billing-adversarial.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,9 +1,9 @@
 # Tarefus Commercial & Entitlements Test Infrastructure Specification (TEST_INFRA.md)
 
-**Document Version:** 1.0.0  
-**Date:** 2026-09-02  
-**Author:** `test_writer_e2e`  
-**Target Repository:** Tarefus (`codex/billing-entitlements-foundation`)  
+**Document Version:** 1.0.0
+**Date:** 2026-09-02
+**Author:** `test_writer_e2e`
+**Target Repository:** Tarefus (`codex/billing-entitlements-foundation`)
 **Scope:** Commercial Foundation, Billing Provider, Raw Event Inbox, Inert Webhooks, Admission Gates, and Product Projections (Tasks 4, 5, 6).
 
 ---
