@@ -13,8 +13,8 @@ export const SiteFooter: React.FC = () => (
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600">
-              <CheckSquare2 className="h-4 w-4 text-white" aria-hidden="true" />
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emphasis">
+              <CheckSquare2 className="h-4 w-4 text-emphasis-ink" aria-hidden="true" />
             </span>
             <span className="font-bold tracking-tight text-ink">Tarefus</span>
           </div>

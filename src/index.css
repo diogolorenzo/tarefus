@@ -28,6 +28,14 @@
   /* Traços */
   --line: #e4e8ef;
   --line-strong: #cbd3e1;
+
+  /* Superfície de ênfase: usada uma vez por página, no bloco que precisa
+     decidir alguma coisa (a coluna do Tarefus no comparativo). No claro ela
+     inverte; no escuro ela sobe, porque inverter para branco cegaria. */
+  --emphasis: #101725;
+  --emphasis-text: #f8fafc;
+  --emphasis-muted: #9aa8bf;
+  --emphasis-line: rgba(255, 255, 255, 0.12);
 }
 
 :root.dark {
@@ -44,6 +52,11 @@
 
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.14);
+
+  --emphasis: #1e2637;
+  --emphasis-text: #f1f5f9;
+  --emphasis-muted: #a7b4c9;
+  --emphasis-line: rgba(255, 255, 255, 0.16);
 }
 
 @theme inline {
@@ -60,6 +73,11 @@
 
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+
+  --color-emphasis: var(--emphasis);
+  --color-emphasis-ink: var(--emphasis-text);
+  --color-emphasis-muted: var(--emphasis-muted);
+  --color-emphasis-line: var(--emphasis-line);
 }
 
 @layer base {

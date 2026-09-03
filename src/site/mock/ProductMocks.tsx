@@ -10,6 +10,13 @@ import { cn } from '../ui/cn';
  * cada elemento aqui corresponde a algo que existe em src/components.
  */
 
+/**
+ * Casca externa do mock. Dentro da `ProofFrame` os mocks entram "bare": a
+ * moldura já fornece borda, raio e sombra, e empilhar as duas coisas cria a
+ * borda dupla que fazia as telas parecerem adesivos colados na página.
+ */
+const shell = (bare: boolean | undefined, chrome: string): string => (bare ? '' : chrome);
+
 interface AvatarProps {
   initials: string;
   tone?: 'indigo' | 'emerald' | 'amber' | 'purple';
@@ -168,8 +175,8 @@ const COLUMNS = [
   },
 ];
 
-export const KanbanMock: React.FC = () => (
-  <div className="rounded-2xl border border-line bg-app p-3 shadow-sm sm:p-4">
+export const KanbanMock: React.FC<{ bare?: boolean }> = ({ bare }) => (
+  <div className={shell(bare, 'rounded-2xl border border-line bg-app p-3 shadow-sm sm:p-4')}>
     <div className="mb-3 flex items-center gap-2 border-b border-line pb-3">
       <span className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white">
         Comercial
@@ -203,8 +210,8 @@ export const KanbanMock: React.FC = () => (
   </div>
 );
 
-export const MyTasksMock: React.FC = () => (
-  <div className="rounded-2xl border border-line bg-app p-4 shadow-sm">
+export const MyTasksMock: React.FC<{ bare?: boolean }> = ({ bare }) => (
+  <div className={shell(bare, 'rounded-2xl border border-line bg-app p-4 shadow-sm')}>
     <div className="mb-4 flex items-center gap-2">
       <Avatar initials="BL" tone="purple" />
       <div>
@@ -268,10 +275,11 @@ export const DeadlinesMock: React.FC = () => (
 interface AssistantMockProps {
   text: string;
   showCursor?: boolean;
+  bare?: boolean;
 }
 
-export const AssistantMock: React.FC<AssistantMockProps> = ({ text, showCursor = false }) => (
-  <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
+export const AssistantMock: React.FC<AssistantMockProps> = ({ text, showCursor = false, bare }) => (
+  <div className={shell(bare, 'rounded-2xl border border-line bg-surface p-4 shadow-sm')}>
     <div className="mb-3 flex items-center gap-2">
       <span className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
         <Sparkles className="h-3 w-3" aria-hidden="true" />
@@ -280,7 +288,14 @@ export const AssistantMock: React.FC<AssistantMockProps> = ({ text, showCursor =
       <span className="text-[11px] text-subtle">Descreva a tarefa como você falaria</span>
     </div>
 
-    <div className="min-h-[76px] rounded-xl border border-line-strong bg-app p-3">
+    <div
+      className={cn(
+        'min-h-[76px] rounded-xl border border-line-strong p-3',
+        // Sem casca o fundo ao redor já é `bg-app`: o campo sobe uma superfície
+        // para continuar legível como campo.
+        bare ? 'bg-surface' : 'bg-app'
+      )}
+    >
       <p className="text-sm leading-relaxed text-ink">
         {text}
         {showCursor && (

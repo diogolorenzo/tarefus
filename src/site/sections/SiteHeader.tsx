@@ -7,6 +7,11 @@ import { home } from '../../content/home';
 /**
  * S0 — Barra de navegação.
  * Fixa apenas depois de 120px de rolagem, para não roubar altura da primeira dobra.
+ *
+ * Antes de rolar, a barra não tem filete nem fundo próprio: ela se dissolve no
+ * herói, e a primeira coisa que a página mostra é a promessa, não uma moldura.
+ * O filete e a sombra só aparecem quando a barra passa a flutuar sobre o
+ * conteúdo — que é quando eles têm função.
  */
 export const SiteHeader: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -35,14 +40,16 @@ export const SiteHeader: React.FC = () => {
   return (
     <header
       className={cn(
-        'z-40 w-full border-b border-line bg-surface transition-shadow',
-        scrolled ? 'sticky top-0 shadow-sm' : 'relative'
+        'z-40 w-full transition-shadow',
+        scrolled
+          ? 'sticky top-0 border-b border-line bg-surface/95 shadow-sm backdrop-blur'
+          : 'relative bg-app'
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-6">
         <a href="/" className="flex items-center gap-2 rounded-lg" aria-label="Tarefus, página inicial">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-            <CheckSquare2 className="h-4.5 w-4.5 text-white" aria-hidden="true" />
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emphasis">
+            <CheckSquare2 className="h-4.5 w-4.5 text-emphasis-ink" aria-hidden="true" />
           </span>
           <span className="text-lg font-bold tracking-tight text-ink">Tarefus</span>
         </a>
@@ -98,7 +105,7 @@ export const SiteHeader: React.FC = () => {
       </div>
 
       {menuOpen && (
-        <div id="menu-mobile" className="border-t border-line bg-surface px-5 py-4 md:hidden">
+        <div id="menu-mobile" className="border-t border-line bg-surface px-5 py-4 shadow-sm md:hidden">
           <ul className="space-y-1">
             {home.header.links.map((link) => (
               <li key={link.href}>

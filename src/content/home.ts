@@ -3,6 +3,10 @@
  * Referência: docs/commercial/01-homepage-plan.md (seções 4.1 a 4.5).
  *
  * Os componentes não contêm frases: revisar texto é editar este arquivo.
+ *
+ * Regra editorial herdada do plano: se não está no código do produto, não entra
+ * aqui. A direção de arte mudou o enquadramento e o ritmo das seções, nunca o
+ * que o Tarefus afirma fazer.
  */
 
 export type Phase = 'waitlist' | 'trial';
@@ -15,34 +19,44 @@ export type Phase = 'waitlist' | 'trial';
 // configuração explícita da variável de ambiente após a migração multiempresa.
 export const PHASE: Phase = import.meta.env.VITE_TAREFUS_LAUNCH_PHASE === 'trial' ? 'trial' : 'waitlist';
 
+/**
+ * Nove blocos, não doze seções. Os fatos entraram no herói, Papéis e Segurança
+ * viraram um bloco só, e Teste e Chamada final fecham juntos: a compactação
+ * existe para que o respiro que sobra caia onde significa alguma coisa.
+ */
 export type SectionId =
   | 'hero'
-  | 'fatos'
+  | 'diagnostico'
+  | 'comparativo'
   | 'demonstracao'
   | 'passos'
   | 'dia-a-dia'
   | 'prazos'
-  | 'papeis'
-  | 'comparativo'
-  | 'seguranca'
-  | 'teste'
+  | 'acessos'
   | 'perguntas'
-  | 'chamada-final';
+  | 'comecar';
 
 export interface Cta {
   label: string;
   href: string;
 }
 
+/**
+ * Na fase de lista de espera o destino é o bloco de fechamento, que carrega o
+ * id `lista-de-espera`. Sem essa âncora o botão principal da página não leva a
+ * lugar nenhum.
+ */
+const WAITLIST_HREF = '#lista-de-espera';
+
 const CTA_PRIMARY: Cta =
   PHASE === 'trial'
     ? { label: 'Começar teste grátis de 14 dias', href: '/cadastro' }
-    : { label: 'Quero ser avisado quando abrir', href: '#lista-de-espera' };
+    : { label: 'Quero ser avisado quando abrir', href: WAITLIST_HREF };
 
 const CTA_PRIMARY_SHORT: Cta =
   PHASE === 'trial'
     ? { label: 'Testar grátis', href: '/cadastro' }
-    : { label: 'Quero ser avisado', href: '#lista-de-espera' };
+    : { label: 'Quero ser avisado', href: WAITLIST_HREF };
 
 export const home = {
   phase: PHASE,
@@ -64,7 +78,7 @@ export const home = {
   },
 
   hero: {
-    headline: 'Cada tarefa da sua equipe com um dono e um prazo',
+    headline: 'Cada tarefa com um dono e um prazo.',
     subheadline:
       'O Tarefus organiza o trabalho da sua pequena empresa em quadros por área. Descreva a tarefa por texto ou por voz: a IA sugere título, responsável, prazo e checklist — e nada é salvo antes da sua aprovação.',
     primaryCta: CTA_PRIMARY,
@@ -73,18 +87,34 @@ export const home = {
       PHASE === 'trial'
         ? ['14 dias grátis', 'Não pedimos cartão de crédito', 'Plano completo durante o teste']
         : ['Estamos abrindo o acesso aos poucos', 'Deixe seu e-mail e avisamos quando chegar a sua vez'],
+    /** A antiga faixa de fatos: agora uma linha fina dentro do próprio herói. */
+    facts: [
+      { icon: 'CalendarClock', label: '14 dias grátis' },
+      { icon: 'CreditCard', label: 'Sem cartão de crédito' },
+      { icon: 'Building2', label: 'Preço por empresa, não por pessoa' },
+      { icon: 'LogIn', label: 'Entre com a conta Google' },
+    ],
+    proofCaption: 'Uma frase vira uma tarefa com responsável, prazo e checklist.',
   },
 
-  facts: [
-    { icon: 'CalendarClock', label: '14 dias grátis' },
-    { icon: 'CreditCard', label: 'Sem cartão de crédito' },
-    { icon: 'Building2', label: 'Preço por empresa, não por pessoa' },
-    { icon: 'LogIn', label: 'Entre com a conta Google' },
-  ],
+  /**
+   * O momento de declaração da página: só tipografia, sem imagem competindo.
+   * Descreve o problema do decisor levantado na seção 1.1 do plano — nenhuma
+   * funcionalidade nova é prometida aqui.
+   */
+  diagnostico: {
+    eyebrow: 'O problema real',
+    title: 'Hoje o sistema é você.',
+    paragraphs: [
+      'Ninguém na sua empresa está de má vontade. O trabalho é que não mora em lugar nenhum: o pedido chega por mensagem, o prazo fica combinado no corredor e a planilha só é aberta quando alguém lembra.',
+      'Aí a única memória do que está em andamento é a sua. Você é quem sabe quem ficou com o quê, o que já foi entregue e o que atrasou — e remonta esse mapa toda vez que alguém pergunta.',
+    ],
+    kicker: 'O Tarefus tira esse mapa da sua cabeça e põe na tela.',
+  },
 
   aiDemo: {
     eyebrow: 'Assistente com IA',
-    title: 'Descreveu, virou tarefa',
+    title: 'Descreveu, virou tarefa.',
     subtitle:
       'Escreva o pedido do jeito que você falaria. O Tarefus devolve a tarefa montada — e você aprova antes de salvar.',
     approvalNote: 'Assim é no produto: nada é salvo sem a sua aprovação.',
@@ -169,7 +199,7 @@ export const home = {
 
   steps: {
     eyebrow: 'Como funciona',
-    title: 'Comece em três passos',
+    title: 'Começar leva três passos.',
     subtitle: 'Sem implantação, sem consultoria e sem migrar planilha.',
     items: [
       {
@@ -197,69 +227,37 @@ export const home = {
 
   dayToDay: {
     eyebrow: 'No dia a dia',
-    title: 'Cada área com seu quadro, cada pessoa com sua lista',
+    title: 'Cada área com seu quadro, cada pessoa com sua lista.',
     bullets: [
       'Um quadro por área — ou todas as áreas em uma tela só.',
       'Três etapas, a fazer, fazendo e concluído: o cartão muda de etapa arrastando, no computador ou no celular.',
       'Em "Minhas Tarefas", cada pessoa vê apenas o que é dela.',
     ],
     cta: { label: 'Ver o Tarefus por dentro', href: '#prazos' },
+    proofCaption: 'O quadro da área e a lista de uma pessoa, lado a lado.',
   },
 
   deadlines: {
     eyebrow: 'Prazos',
-    title: 'O atraso aparece antes de o cliente cobrar',
+    title: 'O atraso aparece antes de o cliente cobrar.',
     bullets: [
       'O cartão mostra a data de entrega e destaca o que vence hoje.',
       'Uma faixa no topo avisa as tarefas do dia assim que alguém entra no sistema.',
       'O sino mostra quantas tarefas estão atrasadas e quantas vencem hoje.',
     ],
-  },
-
-  roles: {
-    eyebrow: 'Acessos',
-    title: 'Cada pessoa vê o que precisa',
-    subtitle: 'Três níveis de acesso, definidos por você.',
-    items: [
-      {
-        name: 'Administrador',
-        icon: 'ShieldCheck',
-        summary: 'Cuida da empresa dentro do sistema.',
-        abilities: [
-          'Configura os dados da empresa',
-          'Adiciona, remove e muda o nível de acesso das pessoas',
-          'Vê o histórico completo',
-        ],
-      },
-      {
-        name: 'Gestor',
-        icon: 'Briefcase',
-        summary: 'Organiza o trabalho da área.',
-        abilities: [
-          'Cria e edita os quadros da área',
-          'Distribui tarefas e define prazos',
-          'Acompanha o andamento da equipe',
-        ],
-      },
-      {
-        name: 'Colaborador',
-        icon: 'UserCheck',
-        summary: 'Toca as tarefas do dia.',
-        abilities: [
-          'Cria e edita tarefas',
-          'Move o cartão entre as etapas',
-          'Marca os itens do checklist',
-        ],
-      },
-    ],
-    historyNote:
-      'Criação, movimentação, conclusão e exclusão de tarefas ficam registradas, com autor e data.',
+    proofCaption: 'A faixa do dia e o sino de notificações, como aparecem ao entrar.',
   },
 
   comparison: {
-    title: 'Planilha, grupo de mensagens e Tarefus',
-    subtitle:
-      'Você já organiza o trabalho de algum jeito. A pergunta é quanto isso custa em retrabalho.',
+    eyebrow: 'Comparativo',
+    title: 'Você já organiza de algum jeito.',
+    subtitle: 'A pergunta é quanto esse jeito custa em retrabalho.',
+    columns: {
+      criterion: 'Critério',
+      spreadsheet: 'Planilha',
+      messaging: 'Grupo de mensagens',
+      tarefus: 'Tarefus',
+    },
     rows: [
       {
         criterion: 'Onde a tarefa fica',
@@ -295,9 +293,47 @@ export const home = {
     cta: CTA_PRIMARY,
   },
 
-  trust: {
-    title: PHASE === 'trial' ? 'Seus dados e seus acessos' : 'Como vamos tratar seus dados',
-    items:
+  /**
+   * Papéis e dados no mesmo bloco: as duas perguntas são a mesma pergunta do
+   * influenciador técnico — quem acessa o quê, e o que acontece com os dados.
+   */
+  acessos: {
+    eyebrow: 'Acessos e dados',
+    title: 'Cada pessoa vê o que precisa. Os dados continuam seus.',
+    roles: [
+      {
+        name: 'Administrador',
+        icon: 'ShieldCheck',
+        summary: 'Cuida da empresa dentro do sistema.',
+        abilities: [
+          'Configura os dados da empresa',
+          'Adiciona, remove e muda o nível de acesso das pessoas',
+          'Vê o histórico completo',
+        ],
+      },
+      {
+        name: 'Gestor',
+        icon: 'Briefcase',
+        summary: 'Organiza o trabalho da área.',
+        abilities: [
+          'Cria e edita os quadros da área',
+          'Distribui tarefas e define prazos',
+          'Acompanha o andamento da equipe',
+        ],
+      },
+      {
+        name: 'Colaborador',
+        icon: 'UserCheck',
+        summary: 'Toca as tarefas do dia.',
+        abilities: [
+          'Cria e edita tarefas',
+          'Move o cartão entre as etapas',
+          'Marca os itens do checklist',
+        ],
+      },
+    ],
+    dataTitle: PHASE === 'trial' ? 'Seus dados e seus acessos' : 'Como vamos tratar seus dados',
+    dataItems:
       PHASE === 'trial'
         ? [
             {
@@ -340,30 +376,13 @@ export const home = {
                 'Exportação em JSON ou CSV a qualquer momento, e exclusão dos dados da empresa a pedido.',
             },
           ],
-  },
-
-  trial: {
-    title:
-      PHASE === 'trial'
-        ? 'Teste 14 dias e depois escolha o plano'
-        : 'Vai começar com 14 dias grátis',
-    included: [
-      'Plano completo liberado durante os 14 dias, sem cartão de crédito',
-      'Tarefas e checklists ilimitados, em qualquer plano',
-      'Convide a equipe até o limite de membros do plano',
-    ],
-    afterTrial:
-      'No 15º dia você escolhe um plano. Se não escolher, o seu espaço fica em modo somente leitura por 30 dias — dá para consultar e exportar tudo — e só depois o acesso é bloqueado. Nada é cobrado sem a sua escolha.',
-    cancellation:
-      'No mensal não há fidelidade e o cancelamento é feito pelo painel. No anual, o pagamento pode ser parcelado no cartão ou feito à vista por PIX.',
-    billingNote: 'A cobrança é por empresa, não por pessoa, em reais e com nota fiscal.',
-    primaryCta: CTA_PRIMARY,
-    // O link para /planos fica oculto até a página existir (D13).
-    pricingCta: null as Cta | null,
+    historyNote:
+      'Criação, movimentação, conclusão e exclusão de tarefas ficam registradas, com autor e data.',
   },
 
   faq: {
-    title: 'Perguntas frequentes',
+    eyebrow: 'Perguntas frequentes',
+    title: 'O que costumam perguntar antes de decidir.',
     items: [
       {
         id: 'faq-cartao',
@@ -434,11 +453,32 @@ export const home = {
     ],
   },
 
-  finalCta: {
-    title: 'Comece hoje com a sua equipe',
-    supportLine:
-      'Crie os quadros das suas áreas, descreva a primeira tarefa e veja o trabalho se organizar. 14 dias grátis, sem cartão de crédito.',
-    cta: CTA_PRIMARY,
+  /**
+   * Fecha o que antes eram duas seções (Teste e Chamada final). O bloco carrega
+   * o id `lista-de-espera`, destino dos CTAs na fase 0.
+   */
+  comecar: {
+    title:
+      PHASE === 'trial'
+        ? 'Comece hoje com a sua equipe.'
+        : 'Entre na fila e comece com 14 dias grátis.',
+    lead:
+      PHASE === 'trial'
+        ? 'Crie os quadros das suas áreas, descreva a primeira tarefa e veja o trabalho se organizar.'
+        : 'Estamos abrindo o acesso aos poucos. Deixe seu e-mail e avisamos quando chegar a sua vez.',
+    included: [
+      'Plano completo liberado durante os 14 dias, sem cartão de crédito',
+      'Tarefas e checklists ilimitados, em qualquer plano',
+      'Convide a equipe até o limite de membros do plano',
+    ],
+    fineprint: [
+      'No 15º dia você escolhe um plano. Se não escolher, o seu espaço fica em modo somente leitura por 30 dias — dá para consultar e exportar tudo — e só depois o acesso é bloqueado. Nada é cobrado sem a sua escolha.',
+      'No mensal não há fidelidade e o cancelamento é feito pelo painel. No anual, o pagamento pode ser parcelado no cartão ou feito à vista por PIX.',
+    ],
+    billingNote: 'A cobrança é por empresa, não por pessoa, em reais e com nota fiscal.',
+    primaryCta: CTA_PRIMARY,
+    // O link para /planos fica oculto até a página existir (D13).
+    pricingCta: null as Cta | null,
   },
 
   footer: {
