@@ -1,25 +1,38 @@
 import React, { useEffect } from 'react';
 import { SiteHeader } from './sections/SiteHeader';
 import { HeroSection } from './sections/HeroSection';
-import { FactStrip } from './sections/FactStrip';
-import { AiDemoSection } from './sections/AiDemoSection';
-import { StepsSection } from './sections/StepsSection';
-import { FeatureShowcase } from './sections/FeatureShowcase';
-import { RolesSection } from './sections/RolesSection';
+import { StatementSection } from './sections/StatementSection';
 import { ComparisonSection } from './sections/ComparisonSection';
-import { TrustSection } from './sections/TrustSection';
-import { TrialSection } from './sections/TrialSection';
+import { AiDemoSection } from './sections/AiDemoSection';
+import { InsideSection } from './sections/InsideSection';
+import { AccessSection } from './sections/AccessSection';
+import { TipsCarousel } from './sections/TipsCarousel';
 import { FaqSection } from './sections/FaqSection';
-import { FinalCtaSection } from './sections/FinalCtaSection';
+import { PricingSection } from './sections/PricingSection';
+import { ClosingSection } from './sections/ClosingSection';
 import { SiteFooter } from './sections/SiteFooter';
 import { StickyMobileCta } from './sections/StickyMobileCta';
-import { KanbanMock, MyTasksMock, DeadlinesMock } from './mock/ProductMocks';
 import { trackHomeView } from '../analytics/track';
-import { home } from '../content/home';
 
 /**
  * Homepage pública do Tarefus.
- * Ordem das seções conforme docs/commercial/01-homepage-plan.md, seção 3.1.
+ *
+ * A página inteira em nove blocos, planos incluídos: quem chega aqui entende o
+ * produto, vê o preço e decide sem trocar de rota. `/planos` e `/guia`
+ * continuam publicados, mas como aprofundamento, não como etapa obrigatória —
+ * o que também evita que um visitante baixe o bundle da aplicação só para ver
+ * quanto custa.
+ *
+ * O ritmo é a regra de composição, e ela se lê aqui de cima a baixo —
+ * densidade e superfície andam sempre juntas:
+ *
+ *   air    + raised  → os dois momentos de declaração (Diagnóstico, Fechamento)
+ *   normal + app     → os blocos de prova (Demonstração, Por dentro, Acessos, Planos)
+ *   dense  + sunken  → os blocos de informação (Comparativo, Dicas, Perguntas)
+ *
+ * Nenhum bloco repete a densidade do vizinho. É isso que faz a compactação
+ * virar ritmo em vez de aperto: o espaço que sai dos blocos densos é o mesmo
+ * que sobra para os dois momentos de respiro.
  */
 export const HomePage: React.FC = () => {
   useEffect(() => {
@@ -39,43 +52,15 @@ export const HomePage: React.FC = () => {
 
       <main>
         <HeroSection />
-        <FactStrip />
-        <AiDemoSection />
-        <StepsSection />
-
-        <FeatureShowcase
-          id="dia-a-dia"
-          eyebrow={home.dayToDay.eyebrow}
-          title={home.dayToDay.title}
-          bullets={home.dayToDay.bullets}
-          cta={home.dayToDay.cta}
-          visualSide="right"
-          visual={
-            <div className="space-y-4">
-              <KanbanMock />
-              <div className="mx-auto max-w-sm lg:ml-auto lg:mr-0">
-                <MyTasksMock />
-              </div>
-            </div>
-          }
-        />
-
-        <FeatureShowcase
-          id="prazos"
-          surface="sunken"
-          eyebrow={home.deadlines.eyebrow}
-          title={home.deadlines.title}
-          bullets={home.deadlines.bullets}
-          visualSide="left"
-          visual={<DeadlinesMock />}
-        />
-
-        <RolesSection />
+        <StatementSection />
         <ComparisonSection />
-        <TrustSection />
-        <TrialSection />
+        <AiDemoSection />
+        <InsideSection />
+        <AccessSection />
+        <TipsCarousel />
         <FaqSection />
-        <FinalCtaSection />
+        <PricingSection />
+        <ClosingSection />
       </main>
 
       <SiteFooter />

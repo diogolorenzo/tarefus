@@ -6,11 +6,11 @@ import { home } from '../../content/home';
 
 /**
  * SF — Barra fixa do celular.
- * Aparece depois que o herói sai da tela e some quando a chamada final entra,
+ * Aparece depois que o herói sai da tela e some quando o bloco de fechamento entra,
  * para não duplicar o mesmo botão na mesma tela.
  */
 export const StickyMobileCta: React.FC = () => {
-  const visible = useScrolledPast('hero', 'chamada-final');
+  const visible = useScrolledPast('hero', 'comecar');
 
   return (
     <div

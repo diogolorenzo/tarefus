@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Check, Edit3, Loader2 } from 'lucide-react';
 import { SectionShell } from '../ui/SectionShell';
 import { SectionHeading } from '../ui/SectionHeading';
-import { CtaButton } from '../ui/CtaButton';
+import { ProofFrame } from '../ui/ProofFrame';
 import { AssistantMock, Avatar } from '../mock/ProductMocks';
 import { cn } from '../ui/cn';
 import { track } from '../../analytics/track';
@@ -12,9 +12,17 @@ import { home } from '../../content/home';
 type Stage = 'typing' | 'loading' | 'result';
 
 /**
- * S3 — Demonstração da IA.
+ * S4 — Demonstração da IA.
  * Pré-computada, sem chamar /api/generate-task-draft (decisão D3 do plano):
  * evita custo por visitante, abuso do endpoint e latência na primeira dobra.
+ *
+ * Pedido e resultado agora dividem uma moldura só. Como dois cartões soltos,
+ * o visitante via dois enfeites; como uma superfície única, vê a tela do
+ * produto fazendo a coisa acontecer.
+ *
+ * O bloco não tem botão próprio: o comparativo logo acima e os planos logo
+ * abaixo já oferecem a mesma ação, e repetir o mesmo botão a cada dobra o faz
+ * desaparecer.
  */
 export const AiDemoSection: React.FC = () => {
   const examples = home.aiDemo.examples;
@@ -60,14 +68,14 @@ export const AiDemoSection: React.FC = () => {
   };
 
   return (
-    <SectionShell id="demonstracao" surface="raised">
+    <SectionShell id="demonstracao" density="normal" surface="app">
       <SectionHeading
         eyebrow={home.aiDemo.eyebrow}
         title={home.aiDemo.title}
         subtitle={home.aiDemo.subtitle}
       />
 
-      <div className="mt-8 -mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
+      <div className="-mx-5 mt-8 overflow-x-auto px-5 sm:mx-0 sm:px-0">
         <div className="flex gap-2 pb-1" role="tablist" aria-label="Exemplos por área">
           {examples.map((example) => (
             <button
@@ -78,9 +86,11 @@ export const AiDemoSection: React.FC = () => {
               onClick={() => handleSelect(example.id)}
               className={cn(
                 'shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                // O estado ativo usa a superfície de ênfase, não o índigo: o
+                // índigo continua reservado ao CTA primário.
                 example.id === activeId
-                  ? 'border-indigo-600 bg-indigo-600 text-white'
-                  : 'border-line bg-app text-muted hover:text-ink'
+                  ? 'border-emphasis bg-emphasis text-emphasis-ink'
+                  : 'border-line bg-surface text-muted hover:text-ink'
               )}
             >
               {example.areaLabel}
@@ -89,73 +99,99 @@ export const AiDemoSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-2 lg:items-start">
-        <AssistantMock text={typed} showCursor={stage === 'typing'} />
+      <ProofFrame
+        label="Tarefus · Criar tarefa com IA"
+        caption={home.aiDemo.approvalNote}
+        className="mt-6"
+      >
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          <AssistantMock bare text={typed} showCursor={stage === 'typing'} />
 
-        <div className="rounded-2xl border border-line bg-app p-4 shadow-sm">
-          {stage === 'loading' ? (
-            <div className="flex min-h-[260px] items-center justify-center gap-2 text-muted">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              <span className="text-sm">Montando a tarefa…</span>
-            </div>
-          ) : (
-            <div className="min-h-[260px]">
-              <h3 className="text-base font-semibold leading-snug text-ink">{active.draft.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{active.draft.description}</p>
-
-              <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-line py-3">
-                <div>
-                  <dt className="text-[11px] font-medium uppercase tracking-wide text-subtle">
-                    Responsável
-                  </dt>
-                  <dd className="mt-1.5 flex items-center gap-2">
-                    <Avatar initials={active.draft.assignee.initials} size="sm" />
-                    <span className="text-xs font-medium text-ink">{active.draft.assignee.name}</span>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[11px] font-medium uppercase tracking-wide text-subtle">Prazo</dt>
-                  <dd className="mt-1.5 text-xs font-medium text-ink tnum">{active.draft.dueDateLabel}</dd>
-                </div>
-              </dl>
-
-              <p className="mt-3 text-[11px] font-medium uppercase tracking-wide text-subtle">Checklist</p>
-              <ul className="mt-2 space-y-1.5">
-                {active.draft.checklist.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-                    <span className="mt-0.5 inline-block h-3.5 w-3.5 shrink-0 rounded border border-line-strong" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-5 flex flex-wrap gap-2" aria-hidden="true">
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white">
-                  <Check className="h-3.5 w-3.5" />
-                  Aprovar e criar
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-muted">
-                  <Edit3 className="h-3.5 w-3.5" />
-                  Editar sugestão
-                </span>
+          <div className="rounded-xl border border-line bg-surface p-4">
+            {stage === 'loading' ? (
+              <div className="flex min-h-[228px] items-center justify-center gap-2 text-muted">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <span className="text-sm">Montando a tarefa…</span>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="min-h-[228px]">
+                <h3 className="text-base font-semibold leading-snug text-ink">{active.draft.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{active.draft.description}</p>
+
+                <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-line py-3">
+                  <div>
+                    <dt className="text-[11px] font-medium uppercase tracking-wide text-subtle">
+                      Responsável
+                    </dt>
+                    <dd className="mt-1.5 flex items-center gap-2">
+                      <Avatar initials={active.draft.assignee.initials} size="sm" />
+                      <span className="text-xs font-medium text-ink">
+                        {active.draft.assignee.name}
+                      </span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[11px] font-medium uppercase tracking-wide text-subtle">
+                      Prazo
+                    </dt>
+                    <dd className="mt-1.5 text-xs font-medium text-ink tnum">
+                      {active.draft.dueDateLabel}
+                    </dd>
+                  </div>
+                </dl>
+
+                <p className="mt-3 text-[11px] font-medium uppercase tracking-wide text-subtle">
+                  Checklist
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {active.draft.checklist.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+                      <span className="mt-0.5 inline-block h-3.5 w-3.5 shrink-0 rounded border border-line-strong" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-5 flex flex-wrap gap-2" aria-hidden="true">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white">
+                    <Check className="h-3.5 w-3.5" />
+                    Aprovar e criar
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-muted">
+                    <Edit3 className="h-3.5 w-3.5" />
+                    Editar sugestão
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+      </ProofFrame>
+
+      {/*
+        "Como funciona em três passos" era uma seção inteira logo abaixo desta.
+        Como faixa de rodapé daqui, responde à pergunta que a demonstração
+        acabou de levantar — quanto trabalho dá começar — sem custar mais uma
+        dobra de página.
+      */}
+      <div className="mt-10 border-t border-line pt-7">
+        <p className="text-sm font-semibold text-ink">{home.steps.title}</p>
+
+        <ol className="mt-5 grid gap-6 sm:grid-cols-3 sm:gap-8">
+          {home.steps.items.map((step) => (
+            <li key={step.number} className="flex gap-3">
+              <span className="text-sm font-bold leading-6 text-subtle tnum">{step.number}</span>
+              <div>
+                <h3 className="text-sm font-semibold leading-6 text-ink">{step.title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted">{step.description}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-6 text-xs leading-relaxed text-subtle">{home.steps.supportLine}</p>
       </div>
 
-      <p className="mt-5 text-sm text-subtle">{home.aiDemo.approvalNote}</p>
-
-      <div className="mt-7">
-        <CtaButton
-          label={home.aiDemo.cta.label}
-          href={home.aiDemo.cta.href}
-          ctaId="demo_primary"
-          sectionId="demonstracao"
-          fullWidth
-          className="sm:w-auto"
-        />
-      </div>
     </SectionShell>
   );
 };
