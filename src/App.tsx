@@ -143,13 +143,19 @@ const MainContent: React.FC = () => {
   }
 
   if (currentRoute.type === 'auth') {
-    return (
-      <AuthPage
-        initialMode={PHASE === 'trial' ? currentRoute.mode : 'login'}
-        allowRegistration={PHASE === 'trial'}
-        onNavigate={navigateTo}
-      />
-    );
+    if (isAuthenticated && currentUser) {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.history.replaceState({}, '', '/');
+      }
+    } else {
+      return (
+        <AuthPage
+          initialMode={PHASE === 'trial' ? currentRoute.mode : 'login'}
+          allowRegistration={PHASE === 'trial'}
+          onNavigate={navigateTo}
+        />
+      );
+    }
   }
 
   // 4. UNKNOWN 404 ROUTE (Not Found)

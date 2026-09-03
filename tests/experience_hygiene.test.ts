@@ -408,6 +408,37 @@ async function runExperienceHygieneTests() {
       assert(!html.includes('Auditoria de Atividades'), 'SettingsView must not show Auditoria de Atividades for managers');
       assert(!html.includes('Auditoria &amp; Banco') && !html.includes('Auditoria & Banco'), 'SettingsView must not show old tab name');
     });
+
+    await test('7.13 App.tsx yields to workspace when user is authenticated on auth route', () => {
+      const appPath = path.join(process.cwd(), 'src', 'App.tsx');
+      const appContent = fs.readFileSync(appPath, 'utf8');
+      assert(appContent.includes("currentRoute.type === 'auth'"), 'App.tsx must handle auth route');
+      assert(appContent.includes('if (isAuthenticated && currentUser)'), 'App.tsx must check isAuthenticated and currentUser on auth route');
+      assert(appContent.includes("window.history.replaceState({}, '', '/')"), 'App.tsx must synchronize URL to / for authenticated user on auth route');
+    });
+
+    await test('7.14 AuthPage auto-redirects on login success and contains Google login option', () => {
+      const authPath = path.join(process.cwd(), 'src', 'components', 'auth', 'AuthPage.tsx');
+      const authContent = fs.readFileSync(authPath, 'utf8');
+      assert(authContent.includes("handleNavigate('/')"), 'AuthPage must navigate to / on successful authentication');
+      assert(authContent.includes('handleGoogleLogin'), 'AuthPage must have handleGoogleLogin');
+      assert(authContent.includes('Conectar com Google'), 'AuthPage must render Google login button');
+    });
+
+    await test('7.15 INITIAL_USERS contains administrator Diogo Pincerno', () => {
+      const initialDataPath = path.join(process.cwd(), 'src', 'data', 'initialData.ts');
+      const content = fs.readFileSync(initialDataPath, 'utf8');
+      assert(content.includes('diogopincerno@gmail.com'), 'initialData.ts must include diogopincerno@gmail.com');
+      assert(content.includes('Diogo Pincerno'), 'initialData.ts must include Diogo Pincerno');
+      assert(content.includes("permissionRole: 'admin'"), 'Diogo Pincerno must have admin permission role');
+    });
+
+    await test('7.16 ToastContainer is centered at bottom of screen with slideUp animation', () => {
+      const toastPath = path.join(process.cwd(), 'src', 'components', 'ToastContainer.tsx');
+      const toastContent = fs.readFileSync(toastPath, 'utf8');
+      assert(toastContent.includes('bottom-6 left-1/2 -translate-x-1/2'), 'ToastContainer must be centered at bottom-6');
+      assert(toastContent.includes('animate-slide-up'), 'ToastContainer items must include animate-slide-up class');
+    });
   });
 
   // SUMMARY REPORT
