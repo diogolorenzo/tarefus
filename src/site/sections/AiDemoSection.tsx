@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Check, Edit3, Loader2 } from 'lucide-react';
 import { SectionShell } from '../ui/SectionShell';
 import { SectionHeading } from '../ui/SectionHeading';
-import { CtaButton } from '../ui/CtaButton';
 import { ProofFrame } from '../ui/ProofFrame';
 import { AssistantMock, Avatar } from '../mock/ProductMocks';
 import { cn } from '../ui/cn';
@@ -20,6 +19,10 @@ type Stage = 'typing' | 'loading' | 'result';
  * Pedido e resultado agora dividem uma moldura só. Como dois cartões soltos,
  * o visitante via dois enfeites; como uma superfície única, vê a tela do
  * produto fazendo a coisa acontecer.
+ *
+ * O bloco não tem botão próprio: o comparativo logo acima e os planos logo
+ * abaixo já oferecem a mesma ação, e repetir o mesmo botão a cada dobra o faz
+ * desaparecer.
  */
 export const AiDemoSection: React.FC = () => {
   const examples = home.aiDemo.examples;
@@ -106,12 +109,12 @@ export const AiDemoSection: React.FC = () => {
 
           <div className="rounded-xl border border-line bg-surface p-4">
             {stage === 'loading' ? (
-              <div className="flex min-h-[260px] items-center justify-center gap-2 text-muted">
+              <div className="flex min-h-[228px] items-center justify-center gap-2 text-muted">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 <span className="text-sm">Montando a tarefa…</span>
               </div>
             ) : (
-              <div className="min-h-[260px]">
+              <div className="min-h-[228px]">
                 <h3 className="text-base font-semibold leading-snug text-ink">{active.draft.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{active.draft.description}</p>
 
@@ -165,16 +168,30 @@ export const AiDemoSection: React.FC = () => {
         </div>
       </ProofFrame>
 
-      <div className="mt-8">
-        <CtaButton
-          label={home.aiDemo.cta.label}
-          href={home.aiDemo.cta.href}
-          ctaId="demo_primary"
-          sectionId="demonstracao"
-          fullWidth
-          className="sm:w-auto"
-        />
+      {/*
+        "Como funciona em três passos" era uma seção inteira logo abaixo desta.
+        Como faixa de rodapé daqui, responde à pergunta que a demonstração
+        acabou de levantar — quanto trabalho dá começar — sem custar mais uma
+        dobra de página.
+      */}
+      <div className="mt-10 border-t border-line pt-7">
+        <p className="text-sm font-semibold text-ink">{home.steps.title}</p>
+
+        <ol className="mt-5 grid gap-6 sm:grid-cols-3 sm:gap-8">
+          {home.steps.items.map((step) => (
+            <li key={step.number} className="flex gap-3">
+              <span className="text-sm font-bold leading-6 text-subtle tnum">{step.number}</span>
+              <div>
+                <h3 className="text-sm font-semibold leading-6 text-ink">{step.title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted">{step.description}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-6 text-xs leading-relaxed text-subtle">{home.steps.supportLine}</p>
       </div>
+
     </SectionShell>
   );
 };

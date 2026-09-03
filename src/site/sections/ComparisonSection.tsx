@@ -11,10 +11,10 @@ const { columns, rows } = home.comparison;
  * Nenhuma marca de software é citada: "grupo de mensagens" cobre a realidade.
  * Abaixo de 768px a tabela vira blocos — nunca rolagem horizontal.
  *
- * Este é o bloco mais denso e o único que usa a superfície de ênfase: a coluna
- * do Tarefus atravessa a tabela inteira como um bloco sólido. É onde a página
- * decide alguma coisa, então é onde o contraste forte se justifica — e por isso
- * ele não aparece em nenhum outro lugar.
+ * Este é o bloco mais denso da página, e a coluna do Tarefus atravessa a tabela
+ * inteira sobre a superfície de ênfase. A ênfase é usada sempre com o mesmo
+ * sentido — "é por aqui" — e por isso reaparece só na aba ativa da demonstração
+ * e no plano em destaque, nunca como enfeite.
  */
 export const ComparisonSection: React.FC = () => (
   <SectionShell id="comparativo" density="dense" surface="sunken">

@@ -27,6 +27,9 @@ export type AnalyticsEvent =
     }
   | { name: 'ai_demo_run'; props: { exampleId: string } }
   | { name: 'faq_open'; props: { questionId: string } }
+  | { name: 'tips_scroll'; props: { direction: 'prev' | 'next' } }
+  | { name: 'tip_article_click'; props: { tipId: string; slug: string } }
+  | { name: 'pricing_interval_change'; props: { interval: 'monthly' | 'annual' } }
   | { name: 'scroll_depth'; props: { percent: 25 | 50 | 75 | 100 } };
 
 export function track(event: AnalyticsEvent): void {

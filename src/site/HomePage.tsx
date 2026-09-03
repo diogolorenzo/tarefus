@@ -4,31 +4,31 @@ import { HeroSection } from './sections/HeroSection';
 import { StatementSection } from './sections/StatementSection';
 import { ComparisonSection } from './sections/ComparisonSection';
 import { AiDemoSection } from './sections/AiDemoSection';
-import { StepsSection } from './sections/StepsSection';
-import { FeatureShowcase } from './sections/FeatureShowcase';
+import { InsideSection } from './sections/InsideSection';
 import { AccessSection } from './sections/AccessSection';
+import { TipsCarousel } from './sections/TipsCarousel';
 import { FaqSection } from './sections/FaqSection';
+import { PricingSection } from './sections/PricingSection';
 import { ClosingSection } from './sections/ClosingSection';
 import { SiteFooter } from './sections/SiteFooter';
 import { StickyMobileCta } from './sections/StickyMobileCta';
-import { KanbanMock, MyTasksMock, DeadlinesMock } from './mock/ProductMocks';
 import { trackHomeView } from '../analytics/track';
-import { home } from '../content/home';
 
 /**
  * Homepage pública do Tarefus.
  *
- * A ordem das seções vem de docs/commercial/01-homepage-plan.md, seção 3.1.
- * As doze seções originais viraram nove blocos: os fatos entraram no herói,
- * Papéis e Segurança viraram "Acessos e dados", e Teste e Chamada final fecham
- * juntos.
+ * A página inteira em nove blocos, planos incluídos: quem chega aqui entende o
+ * produto, vê o preço e decide sem trocar de rota. `/planos` e `/guia`
+ * continuam publicados, mas como aprofundamento, não como etapa obrigatória —
+ * o que também evita que um visitante baixe o bundle da aplicação só para ver
+ * quanto custa.
  *
- * O ritmo é a regra de composição desta página, e ela se lê aqui de cima a
- * baixo — densidade e superfície andam sempre juntas:
+ * O ritmo é a regra de composição, e ela se lê aqui de cima a baixo —
+ * densidade e superfície andam sempre juntas:
  *
  *   air    + raised  → os dois momentos de declaração (Diagnóstico, Fechamento)
- *   normal + app     → os blocos de prova (Demonstração, Dia a dia, Acessos)
- *   dense  + sunken  → os blocos de informação (Comparativo, Passos, Prazos, FAQ)
+ *   normal + app     → os blocos de prova (Demonstração, Por dentro, Acessos, Planos)
+ *   dense  + sunken  → os blocos de informação (Comparativo, Dicas, Perguntas)
  *
  * Nenhum bloco repete a densidade do vizinho. É isso que faz a compactação
  * virar ritmo em vez de aperto: o espaço que sai dos blocos densos é o mesmo
@@ -55,44 +55,11 @@ export const HomePage: React.FC = () => {
         <StatementSection />
         <ComparisonSection />
         <AiDemoSection />
-        <StepsSection />
-
-        <FeatureShowcase
-          id="dia-a-dia"
-          surface="app"
-          density="normal"
-          eyebrow={home.dayToDay.eyebrow}
-          title={home.dayToDay.title}
-          bullets={home.dayToDay.bullets}
-          cta={home.dayToDay.cta}
-          visualSide="right"
-          proofLabel="Tarefus · Quadro da área e Minhas Tarefas"
-          proofCaption={home.dayToDay.proofCaption}
-          visual={
-            <div className="space-y-3">
-              <KanbanMock bare />
-              <div className="rounded-xl border border-line bg-surface p-4">
-                <MyTasksMock bare />
-              </div>
-            </div>
-          }
-        />
-
-        <FeatureShowcase
-          id="prazos"
-          surface="sunken"
-          density="dense"
-          eyebrow={home.deadlines.eyebrow}
-          title={home.deadlines.title}
-          bullets={home.deadlines.bullets}
-          visualSide="left"
-          proofLabel="Tarefus · Faixa do dia e notificações"
-          proofCaption={home.deadlines.proofCaption}
-          visual={<DeadlinesMock />}
-        />
-
+        <InsideSection />
         <AccessSection />
+        <TipsCarousel />
         <FaqSection />
+        <PricingSection />
         <ClosingSection />
       </main>
 

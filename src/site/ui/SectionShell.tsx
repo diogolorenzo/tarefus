@@ -33,7 +33,7 @@ interface SectionShellProps {
 }
 
 const DENSITY: Record<Density, string> = {
-  air: 'py-24 sm:py-32 lg:py-40',
+  air: 'py-20 sm:py-24 lg:py-28',
   normal: 'py-16 sm:py-20 lg:py-24',
   dense: 'py-10 sm:py-12 lg:py-16',
 };
