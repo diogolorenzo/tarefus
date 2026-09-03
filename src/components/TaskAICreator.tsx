@@ -56,7 +56,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   onEditSuggestion,
   onSwitchToManual,
 }) => {
-  const { boards, users, showToast } = useTaskContext();
+  const { boards, users, showToast, entitlements, sessionToken, organizationId, refetchEntitlements } = useTaskContext();
 
   const [promptText, setPromptText] = useState('');
   const [selectedBoardPreference, setSelectedBoardPreference] = useState<string>(
@@ -67,6 +67,11 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   const [draft, setDraft] = useState<TaskDraft | null>(null);
   const [includeChecklist, setIncludeChecklist] = useState(false);
   const [placeholderText, setPlaceholderText] = useState('');
+
+  const canUseAction = entitlements ? entitlements.ai.canUseAction : true;
+  const remainingActions = entitlements?.ai.remainingActions ?? 20;
+  const maxActionsPerMonth = entitlements?.ai.maxActionsPerMonth ?? 20;
+  const isAiExhausted = !canUseAction || remainingActions <= 0;
 
   // Voice Hook
   const {
@@ -141,6 +146,11 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   };
 
   const handleGenerateDraft = async (customPrompt?: string) => {
+    if (isAiExhausted) {
+      setError('Você atingiu o limite de gerações por IA do seu plano neste ciclo. O limite será renovado no próximo ciclo.');
+      return;
+    }
+
     const textToUse = (customPrompt || promptText).trim();
     if (!textToUse) {
       setError('Por favor, descreva ou dite os detalhes da tarefa antes de gerar.');
@@ -156,25 +166,63 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
     setIncludeChecklist(false);
 
     try {
-      const response = await fetch('/api/generate-task-draft', {
+      const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `idemp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey,
+      };
+      const hasFirebaseIdToken = Boolean(sessionToken && sessionToken.split('.').length === 3);
+      if (hasFirebaseIdToken && sessionToken) {
+        headers['Authorization'] = `Bearer ${sessionToken}`;
+      }
+
+      const targetOrg = organizationId || 'org-tarefus-default';
+      const response = await fetch(
+        hasFirebaseIdToken ? `/api/organizations/${targetOrg}/ai/task-drafts` : '/api/generate-task-draft',
+        {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
-          prompt: textToUse,
-          boards: boards.map((b) => ({ id: b.id, name: b.name, description: b.description })),
-          users: users.map((u) => ({ id: u.id, name: u.name, role: u.role })),
-          currentDate: new Date().toISOString().split('T')[0],
+          ...(hasFirebaseIdToken
+            ? { description: textToUse }
+            : { prompt: textToUse, boards, users, currentDate: new Date().toISOString().slice(0, 10) }),
         }),
-      });
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Falha ao conectar com o assistente inteligente.');
+        if (response.status === 401) {
+          throw new Error('Autenticação necessária. Por favor, realize o login para utilizar o assistente de IA.');
+        }
+        if (response.status === 403) {
+          throw new Error('O plano atual não contempla IA inteligente ou a conta corporativa está temporariamente bloqueada.');
+        }
+        if (response.status === 429) {
+          throw new Error('Limite de requisições por minuto ou cota de IA atingida. Aguarde um instante e tente novamente.');
+        }
+        if (response.status === 503) {
+          throw new Error('O assistente inteligente está temporariamente indisponível. Você pode continuar criando tarefas manualmente.');
+        }
+        if (response.status === 410) {
+          throw new Error('A rota legada de IA foi desativada. O assistente foi atualizado para a versão segura.');
+        }
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.message || 'O assistente inteligente está temporariamente indisponível. Você pode continuar criando tarefas manualmente.');
       }
 
       const data = await response.json();
       if (data.draft) {
-        // If user explicitly picked a board preference, override if desired
-        const finalBoardId = selectedBoardPreference || data.draft.boardId || boards[0]?.id;
+        const finalBoardId = selectedBoardPreference || defaultBoardId || boards[0]?.id;
+        const checklistItems: ChecklistItem[] = Array.isArray(data.draft.checklist)
+          ? data.draft.checklist.map((item: any, idx: number) => ({
+              id: `chk-${Date.now()}-${idx}`,
+              text: typeof item === 'string' ? item : item.text || '',
+              completed: false,
+            }))
+          : [];
 
         const finalDraft: TaskDraft = {
           title: data.draft.title || textToUse.slice(0, 80),
@@ -185,17 +233,17 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
             ? data.draft.assigneeIds
             : users[0]?.id ? [users[0].id] : [],
           dueDate: data.draft.dueDate || '',
-          checklist: Array.isArray(data.draft.checklist) ? data.draft.checklist : [],
+          checklist: checklistItems,
         };
 
         setDraft(finalDraft);
-        showToast('Rascunho gerado. Revise antes de criar a tarefa.', 'success');
+        refetchEntitlements().catch(() => {});
+        showToast('Rascunho gerado com IA! Revise antes de criar a tarefa.', 'success');
       } else {
-        throw new Error(data.error || 'Não foi possível estruturar a tarefa.');
+        throw new Error('Não foi possível estruturar a tarefa a partir da resposta do assistente.');
       }
     } catch (err: any) {
-      console.error('Erro na criação com IA:', err);
-      setError(err.message || 'Ocorreu um erro ao gerar a tarefa. Tente novamente.');
+      setError(err.message || 'O assistente inteligente está temporariamente indisponível. Você pode continuar criando tarefas manualmente.');
     } finally {
       setIsLoading(false);
     }
@@ -228,6 +276,41 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
       {/* If No Draft has been generated yet, show input & dictation view */}
       {!draft ? (
         <div className="space-y-5">
+          {/* AI Quota Indicator */}
+          <div className="flex items-center justify-between px-1 text-xs">
+            <div className="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-300 font-semibold">
+              <AiMark className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span>
+                Ações de IA disponíveis neste ciclo: <strong className="font-extrabold">{remainingActions} de {maxActionsPerMonth}</strong>
+              </span>
+            </div>
+            {isAiExhausted && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200">
+                Limite Atingido
+              </span>
+            )}
+          </div>
+
+          {/* AI Exhausted Friendly Banner */}
+          {isAiExhausted && (
+            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl flex items-start justify-between gap-3 text-xs text-amber-800 dark:text-amber-300 animate-fade-in">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold block mb-0.5">Limite de IA Atingido</span>
+                  <span>Você atingiu o limite de gerações por IA do seu plano neste ciclo. O limite será renovado no próximo ciclo.</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onSwitchToManual}
+                className="shrink-0 px-3 py-1.5 bg-amber-200 hover:bg-amber-300 dark:bg-amber-800/80 dark:hover:bg-amber-700 text-amber-900 dark:text-amber-100 rounded-xl font-bold transition-all cursor-pointer"
+              >
+                Criar Manualmente
+              </button>
+            </div>
+          )}
+
           {/* Voice status banner if recording */}
           {isListening && (
             <div className="bg-rose-500/10 border border-rose-500/30 dark:border-rose-500/40 p-3.5 rounded-2xl flex items-center justify-between animate-pulse">
@@ -364,7 +447,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
 
             <button
               type="button"
-              disabled={isLoading || !promptText.trim()}
+              disabled={isLoading || isAiExhausted || !promptText.trim()}
               onClick={() => handleGenerateDraft()}
               className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-colors active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
             >

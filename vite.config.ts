@@ -8,6 +8,15 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    rollupOptions: {
+      // Duas entradas: site público (index.html) e aplicação (app.html).
+      input: {
+        site: 'index.html',
+        app: 'app.html',
+      },
+    },
+  },
   server: {
     host: '0.0.0.0',
     port: 3000,

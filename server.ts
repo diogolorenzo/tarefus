@@ -1,8 +1,12 @@
 import express from 'express';
 import path from 'path';
+import { readFile } from 'fs/promises';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { mountCommercialAccessRouter } from './src/server/commercial-access-default';
+import { mountAiTaskDraftRouter } from './src/server/ai-task-draft-default';
+import { mountBillingRouter } from './src/server/billing-default';
 import {
   INITIAL_BOARDS,
   INITIAL_COMPANY,
@@ -40,7 +44,16 @@ async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
-  app.use(express.json());
+  app.use(
+    express.json({
+      verify: (req, _res, buf) => {
+        (req as unknown as { rawBody: Buffer }).rawBody = buf;
+      },
+    }),
+  );
+  mountCommercialAccessRouter(app);
+  mountAiTaskDraftRouter(app);
+  mountBillingRouter(app);
 
   // Health check
   app.get('/api/health', (req, res) => {
@@ -699,18 +712,36 @@ Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
     };
   }
 
+  // Duas entradas HTML (decisão D1 do plano da homepage):
+  // - index.html: site público, com <head> completo e indexável
+  // - app.html: aplicação, com noindex
+  const SITE_ROUTES = new Set(['/', '/index.html']);
+  const entryFor = (pathname: string) => (SITE_ROUTES.has(pathname) ? 'index.html' : 'app.html');
+
   // Vite middleware for dev / static for prod
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: 'spa',
+      appType: 'custom',
     });
     app.use(vite.middlewares);
+
+    app.get('*all', async (req, res, next) => {
+      if (req.path.startsWith('/api/')) return next();
+      try {
+        const raw = await readFile(path.join(process.cwd(), entryFor(req.path)), 'utf-8');
+        const html = await vite.transformIndexHtml(req.originalUrl, raw);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+      } catch (err) {
+        vite.ssrFixStacktrace(err as Error);
+        next(err);
+      }
+    });
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, { index: false }));
     app.get('*all', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(distPath, entryFor(req.path)));
     });
   }
 

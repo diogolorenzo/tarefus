@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Tarefus</title>
+    <meta name="description" content="Gestão de tarefas e quadros Kanban com suporte a criação inteligente via IA e ditado por voz" />
+    <!-- A aplicação não é indexada; só o site público é (plano, seção 7.1). -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <script>
+      // Aplica o tema salvo antes da primeira pintura, evitando o "flash" branco.
+      try {
+        // Só o tema explicitamente salvo ativa o escuro; o padrão é claro.
+        if (localStorage.getItem('tarefus_theme_v1') === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body class="selection:bg-indigo-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

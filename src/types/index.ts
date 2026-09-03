@@ -6,6 +6,14 @@ export type PermissionRole = 'admin' | 'manager' | 'member';
 
 export type ActiveTab = 'board' | 'my-tasks' | 'settings';
 
+export type AppRoute =
+  | { type: 'app'; tab: 'board' | 'my-tasks' | 'settings' }
+  | { type: 'auth'; mode: 'login' | 'register' }
+  | { type: 'pricing' }
+  | { type: 'guide-landing' }
+  | { type: 'guide-article'; slug: string }
+  | { type: 'not-found' };
+
 export interface ChecklistItem {
   id: string;
   text: string;

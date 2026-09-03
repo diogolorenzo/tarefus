@@ -1,5 +1,55 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ActiveTab, Board, CompanyInfo, PermissionRole, Task, TaskStatus, User, ActivityLog } from '../types';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { ActiveTab, AppRoute, Board, CompanyInfo, PermissionRole, Task, TaskStatus, User, ActivityLog } from '../types';
+
+export function resolveClientRoute(pathname: string): AppRoute {
+  // Normalize pathname: remove duplicate slashes, trailing slash (unless root), strip query/hash
+  let normalized = pathname.split('?')[0].split('#')[0].replace(/\/+/g, '/');
+  if (normalized.length > 1 && normalized.endsWith('/')) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  if (normalized === '' || normalized === '/') {
+    return { type: 'app', tab: 'board' };
+  }
+
+  if (normalized === '/entrar' || normalized === '/login') {
+    return { type: 'auth', mode: 'login' };
+  }
+
+  if (normalized === '/cadastro' || normalized === '/register') {
+    return { type: 'auth', mode: 'register' };
+  }
+
+  if (normalized === '/planos' || normalized === '/pricing') {
+    return { type: 'pricing' };
+  }
+
+  if (normalized === '/guia' || normalized === '/guide') {
+    return { type: 'guide-landing' };
+  }
+
+  if (normalized.startsWith('/guia/')) {
+    const slug = normalized.replace('/guia/', '').trim();
+    if (slug) {
+      return { type: 'guide-article', slug };
+    }
+    return { type: 'guide-landing' };
+  }
+
+  if (normalized === '/my-tasks' || normalized === '/minhas-tarefas') {
+    return { type: 'app', tab: 'my-tasks' };
+  }
+
+  if (normalized === '/settings' || normalized === '/configuracoes') {
+    return { type: 'app', tab: 'settings' };
+  }
+
+  return { type: 'not-found' };
+}
+
+export function isPublicRoute(route: AppRoute): boolean {
+  return route.type === 'pricing' || route.type === 'guide-landing' || route.type === 'guide-article';
+}
 import {
   loadBoards,
   loadCompany,
@@ -19,6 +69,12 @@ import {
   saveUsers,
 } from '../services/storage';
 import { logoutFirebase } from '../lib/firebase';
+import {
+  COMMERCIAL_CATALOG_DRAFT,
+  createTrialSubscription,
+  resolveEntitlements,
+  type EntitlementSnapshot,
+} from '../domain/commercial';
 import {
   ensureDatabaseSeeded,
   saveTaskToFirestore,
@@ -68,6 +124,13 @@ export interface TaskContextType {
   setSearchQuery: (query: string) => void;
   filterAssignee: string; // 'all' or user id
   setFilterAssignee: (userId: string) => void;
+
+  // Routing & URL History
+  currentPath: string;
+  currentRoute: AppRoute;
+  navigateTo: (path: string, options?: { replace?: boolean }) => void;
+  authMode: 'login' | 'register' | 'forgot_password';
+  setAuthMode: (mode: 'login' | 'register' | 'forgot_password') => void;
 
   // Auth & Session
   isAuthenticated: boolean;
@@ -129,6 +192,12 @@ export interface TaskContextType {
   toasts: Toast[];
   showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
   removeToast: (id: string) => void;
+
+  // Commercial Entitlements & Product Projections
+  entitlements: EntitlementSnapshot | null;
+  isCommercialUnavailable: boolean;
+  organizationId: string;
+  refetchEntitlements: () => Promise<void>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -149,7 +218,71 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [sessionToken, setSessionToken] = useState<string | null>(() => initialSession?.token || null);
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('board');
+  // Routing & URL History State
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname + window.location.search + window.location.hash;
+    }
+    return '/';
+  });
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot_password'>('login');
+
+  const initialRoute = resolveClientRoute(currentPath);
+  const [activeTab, setActiveTabState] = useState<ActiveTab>(() => {
+    if (initialRoute.type === 'app') {
+      return initialRoute.tab;
+    }
+    return 'board';
+  });
+
+  const currentRoute = resolveClientRoute(currentPath);
+
+  const navigateTo = (path: string, options?: { replace?: boolean }) => {
+    if (typeof window !== 'undefined') {
+      if (options?.replace) {
+        window.history.replaceState({}, '', path);
+      } else {
+        window.history.pushState({}, '', path);
+      }
+    }
+    setCurrentPath(path);
+
+    if (path === '/register' || path === '/cadastro') {
+      setAuthMode('register');
+    } else if (path === '/login' || path === '/entrar') {
+      setAuthMode('login');
+    }
+
+    const route = resolveClientRoute(path);
+    if (route.type === 'app') {
+      setActiveTabState(route.tab);
+    }
+  };
+
+  const setActiveTab = (tab: ActiveTab) => {
+    setActiveTabState(tab);
+    const targetPath = tab === 'board' ? '/' : tab === 'my-tasks' ? '/my-tasks' : '/settings';
+    if (typeof window !== 'undefined' && window.location.pathname !== targetPath) {
+      window.history.pushState({}, '', targetPath);
+    }
+    setCurrentPath(targetPath);
+  };
+
+  // Sync route on popstate (browser back/forward)
+  useEffect(() => {
+    const handlePopState = () => {
+      const newPath = window.location.pathname + window.location.search + window.location.hash;
+      setCurrentPath(newPath);
+      const route = resolveClientRoute(newPath);
+      if (route.type === 'app') {
+        setActiveTabState(route.tab);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [selectedBoardId, setSelectedBoardId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterAssignee, setFilterAssignee] = useState<string>('all');
@@ -162,6 +295,70 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tourStep, setTourStep] = useState(0);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [theme, setThemeState] = useState<'light' | 'dark'>(() => loadTheme());
+
+  // Commercial Entitlements & Tenancy State
+  const organizationId = company.id || 'org-tarefus-default';
+  const [entitlements, setEntitlements] = useState<EntitlementSnapshot | null>(() => {
+    const activeSeats = loadUsers().filter((u) => u.status !== 'inactive').length;
+    const defaultSub = createTrialSubscription({
+      subscriptionId: 'sub-local-trial',
+      workspaceId: 'org-tarefus-default',
+      planId: 'draft-team',
+      startedAt: new Date().toISOString(),
+    });
+    return resolveEntitlements({
+      catalog: COMMERCIAL_CATALOG_DRAFT,
+      subscription: defaultSub,
+      seatUsage: { assignedSeats: activeSeats },
+      aiUsage: { usedActions: 0 },
+      now: new Date().toISOString(),
+    });
+  });
+  const [isCommercialUnavailable, setIsCommercialUnavailable] = useState<boolean>(false);
+
+  const refetchEntitlements = useCallback(async () => {
+    const activeSeats = users.filter((u) => u.status !== 'inactive').length;
+    if (sessionToken) {
+      try {
+        const res = await fetch(`/api/organizations/${organizationId}/entitlements`, {
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.entitlements) {
+            setEntitlements(data.entitlements);
+            setIsCommercialUnavailable(false);
+            return;
+          }
+        } else if (res.status === 503) {
+          setIsCommercialUnavailable(true);
+        }
+      } catch {
+        setIsCommercialUnavailable(true);
+      }
+    }
+
+    const defaultSub = createTrialSubscription({
+      subscriptionId: 'sub-local-trial',
+      workspaceId: organizationId,
+      planId: 'draft-team',
+      startedAt: new Date().toISOString(),
+    });
+    const local = resolveEntitlements({
+      catalog: COMMERCIAL_CATALOG_DRAFT,
+      subscription: defaultSub,
+      seatUsage: { assignedSeats: activeSeats },
+      aiUsage: { usedActions: 0 },
+      now: new Date().toISOString(),
+    });
+    setEntitlements(local);
+  }, [organizationId, sessionToken, users]);
+
+  useEffect(() => {
+    refetchEntitlements();
+  }, [refetchEntitlements]);
 
   // Initialize and Sync with Firestore
   useEffect(() => {
@@ -226,70 +423,80 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [theme]);
 
-  const setTheme = (newTheme: 'light' | 'dark') => {
-    setThemeState(newTheme);
-    saveTheme(newTheme);
-  };
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    showToast(nextTheme === 'dark' ? 'Modo escuro ativado' : 'Modo claro ativado', 'info');
-  };
-
-  const currentUser = isAuthenticated
-    ? (users.find((u) => u.id === currentUserId) || users[0] || null)
-    : null;
-
-  const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
+  const showToast = useCallback((message: string, type: 'success' | 'info' | 'error' = 'success') => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       removeToast(id);
     }, 3500);
-  };
+  }, [removeToast]);
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  const setTheme = useCallback((newTheme: 'light' | 'dark') => {
+    setThemeState(newTheme);
+    saveTheme(newTheme);
+  }, []);
 
-  const openTaskModal = (task: Task | null = null, defaultStatus: TaskStatus = 'todo', defaultBoardId?: string) => {
+  const toggleTheme = useCallback(() => {
+    setThemeState((prev) => {
+      const nextTheme = prev === 'dark' ? 'light' : 'dark';
+      saveTheme(nextTheme);
+      showToast(nextTheme === 'dark' ? 'Modo escuro ativado' : 'Modo claro ativado', 'info');
+      return nextTheme;
+    });
+  }, [showToast]);
+
+  const currentUser = isAuthenticated
+    ? (users.find((u) => u.id === currentUserId) || users[0] || null)
+    : null;
+
+  const openTaskModal = useCallback((task: Task | null = null, defaultStatus: TaskStatus = 'todo', defaultBoardId?: string) => {
     setTaskModal({
       isOpen: true,
       task,
       defaultStatus,
       defaultBoardId: defaultBoardId || (selectedBoardId !== 'all' ? selectedBoardId : boards[0]?.id),
     });
-  };
+  }, [selectedBoardId, boards]);
 
-  const closeTaskModal = () => {
+  const closeTaskModal = useCallback(() => {
     setTaskModal({ isOpen: false, task: null });
-  };
+  }, []);
 
-  const markTourAsCompleted = async (userId?: string) => {
+  const markTourAsCompleted = useCallback(async (userId?: string) => {
     const targetId = userId || currentUser?.id;
     if (!targetId) return;
     try {
       localStorage.setItem(`tarefus_tour_seen_${targetId}`, 'true');
-      await updateUser(targetId, { hasSeenTour: true });
+      const targetUser = users.find((u) => u.id === targetId);
+      if (targetUser) {
+        const updatedUser = { ...targetUser, hasSeenTour: true, updatedAt: new Date().toISOString() };
+        const updatedUsers = users.map((u) => (u.id === targetId ? updatedUser : u));
+        setUsers(updatedUsers);
+        saveUsers(updatedUsers);
+        await saveUserToFirestore(updatedUser);
+      }
     } catch {
       // ignore
     }
-  };
+  }, [currentUser?.id, users]);
 
-  const startTour = () => {
+  const startTour = useCallback(() => {
     setActiveTab('board');
     setIsHelpCenterOpen(false);
     setTourStep(0);
     setIsTourActive(true);
-  };
+  }, [setActiveTab]);
 
-  const endTour = (markAsCompleted = true) => {
+  const endTour = useCallback((markAsCompleted = true) => {
     setIsTourActive(false);
     if (markAsCompleted && currentUser?.id) {
       markTourAsCompleted(currentUser.id);
     }
-  };
+  }, [currentUser?.id, markTourAsCompleted]);
 
   // Auto trigger tour on user's first login
   useEffect(() => {
@@ -304,7 +511,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => clearTimeout(timer);
       }
     }
-  }, [isAuthenticated, currentUser?.id, currentUser?.hasSeenTour]);
+  }, [isAuthenticated, currentUser]);
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -389,7 +596,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     window.addEventListener('keydown', handleGlobalShortcuts);
     return () => window.removeEventListener('keydown', handleGlobalShortcuts);
-  }, [isTourActive, isHelpCenterOpen, taskModal.isOpen, isBoardModalOpen, toggleTheme, openTaskModal, setActiveTab]);
+  }, [isTourActive, isHelpCenterOpen, taskModal.isOpen, isBoardModalOpen, toggleTheme, openTaskModal, closeTaskModal, endTour, setActiveTab]);
 
   // ==========================================
   // TASKS ACTIONS
@@ -1084,6 +1291,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     password = '123456'
   ): Promise<User> => {
     const trimmedEmail = email.trim().toLowerCase();
+    // Seat Capacity Admission Gate
+    if (entitlements && !entitlements.seats.canAssignSeat) {
+      const msg = 'O limite de membros do plano atual foi atingido. Para adicionar novos colaboradores, solicite um upgrade de plano.';
+      showToast(msg, 'error');
+      throw new Error(msg);
+    }
     const exists = users.some(
       (u) => u.email.trim().toLowerCase() === trimmedEmail
     );
@@ -1194,6 +1407,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSearchQuery,
         filterAssignee,
         setFilterAssignee,
+        currentPath,
+        currentRoute,
+        navigateTo,
+        authMode,
+        setAuthMode,
         isAuthenticated,
         sessionToken,
         login,
@@ -1241,6 +1459,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toasts,
         showToast,
         removeToast,
+        entitlements,
+        isCommercialUnavailable,
+        organizationId,
+        refetchEntitlements,
       }}
     >
       {children}

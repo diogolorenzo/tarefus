@@ -18,9 +18,19 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
-type AuthMode = 'login' | 'register' | 'forgot_password';
+export type AuthMode = 'login' | 'register' | 'forgot_password';
 
-export const AuthPage: React.FC = () => {
+export interface AuthPageProps {
+  initialMode?: AuthMode;
+  onNavigate?: (path: string) => void;
+  allowRegistration?: boolean;
+}
+
+export const AuthPage: React.FC<AuthPageProps> = ({
+  initialMode,
+  onNavigate,
+  allowRegistration = true,
+}) => {
   const {
     login,
     register,
@@ -28,9 +38,41 @@ export const AuthPage: React.FC = () => {
     resetPassword,
     showToast,
     users,
+    authMode: contextAuthMode,
+    setAuthMode: contextSetAuthMode,
+    navigateTo: contextNavigateTo,
   } = useTaskContext();
 
-  const [mode, setMode] = useState<AuthMode>('login');
+  const pathMode: AuthMode | null =
+    typeof window !== 'undefined' && ['/cadastro', '/register'].includes(window.location.pathname)
+      ? 'register'
+      : typeof window !== 'undefined' && ['/entrar', '/login'].includes(window.location.pathname)
+        ? 'login'
+        : null;
+
+  const [mode, setModeState] = useState<AuthMode>(
+    !allowRegistration && (initialMode === 'register' || pathMode === 'register')
+      ? 'login'
+      : initialMode || pathMode || contextAuthMode || 'login',
+  );
+
+  const setMode = (newMode: AuthMode) => {
+    setModeState(newMode);
+    if (contextSetAuthMode) {
+      contextSetAuthMode(newMode);
+    }
+  };
+
+  const handleNavigate = (path: string) => {
+    if (onNavigate) {
+      onNavigate(path);
+    } else if (contextNavigateTo) {
+      contextNavigateTo(path);
+    } else if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', path);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
 
   // Form State - Login
   const [loginEmail, setLoginEmail] = useState('');
@@ -329,7 +371,7 @@ export const AuthPage: React.FC = () => {
               </div>
 
               {/* Toggle to Register */}
-              <div className="mt-6 text-center">
+              {allowRegistration && <div className="mt-6 text-center">
                 <p className="text-xs text-muted">
                   Novo colaborador na empresa?{' '}
                   <button
@@ -343,7 +385,7 @@ export const AuthPage: React.FC = () => {
                     Criar conta corporativa
                   </button>
                 </p>
-              </div>
+              </div>}
             </div>
           )}
 
@@ -629,8 +671,27 @@ export const AuthPage: React.FC = () => {
           )}
         </div>
 
+        {/* Public Strategy Navigation Links */}
+        <div className="mt-5 flex items-center justify-center gap-4 text-xs font-semibold text-muted">
+          <button
+            type="button"
+            onClick={() => handleNavigate('/planos')}
+            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+          >
+            Planos & Preços (R$)
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => handleNavigate('/guia')}
+            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+          >
+            Guia de Boas Práticas (12 Artigos)
+          </button>
+        </div>
+
         {/* Footer Security Badges */}
-        <div className="mt-6 flex items-center justify-center gap-6 text-[11px] font-medium text-subtle">
+        <div className="mt-4 flex items-center justify-center gap-6 text-[11px] font-medium text-subtle">
           <span className="flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>Ambiente Single-Tenant</span>

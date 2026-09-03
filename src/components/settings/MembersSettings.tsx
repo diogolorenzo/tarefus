@@ -16,12 +16,18 @@ import {
 import { Select } from '../ui/Select';
 
 export const MembersSettings: React.FC = () => {
-  const { users, currentUser, updateUser, deleteUser } = useTaskContext();
+  const { users, currentUser, updateUser, deleteUser, entitlements } = useTaskContext();
   const canManage = canManageMembers(currentUser);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'manager' | 'member'>('all');
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
+  const activeSeats = users.filter((u) => u.status !== 'inactive').length;
+  const assignedSeats = entitlements?.seats.assignedSeats ?? activeSeats;
+  const maxSeats = entitlements?.seats.maxSeats ?? 3;
+  const isAtOrOverLimit = entitlements ? entitlements.seats.isAtOrOverLimit : (assignedSeats >= maxSeats);
+  const canAssignSeat = entitlements ? entitlements.seats.canAssignSeat : (assignedSeats < maxSeats);
 
   const adminCount = users.filter((u) => u.isAdmin || u.permissionRole === 'admin').length;
   const managerCount = users.filter((u) => u.permissionRole === 'manager').length;
@@ -89,10 +95,28 @@ export const MembersSettings: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsInviteModalOpen(true)}
-            className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-600/25 active:scale-98 cursor-pointer flex items-center gap-2"
+            className={`self-start sm:self-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              isAtOrOverLimit || !canAssignSeat
+                ? 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700/60'
+                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/25 active:scale-98'
+            }`}
+            title={
+              isAtOrOverLimit || !canAssignSeat
+                ? 'O limite de membros do plano atual foi atingido. Solicite um upgrade de plano.'
+                : 'Convidar novo colaborador'
+            }
           >
             <UserPlus className="w-4 h-4 stroke-[2.5]" />
             <span>Convidar Membro</span>
+            {isAtOrOverLimit || !canAssignSeat ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 dark:bg-amber-900/70 text-amber-900 dark:text-amber-100 ml-1">
+                Limite Atingido ({assignedSeats}/{maxSeats})
+              </span>
+            ) : (
+              <span className="text-[11px] opacity-80 font-normal ml-0.5">
+                ({assignedSeats}/{maxSeats})
+              </span>
+            )}
           </button>
         )}
       </div>
@@ -104,11 +128,18 @@ export const MembersSettings: React.FC = () => {
             <Users className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-subtle">
-              Total de Membros
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-subtle">
+                Assentos ({assignedSeats}/{maxSeats})
+              </span>
+              {isAtOrOverLimit && (
+                <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                  Cheio
+                </span>
+              )}
+            </div>
             <h4 className="text-lg font-black text-ink leading-tight">
-              {users.length}
+              {assignedSeats} <span className="text-xs font-normal text-muted">/ {maxSeats} ativos</span>
             </h4>
           </div>
         </div>
