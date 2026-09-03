@@ -395,6 +395,19 @@ async function runExperienceHygieneTests() {
       assert(html.includes('Auditoria de Atividades'), 'SettingsView must show Auditoria de Atividades for admins');
       assert(!html.includes('Auditoria &amp; Banco') && !html.includes('Auditoria & Banco'), 'SettingsView must not show old tab name');
     });
+
+    await test('7.12 SettingsView hides Auditoria de Atividades for manager role (user-2)', () => {
+      globalThis.localStorage.setItem(
+        'tarefus_auth_session_v1',
+        JSON.stringify({ userId: 'user-2', token: 'token-manager', rememberMe: true, loggedInAt: new Date().toISOString() })
+      );
+      globalThis.localStorage.setItem('tarefus_current_user_id_v1', 'user-2');
+      const html = renderToStaticMarkup(
+        React.createElement(TaskProvider, null, React.createElement(SettingsView, null))
+      );
+      assert(!html.includes('Auditoria de Atividades'), 'SettingsView must not show Auditoria de Atividades for managers');
+      assert(!html.includes('Auditoria &amp; Banco') && !html.includes('Auditoria & Banco'), 'SettingsView must not show old tab name');
+    });
   });
 
   // SUMMARY REPORT
