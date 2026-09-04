@@ -5,7 +5,8 @@ import { CompanyGeneralSettings } from './CompanyGeneralSettings';
 import { AreasSettings } from './AreasSettings';
 import { MembersSettings } from './MembersSettings';
 import { AuditLogsSettings } from './AuditLogsSettings';
-import { canManageCompany, canManageAuditLogs } from '../../utils/rbac';
+import { PlanUsageSettings } from './PlanUsageSettings';
+import { canManageCompany, canManageAuditLogs, isAdminOrManager as checkIsAdminOrManager } from '../../utils/rbac';
 import {
   User,
   Building2,
@@ -15,9 +16,10 @@ import {
   ChevronRight,
   ShieldCheck,
   History,
+  Gauge,
 } from 'lucide-react';
 
-export type SettingsSubTab = 'profile' | 'company' | 'areas' | 'members' | 'audit';
+export type SettingsSubTab = 'profile' | 'company' | 'areas' | 'members' | 'audit' | 'plan-usage';
 
 interface NavItem {
   id: SettingsSubTab;
@@ -36,6 +38,12 @@ const NAV_ITEMS: { group: string; adminOnly?: boolean; items: NavItem[] }[] = [
         label: 'Meu Perfil',
         description: 'Informações pessoais e avatar',
         icon: User,
+      },
+      {
+        id: 'plan-usage',
+        label: 'Plano & Uso',
+        description: 'Assinatura e cota de IA',
+        icon: Gauge,
       },
     ],
   },
@@ -77,9 +85,7 @@ export const SettingsView: React.FC = () => {
   const { currentUser, setActiveTab } = useTaskContext();
   const [activeSubTab, setActiveSubTab] = useState<SettingsSubTab>('profile');
 
-  const isAdminOrManager = Boolean(
-    currentUser?.isAdmin || currentUser?.permissionRole === 'admin' || currentUser?.permissionRole === 'manager'
-  );
+  const isAdminOrManager = checkIsAdminOrManager(currentUser);
   const canCompany = canManageCompany(currentUser);
   const canAudit = canManageAuditLogs(currentUser);
 
@@ -96,7 +102,7 @@ export const SettingsView: React.FC = () => {
     effectiveSubTab = 'profile';
   } else if (effectiveSubTab === 'audit' && !canAudit) {
     effectiveSubTab = 'profile';
-  } else if (!isAdminOrManager && effectiveSubTab !== 'profile') {
+  } else if (!isAdminOrManager && effectiveSubTab !== 'profile' && effectiveSubTab !== 'plan-usage') {
     effectiveSubTab = 'profile';
   }
 
@@ -206,6 +212,7 @@ export const SettingsView: React.FC = () => {
           {effectiveSubTab === 'areas' && <AreasSettings />}
           {effectiveSubTab === 'members' && <MembersSettings />}
           {effectiveSubTab === 'audit' && <AuditLogsSettings />}
+          {effectiveSubTab === 'plan-usage' && <PlanUsageSettings />}
         </div>
       </div>
     </div>

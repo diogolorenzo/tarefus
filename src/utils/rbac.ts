@@ -22,6 +22,10 @@ export const canManageAuditLogs = (user: User | null): boolean => {
   return role === 'admin';
 };
 
+export const isAdminOrManager = (user: User | null): boolean => {
+  return Boolean(user?.isAdmin || user?.permissionRole === 'admin' || user?.permissionRole === 'manager');
+};
+
 export const canCreateBoard = (user: User | null): boolean => {
   const role = getEffectiveRole(user);
   return role === 'admin' || role === 'manager';
