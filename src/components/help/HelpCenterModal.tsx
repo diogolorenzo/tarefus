@@ -97,14 +97,9 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-extrabold text-ink tracking-tight">
-                  Central de Ajuda & Conhecimento
-                </h2>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-200/60 dark:border-indigo-800/50">
-                  Tarefus MVP
-                </span>
-              </div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-ink tracking-tight">
+                Central de Ajuda & Conhecimento
+              </h2>
               <p className="text-xs text-muted">
                 Guias práticos, atalhos de produtividade e tutorial interativo
               </p>
