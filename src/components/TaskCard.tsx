@@ -49,14 +49,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, showBoardBadge 
             !isDone && dueInfo.isToday ? 'ring-1 ring-amber-400/40 dark:ring-amber-500/30' : ''
           }`}
         >
-          {/* Left indicator stripe for urgent/today tasks */}
-          {!isDone && dueInfo.isToday && (
-            <div className="absolute top-0 left-0 bottom-0 w-1 bg-amber-500 dark:bg-amber-400" />
-          )}
-          {!isDone && dueInfo.isOverdue && (
-            <div className="absolute top-0 left-0 bottom-0 w-1 bg-rose-500 dark:bg-rose-400" />
-          )}
-
           {/* Top Row: Board Tag & Quick Complete Checkbox */}
           <div className="flex items-center justify-between gap-2 mb-2.5 h-6">
             <div className="flex items-center gap-1.5 flex-wrap">
