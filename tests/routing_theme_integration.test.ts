@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { isPublicRoute, resolveClientRoute } from '../src/context/TaskContext';
 
 interface TestResult {
   suite: string;
@@ -52,58 +53,6 @@ function assertEquals<T>(actual: T, expected: T, message: string) {
   }
 }
 
-// ====================================================================
-// Pure Client-Side Route Resolver Specification Implementation
-// ====================================================================
-export type AppRoute =
-  | { type: 'app'; tab: 'board' | 'my-tasks' | 'settings' }
-  | { type: 'pricing' }
-  | { type: 'guide-landing' }
-  | { type: 'guide-article'; slug: string }
-  | { type: 'not-found' };
-
-export function resolveClientRoute(pathname: string): AppRoute {
-  // Normalize pathname: remove duplicate slashes, trailing slash (unless root), strip query/hash
-  let normalized = pathname.split('?')[0].split('#')[0].replace(/\/+/g, '/');
-  if (normalized.length > 1 && normalized.endsWith('/')) {
-    normalized = normalized.slice(0, -1);
-  }
-
-  if (normalized === '' || normalized === '/') {
-    return { type: 'app', tab: 'board' };
-  }
-
-  if (normalized === '/planos' || normalized === '/pricing') {
-    return { type: 'pricing' };
-  }
-
-  if (normalized === '/guia' || normalized === '/guide') {
-    return { type: 'guide-landing' };
-  }
-
-  if (normalized.startsWith('/guia/')) {
-    const slug = normalized.replace('/guia/', '').trim();
-    if (slug) {
-      return { type: 'guide-article', slug };
-    }
-    return { type: 'guide-landing' };
-  }
-
-  if (normalized === '/my-tasks' || normalized === '/minhas-tarefas') {
-    return { type: 'app', tab: 'my-tasks' };
-  }
-
-  if (normalized === '/settings' || normalized === '/configuracoes') {
-    return { type: 'app', tab: 'settings' };
-  }
-
-  return { type: 'not-found' };
-}
-
-export function isPublicRoute(route: AppRoute): boolean {
-  return route.type === 'pricing' || route.type === 'guide-landing' || route.type === 'guide-article';
-}
-
 // Theme Manager Emulator
 export class ThemeManager {
   private currentTheme: 'light' | 'dark' = 'light';
@@ -120,7 +69,7 @@ export class ThemeManager {
 
   public setTheme(theme: 'light' | 'dark') {
     this.currentTheme = theme;
-    this.storage.set('tarefus_theme', theme);
+    this.storage.set('tarefus_theme_v1', theme);
     if (theme === 'dark') {
       this.classList.add('dark');
     } else {
@@ -137,7 +86,7 @@ export class ThemeManager {
   }
 
   public getStoredTheme(): string | null {
-    return this.storage.get('tarefus_theme') ?? null;
+    return this.storage.get('tarefus_theme_v1') ?? null;
   }
 }
 

@@ -30,4 +30,6 @@ dist-ssr
 
 # Agent runtime logs and artifacts
 .agents/
+.claude/
+.gemini/
 
