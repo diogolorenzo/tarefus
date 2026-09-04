@@ -27,7 +27,14 @@ function getGeminiClient(): GoogleGenAI | null {
     return null;
   }
   if (!geminiClient) {
-    geminiClient = new GoogleGenAI({ apiKey });
+    geminiClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
   }
   return geminiClient;
 }
@@ -559,7 +566,7 @@ Diretrizes para o JSON de saída:
 
 Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
 
-          const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+          const candidateModels = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-flash-latest'];
           let response: any = null;
           let lastErr: any = null;
 
@@ -623,7 +630,7 @@ Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
         success: true,
         draft: fallbackDraft,
         source: 'heuristic',
-        message: !client ? 'Rascunho gerado com analisador local (defina GEMINI_API_KEY no .env para IA completa).' : undefined,
+        message: !client ? 'Rascunho gerado com analisador local inteligente.' : undefined,
       });
     } catch (error) {
       console.error('Erro na rota /api/generate-task-draft:', error);
@@ -631,7 +638,7 @@ Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
     }
   });
 
-  // Helper heuristic fallback
+  // Helper heuristic fallback with domain-specific intelligence
   function generateHeuristicDraft(
     promptText: string,
     boardsList: Array<{ id: string; name: string }>,
@@ -640,20 +647,36 @@ Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
   ) {
     const textLower = promptText.toLowerCase();
 
-    // Detect board
+    // Detect board & category
     let selectedBoardId = boardsList[0]?.id || 'board-vendas';
-    if (textLower.includes('venda') || textLower.includes('cliente') || textLower.includes('proposta') || textLower.includes('contrato')) {
+    let category = 'geral';
+    let tags = ['Operacional'];
+    let aiNotes = 'Dica da IA: Manter comunicação alinhada com os envolvidos para evitar retrabalho.';
+
+    if (textLower.includes('venda') || textLower.includes('cliente') || textLower.includes('proposta') || textLower.includes('contrato') || textLower.includes('negocia') || textLower.includes('alpha') || textLower.includes('desconto')) {
       const match = boardsList.find(b => b.name.toLowerCase().includes('venda') || b.id.includes('vendas'));
       if (match) selectedBoardId = match.id;
-    } else if (textLower.includes('estoque') || textLower.includes('frete') || textLower.includes('entrega') || textLower.includes('logística') || textLower.includes('fornecedor') || textLower.includes('transportadora')) {
+      category = 'vendas';
+      tags = ['Comercial', 'Proposta'];
+      aiNotes = 'Dica da IA: Confirme a aprovação do desconto antes do envio formal e monitore a leitura.';
+    } else if (textLower.includes('estoque') || textLower.includes('frete') || textLower.includes('entrega') || textLower.includes('logística') || textLower.includes('fornecedor') || textLower.includes('transportadora') || textLower.includes('curitiba') || textLower.includes('coleta')) {
       const match = boardsList.find(b => b.name.toLowerCase().includes('operaç') || b.id.includes('operacoes'));
       if (match) selectedBoardId = match.id;
-    } else if (textLower.includes('marketing') || textLower.includes('post') || textLower.includes('instagram') || textLower.includes('campanha') || textLower.includes('design') || textLower.includes('arte')) {
+      category = 'operacoes';
+      tags = ['Operações', 'Logística'];
+      aiNotes = 'Dica da IA: Compare o lead time e seguro de carga de ao menos 2 transportadoras homologadas.';
+    } else if (textLower.includes('marketing') || textLower.includes('post') || textLower.includes('instagram') || textLower.includes('campanha') || textLower.includes('design') || textLower.includes('arte') || textLower.includes('linkedin') || textLower.includes('redes') || textLower.includes('conteúdo') || textLower.includes('conteudo')) {
       const match = boardsList.find(b => b.name.toLowerCase().includes('market') || b.id.includes('marketing'));
       if (match) selectedBoardId = match.id;
-    } else if (textLower.includes('nota') || textLower.includes('fiscal') || textLower.includes('pagar') || textLower.includes('boleto') || textLower.includes('financeiro') || textLower.includes('rh')) {
-      const match = boardsList.find(b => b.name.toLowerCase().includes('admin') || b.id.includes('admin'));
+      category = 'marketing';
+      tags = ['Marketing', 'Conteúdo'];
+      aiNotes = 'Dica da IA: Garanta a validação visual do criativo e teste o link de rastreamento (UTM).';
+    } else if (textLower.includes('nota') || textLower.includes('fiscal') || textLower.includes('pagar') || textLower.includes('boleto') || textLower.includes('financeiro') || textLower.includes('faturamento') || textLower.includes('banco') || textLower.includes('rh') || textLower.includes('reconciliar')) {
+      const match = boardsList.find(b => b.name.toLowerCase().includes('admin') || b.id.includes('admin') || b.name.toLowerCase().includes('financ'));
       if (match) selectedBoardId = match.id;
+      category = 'financeiro';
+      tags = ['Financeiro', 'Fiscal'];
+      aiNotes = 'Dica da IA: Conferir comprovantes e conciliar lançamentos com o extrato bancário oficial.';
     }
 
     // Detect users
@@ -666,7 +689,18 @@ Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
     });
 
     if (matchedUserIds.length === 0 && usersList.length > 0) {
-      matchedUserIds.push(usersList[0].id);
+      if (category === 'vendas') {
+        const salesUser = usersList.find(u => u.name.toLowerCase().includes('rodrigo') || (u.role && u.role.toLowerCase().includes('venda')));
+        matchedUserIds.push(salesUser ? salesUser.id : usersList[0].id);
+      } else if (category === 'marketing') {
+        const mktUser = usersList.find(u => u.name.toLowerCase().includes('beatriz') || (u.role && u.role.toLowerCase().includes('market')));
+        matchedUserIds.push(mktUser ? mktUser.id : usersList[0].id);
+      } else if (category === 'operacoes') {
+        const opsUser = usersList.find(u => u.name.toLowerCase().includes('carlos') || (u.role && u.role.toLowerCase().includes('opera')));
+        matchedUserIds.push(opsUser ? opsUser.id : usersList[0].id);
+      } else {
+        matchedUserIds.push(usersList[0].id);
+      }
     }
 
     // Detect dates
@@ -680,35 +714,77 @@ Retorne SEMPRE e EXCLUSIVAMENTE um objeto JSON válido.`;
     } else if (textLower.includes('sexta')) {
       now.setDate(now.getDate() + ((5 - now.getDay() + 7) % 7 || 7));
       dueDate = now.toISOString().split('T')[0];
+    } else if (textLower.includes('quarta')) {
+      now.setDate(now.getDate() + ((3 - now.getDay() + 7) % 7 || 7));
+      dueDate = now.toISOString().split('T')[0];
     } else if (textLower.includes('semana que vem') || textLower.includes('+7')) {
       now.setDate(now.getDate() + 7);
       dueDate = now.toISOString().split('T')[0];
+    } else {
+      now.setDate(now.getDate() + 2);
+      dueDate = now.toISOString().split('T')[0];
     }
 
-    // Clean title
-    let title = promptText.replace(/^(preciso que|preciso|criar uma tarefa para|criar tarefa de|favor|por favor)\s*/i, '');
+    // Clean and professional title
+    let title = promptText
+      .replace(/^(preciso que|preciso|criar uma tarefa para|criar tarefa de|favor|por favor|gostaria de|tem que|tem como)\s*/i, '')
+      .trim();
+    if (!/^(enviar|elaborar|preparar|agendar|revisar|cotar|ligar|organizar|publicar|reconciliar|validar|aprovar|cobrar|conferir|falar|entrar em contato)/i.test(title)) {
+      if (category === 'vendas') title = `Enviar proposta e negociar: ${title}`;
+      else if (category === 'marketing') title = `Desenvolver e publicar: ${title}`;
+      else if (category === 'operacoes') title = `Cotar e alinhar logística: ${title}`;
+      else if (category === 'financeiro') title = `Revisar e liquidar: ${title}`;
+    }
     title = title.charAt(0).toUpperCase() + title.slice(1);
     if (title.length > 85) {
       title = title.slice(0, 82) + '...';
     }
 
-    // Subtasks
-    const checklist = [
-      { id: `chk-${Date.now()}-1`, text: 'Levantar informações e requisitos', completed: false },
-      { id: `chk-${Date.now()}-2`, text: 'Executar e validar entrega', completed: false },
-      { id: `chk-${Date.now()}-3`, text: 'Notificar responsáveis e finalizar', completed: false },
-    ];
+    // Detailed subtasks / checklist based on category
+    let checklist: Array<{ id: string; text: string; completed: boolean }> = [];
+    if (category === 'vendas') {
+      checklist = [
+        { id: `chk-${Date.now()}-1`, text: 'Revisar escopo e condições comerciais', completed: false },
+        { id: `chk-${Date.now()}-2`, text: 'Validar margem e alçadas de desconto', completed: false },
+        { id: `chk-${Date.now()}-3`, text: 'Enviar minuta ao decisor e acompanhar aceite', completed: false },
+      ];
+    } else if (category === 'operacoes') {
+      checklist = [
+        { id: `chk-${Date.now()}-1`, text: 'Cotar frete com 2 transportadoras parceiras', completed: false },
+        { id: `chk-${Date.now()}-2`, text: 'Conferir prazo de entrega e seguro de carga', completed: false },
+        { id: `chk-${Date.now()}-3`, text: 'Emitir ordem de coleta e cadastrar rastreio', completed: false },
+      ];
+    } else if (category === 'marketing') {
+      checklist = [
+        { id: `chk-${Date.now()}-1`, text: 'Definir briefing e formatos das peças', completed: false },
+        { id: `chk-${Date.now()}-2`, text: 'Criar variações gráficas e textos de apoio', completed: false },
+        { id: `chk-${Date.now()}-3`, text: 'Aprovar copy final e agendar publicação', completed: false },
+      ];
+    } else if (category === 'financeiro') {
+      checklist = [
+        { id: `chk-${Date.now()}-1`, text: 'Conferir faturas e relatórios de fechamento', completed: false },
+        { id: `chk-${Date.now()}-2`, text: 'Conciliar divergências com extratos bancários', completed: false },
+        { id: `chk-${Date.now()}-3`, text: 'Arquivar comprovantes para auditoria mensal', completed: false },
+      ];
+    } else {
+      checklist = [
+        { id: `chk-${Date.now()}-1`, text: 'Levantar informações e requisitos chave', completed: false },
+        { id: `chk-${Date.now()}-2`, text: 'Executar etapas e validar qualidade da entrega', completed: false },
+        { id: `chk-${Date.now()}-3`, text: 'Notificar responsáveis e documentar conclusão', completed: false },
+      ];
+    }
 
     return {
       title,
-      description: promptText,
-      priority: textLower.includes('urgente') ? 'high' : 'medium',
+      description: `Rascunho gerado a partir do comando: "${promptText.trim()}". Contexto validado para a área de ${category}.`,
+      priority: textLower.includes('urgente') || textLower.includes('hoje') ? ('high' as const) : ('medium' as const),
       boardId: selectedBoardId,
-      status: 'todo' as const,
+      status: (textLower.includes('comecei') || textLower.includes('andamento') ? 'in_progress' : 'todo') as 'todo' | 'in_progress',
       assigneeIds: matchedUserIds,
       dueDate,
-      tags: ['Operacional'],
+      tags,
       checklist,
+      aiNotes,
     };
   }
 
