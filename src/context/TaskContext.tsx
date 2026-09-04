@@ -301,7 +301,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const defaultSub = createTrialSubscription({
       subscriptionId: 'sub-local-trial',
       workspaceId: 'org-tarefus-default',
-      planId: 'draft-team',
+      planId: 'escala',
       startedAt: new Date().toISOString(),
     });
     return resolveEntitlements({
@@ -341,7 +341,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const defaultSub = createTrialSubscription({
       subscriptionId: 'sub-local-trial',
       workspaceId: organizationId,
-      planId: 'draft-team',
+      planId: 'escala',
       startedAt: new Date().toISOString(),
     });
     const local = resolveEntitlements({

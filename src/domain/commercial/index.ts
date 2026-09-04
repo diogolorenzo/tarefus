@@ -109,6 +109,12 @@ export const COMMERCIAL_CATALOG_DRAFT: CommercialCatalog = {
       status: 'draft',
       technicalLimits: { maxSeats: 3, maxAiActionsPerMonth: 100 },
     },
+    {
+      id: 'escala',
+      catalogVersion: 'draft-2026-09-02',
+      status: 'draft',
+      technicalLimits: { maxSeats: 35, maxAiActionsPerMonth: 1200 },
+    },
   ],
 };
 
