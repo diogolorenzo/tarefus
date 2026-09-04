@@ -560,7 +560,7 @@ async function runAllTests() {
 
     await test('3.6 canManageMembers RBAC matrix', () => {
       assertEquals(canManageMembers(adminUser), true, 'Admin can manage members');
-      assertEquals(canManageMembers(managerUser), false, 'Manager CANNOT manage members');
+      assertEquals(canManageMembers(managerUser), true, 'Manager can manage members');
       assertEquals(canManageMembers(memberUser), false, 'Member CANNOT manage members');
       assertEquals(canManageMembers(null), false, 'null user CANNOT manage members');
     });

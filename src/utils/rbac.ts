@@ -14,7 +14,7 @@ export const canManageCompany = (user: User | null): boolean => {
 
 export const canManageMembers = (user: User | null): boolean => {
   const role = getEffectiveRole(user);
-  return role === 'admin';
+  return role === 'admin' || role === 'manager';
 };
 
 export const canManageAuditLogs = (user: User | null): boolean => {

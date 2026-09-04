@@ -237,14 +237,21 @@ async function runAdversarialTests() {
       },
     ];
 
-    await test('3.1 Invariant Check: canDeleteBoard, canManageMembers, canManageCompany, canManageAuditLogs are ADMIN-ONLY', () => {
+    await test('3.1 Invariant Check: canDeleteBoard, canManageCompany, canManageAuditLogs are ADMIN-ONLY', () => {
       for (const { role, user } of roles) {
         const expected = role === 'admin';
         assertEquals(canDeleteBoard(user), expected, role + ' canDeleteBoard invariant');
-        assertEquals(canManageMembers(user), expected, role + ' canManageMembers invariant');
         assertEquals(canManageCompany(user), expected, role + ' canManageCompany invariant');
         assertEquals(canManageAuditLogs(user), expected, role + ' canManageAuditLogs invariant');
       }
+    });
+
+    await test('3.1.1 Invariant Check: canManageMembers is ADMIN and MANAGER only', () => {
+      for (const { role, user } of roles) {
+        const expected = role === 'admin' || role === 'manager';
+        assertEquals(canManageMembers(user), expected, role + ' canManageMembers invariant');
+      }
+      assertEquals(canManageMembers(null), false, 'null canManageMembers invariant');
     });
 
     await test('3.2 Invariant Check: canCreateBoard is ADMIN and MANAGER only', () => {
