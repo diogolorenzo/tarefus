@@ -12,7 +12,6 @@ import {
   Loader2,
   Calendar,
   Building2,
-  Users,
   CheckSquare,
   AlertCircle,
   Info,
@@ -20,6 +19,7 @@ import {
 import { Select } from './ui/Select';
 import { DatePicker } from './ui/DatePicker';
 import { AiMark } from './ui/AiMark';
+import { AssigneeMultiSelect } from './ui/AssigneeMultiSelect';
 
 interface TaskDraft {
   title: string;
@@ -56,7 +56,7 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   onEditSuggestion,
   onSwitchToManual,
 }) => {
-  const { boards, users, showToast, entitlements, sessionToken, organizationId, refetchEntitlements } = useTaskContext();
+  const { boards, users, currentUser, showToast, entitlements, sessionToken, organizationId, refetchEntitlements } = useTaskContext();
 
   const [promptText, setPromptText] = useState('');
   const [selectedBoardPreference, setSelectedBoardPreference] = useState<string>(
@@ -269,8 +269,6 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
   // Find board details for draft
   const currentDraftBoard = boards.find((b) => b.id === draft?.boardId) || boards[0];
   const draftBoardStyle = currentDraftBoard ? getBoardColorStyles(currentDraftBoard.color) : null;
-  const draftAssignedUsers = users.filter((u) => draft?.assigneeIds.includes(u.id));
-
   return (
     <div className="p-6 space-y-6">
       {/* If No Draft has been generated yet, show input & dictation view */}
@@ -533,37 +531,15 @@ export const TaskAICreator: React.FC<TaskAICreatorProps> = ({
               </div>
             </div>
 
-            {/* Assignees */}
             <div className="pt-2 border-t border-line">
-              <div className="text-[10px] font-bold uppercase text-muted mb-2 flex items-center gap-1">
-                <Users className="w-3 h-3" /> Responsáveis Identificados
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {draftAssignedUsers.length > 0 ? (
-                  draftAssignedUsers.map((u) => (
-                    <div
-                      key={u.id}
-                      className="flex items-center gap-2 px-2.5 py-1 bg-surface border border-slate-200/80 dark:border-white/[0.08] rounded-xl shadow-2xs"
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold text-white ${
-                          u.avatarColor || 'bg-indigo-600'
-                        }`}
-                      >
-                        {u.initials}
-                      </div>
-                      <span className="text-xs font-bold text-ink">
-                        {u.name}
-                      </span>
-                      <span className="text-[10px] text-subtle">
-                        ({u.role.split('&')[0]})
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <span className="text-xs text-slate-500">Nenhum responsável específico atribuído</span>
-                )}
-              </div>
+              <AssigneeMultiSelect
+                users={users}
+                selectedIds={draft.assigneeIds}
+                onChange={(assigneeIds) => setDraft({ ...draft, assigneeIds })}
+                currentUserId={currentUser?.id}
+                label="Responsáveis identificados"
+                description="Revise ou ajuste a sugestão da IA"
+              />
             </div>
 
             {/* Description */}

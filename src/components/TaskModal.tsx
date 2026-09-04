@@ -12,9 +12,7 @@ import {
   Plus,
   AlignLeft,
   Building2,
-  Users,
   Clock,
-  Check,
   Edit3,
   Mic,
   MicOff,
@@ -22,6 +20,7 @@ import {
 import { Select } from './ui/Select';
 import { DatePicker } from './ui/DatePicker';
 import { AiMark } from './ui/AiMark';
+import { AssigneeMultiSelect } from './ui/AssigneeMultiSelect';
 import { formatDueDate } from '../utils/helpers';
 
 interface TaskModalFormProps {
@@ -88,16 +87,6 @@ const TaskModalForm: React.FC<TaskModalFormProps> = ({
       setDescription(text);
     },
   });
-
-  const handleToggleAssignee = (userId: string) => {
-    setAssigneeIds((prev) => {
-      if (prev.includes(userId)) {
-        return prev.filter((id) => id !== userId);
-      } else {
-        return [...prev, userId];
-      }
-    });
-  };
 
   const handleAddChecklistItem = () => {
     if (!newChecklistText.trim()) return;
@@ -358,68 +347,12 @@ const TaskModalForm: React.FC<TaskModalFormProps> = ({
             />
           </div>
 
-          {/* Responsáveis */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-subtle" />
-                Responsáveis
-                <span className="text-[11px] font-semibold px-2 py-0.2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20">
-                  {assigneeIds.length} {assigneeIds.length === 1 ? 'selecionado' : 'selecionados'}
-                </span>
-              </label>
-              <span className="text-[11px] text-subtle">
-                Clique nos colaboradores para marcar/desmarcar
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-sunken/70 p-2.5 rounded-2xl border border-line">
-              {users.map((u) => {
-                const isSelected = assigneeIds.includes(u.id);
-
-                return (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => handleToggleAssignee(u.id)}
-                    className={`flex items-center justify-between gap-2.5 p-2 rounded-xl border text-left transition-all cursor-pointer select-none ${
-                      isSelected
-                        ? 'bg-white dark:bg-[#192336] border-indigo-500/80 dark:border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs'
-                        : 'bg-white/60 dark:bg-[#131B2B]/60 border-line hover:border-slate-300 dark:hover:border-white/[0.12] hover:bg-white dark:hover:bg-[#192336]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-2xs shrink-0 ${
-                          u.avatarColor || 'bg-indigo-600'
-                        }`}
-                      >
-                        {u.initials}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold text-ink truncate leading-tight">
-                          {u.name}
-                        </div>
-                        <div className="text-[10px] text-muted truncate leading-tight">
-                          {u.role.split('&')[0]}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border transition-all ${
-                        isSelected
-                          ? 'bg-indigo-600 border-indigo-600 text-white'
-                          : 'border-slate-300 dark:border-white/[0.15] bg-transparent'
-                      }`}
-                    >
-                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <AssigneeMultiSelect
+            users={users}
+            selectedIds={assigneeIds}
+            onChange={setAssigneeIds}
+            currentUserId={currentUser?.id}
+          />
 
           {/* Description + Voice Dictation */}
           <div>
