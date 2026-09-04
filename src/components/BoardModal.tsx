@@ -35,7 +35,7 @@ export const BoardModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
       <div
-        className="bg-surface rounded-3xl shadow-2xl max-w-md w-full border border-line overflow-hidden dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)]"
+        className="bg-surface rounded-3xl shadow-2xl max-w-md w-full border border-line overflow-hidden dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] animate-modal-pop"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

@@ -184,7 +184,7 @@ const TaskModalForm: React.FC<TaskModalFormProps> = ({
 
   return (
     <div
-      className="bg-surface rounded-3xl shadow-2xl max-w-xl w-full border border-line overflow-hidden my-auto max-h-[92vh] flex flex-col animate-fade-in dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)]"
+      className="bg-surface rounded-3xl shadow-2xl max-w-xl w-full border border-line overflow-hidden my-auto max-h-[92vh] flex flex-col animate-modal-pop dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)]"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Modal Header */}

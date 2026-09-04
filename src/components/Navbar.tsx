@@ -253,7 +253,7 @@ export const Navbar: React.FC = () => {
 
                   {/* Authenticated User Popover Menu */}
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-overlay rounded-2xl shadow-2xl border border-line-strong py-2 z-50 animate-fade-in divide-y divide-slate-100 dark:divide-white/[0.06]">
+                    <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-overlay rounded-2xl shadow-2xl border border-line-strong py-2 z-50 animate-dropdown divide-y divide-slate-100 dark:divide-white/[0.06]">
                       {/* User details & RBAC badge */}
                       <div className="px-4 py-3">
                         <div className="flex items-start gap-3">

@@ -48,7 +48,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
       <div
-        className="bg-surface rounded-3xl shadow-2xl max-w-md w-full border border-line overflow-hidden"
+        className="bg-surface rounded-3xl shadow-2xl max-w-md w-full border border-line overflow-hidden animate-modal-pop"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

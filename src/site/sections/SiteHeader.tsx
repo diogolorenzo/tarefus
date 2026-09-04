@@ -67,6 +67,25 @@ export const SiteHeader: React.FC = () => {
     setMobileOpen(false);
   };
 
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    closeAll();
+    if (href.startsWith('#')) {
+      const targetId = href.slice(1);
+      const target = document.getElementById(targetId);
+      if (target) {
+        e.preventDefault();
+        const headerOffset = 76;
+        const elementPosition = target.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        });
+        window.history.pushState(null, '', href);
+      }
+    }
+  };
+
   const itemClass =
     'block rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-sunken hover:text-ink';
 
@@ -115,20 +134,29 @@ export const SiteHeader: React.FC = () => {
               >
                 {home.header.menu.label}
                 <ChevronDown
-                  className={cn('h-3.5 w-3.5 transition-transform', menuOpen && 'rotate-180')}
+                  className={cn('h-3.5 w-3.5 transition-transform duration-200', menuOpen && 'rotate-180')}
                   aria-hidden="true"
                 />
               </button>
 
               <div
                 id="menu-recursos"
-                hidden={!menuOpen}
-                className="absolute left-0 top-full z-50 mt-2 w-60 rounded-2xl border border-line bg-surface p-1.5 shadow-[0_20px_48px_-20px_rgba(15,23,42,0.35)] dark:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.75)]"
+                className={cn(
+                  'absolute left-0 top-full z-50 mt-2 w-60 rounded-2xl border border-line bg-surface p-1.5 shadow-[0_20px_48px_-20px_rgba(15,23,42,0.35)] dark:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.75)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] origin-top-left',
+                  menuOpen
+                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
+                    : 'opacity-0 scale-95 -translate-y-1 pointer-events-none invisible'
+                )}
+                aria-hidden={!menuOpen}
               >
                 <ul>
                   {home.header.menu.items.map((item) => (
                     <li key={item.href}>
-                      <a href={item.href} onClick={closeAll} className={itemClass}>
+                      <a
+                        href={item.href}
+                        onClick={(e) => handleAnchorClick(e, item.href)}
+                        className={itemClass}
+                      >
                         {item.label}
                       </a>
                     </li>
@@ -141,6 +169,7 @@ export const SiteHeader: React.FC = () => {
               <a
                 key={link.href}
                 href={link.href}
+                onClick={(e) => handleAnchorClick(e, link.href)}
                 className="rounded-full px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink"
               >
                 {link.label}
@@ -181,39 +210,46 @@ export const SiteHeader: React.FC = () => {
               aria-expanded={mobileOpen}
               aria-controls="menu-mobile"
               aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-muted"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-ink cursor-pointer"
             >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileOpen ? <X className="h-5 w-5 transition-transform duration-200" /> : <Menu className="h-5 w-5 transition-transform duration-200" />}
             </button>
           </div>
         </div>
 
         <div
           id="menu-mobile"
-          hidden={!mobileOpen}
-          className="mt-2 rounded-2xl border border-line bg-surface p-2 shadow-[0_20px_48px_-20px_rgba(15,23,42,0.35)] md:hidden dark:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.75)]"
+          aria-hidden={!mobileOpen}
+          className={cn(
+            'grid transition-[grid-template-rows,opacity,margin] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden',
+            mobileOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+          )}
         >
-          <ul>
-            {[...home.header.menu.items, ...home.header.links].map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  onClick={closeAll}
-                  className="flex min-h-12 items-center rounded-xl px-3 text-base font-medium text-ink"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-            <li>
-              <a
-                href={home.header.loginHref}
-                className="flex min-h-12 items-center rounded-xl px-3 text-base font-medium text-muted"
-              >
-                Entrar
-              </a>
-            </li>
-          </ul>
+          <div className="overflow-hidden">
+            <div className="rounded-2xl border border-line bg-surface p-2 shadow-[0_20px_48px_-20px_rgba(15,23,42,0.35)] dark:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.75)]">
+              <ul>
+                {[...home.header.menu.items, ...home.header.links].map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      onClick={(e) => handleAnchorClick(e, link.href)}
+                      className="flex min-h-12 items-center rounded-xl px-3 text-base font-medium text-ink transition-colors hover:bg-sunken"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href={home.header.loginHref}
+                    className="flex min-h-12 items-center rounded-xl px-3 text-base font-medium text-muted transition-colors hover:bg-sunken hover:text-ink"
+                  >
+                    Entrar
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </header>

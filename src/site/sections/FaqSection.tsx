@@ -41,27 +41,41 @@ export const FaqSection: React.FC = () => {
                 <h3>
                   <button
                     type="button"
+                    id={`pergunta-${item.id}`}
                     onClick={() => toggle(item.id)}
                     aria-expanded={isOpen}
                     aria-controls={`resposta-${item.id}`}
-                    className="flex min-h-12 w-full items-center justify-between gap-4 py-4 text-left"
+                    className="group flex min-h-12 w-full cursor-pointer select-none items-center justify-between gap-4 py-4 text-left transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
                   >
-                    <span className="text-sm font-semibold text-ink sm:text-base">
+                    <span className={cn(
+                      "text-sm font-semibold sm:text-base transition-colors duration-200",
+                      isOpen ? "text-ink" : "text-ink/90 group-hover:text-ink"
+                    )}>
                       {item.question}
                     </span>
                     <Plus
                       className={cn(
-                        'h-4 w-4 shrink-0 text-subtle transition-transform duration-200',
-                        isOpen && 'rotate-45'
+                        'h-4 w-4 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                        isOpen ? 'rotate-45 text-ink' : 'text-subtle group-hover:text-muted'
                       )}
                       aria-hidden="true"
                     />
                   </button>
                 </h3>
-                <div id={`resposta-${item.id}`} hidden={!isOpen}>
-                  <p className="max-w-2xl pb-5 pr-8 text-sm leading-relaxed text-muted">
-                    {item.answer}
-                  </p>
+                <div
+                  id={`resposta-${item.id}`}
+                  role="region"
+                  aria-labelledby={`pergunta-${item.id}`}
+                  className={cn(
+                    'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                  )}
+                >
+                  <div className="overflow-hidden">
+                    <p className="max-w-2xl pb-5 pr-8 text-sm leading-relaxed text-muted">
+                      {item.answer}
+                    </p>
+                  </div>
                 </div>
               </div>
             );

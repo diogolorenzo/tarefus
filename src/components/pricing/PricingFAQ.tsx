@@ -12,19 +12,15 @@ export const PricingFAQ: React.FC<PricingFAQProps> = ({
   items = PRICING_FAQS,
   defaultOpenIndex = 0,
 }) => {
-  const [openItems, setOpenItems] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
+  const [openId, setOpenId] = useState<string | null>(() => {
     if (items.length > 0 && defaultOpenIndex >= 0 && defaultOpenIndex < items.length) {
-      initial[items[defaultOpenIndex].id] = true;
+      return items[defaultOpenIndex].id;
     }
-    return initial;
+    return null;
   });
 
   const toggleItem = (id: string) => {
-    setOpenItems((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setOpenId((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -32,7 +28,7 @@ export const PricingFAQ: React.FC<PricingFAQProps> = ({
       {/* FAQ Accordion List */}
       <div className="space-y-3">
         {items.map((item, index) => {
-          const isOpen = !!openItems[item.id];
+          const isOpen = openId === item.id;
           const questionId = `faq-q-${item.id}`;
           const answerId = `faq-a-${item.id}`;
 
@@ -61,22 +57,26 @@ export const PricingFAQ: React.FC<PricingFAQProps> = ({
                 </span>
 
                 <ChevronDown
-                  className={`w-5 h-5 text-muted shrink-0 transition-transform duration-200 ${
-                    isOpen ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : ''
+                  className={`w-5 h-5 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isOpen ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : 'text-muted'
                   }`}
                 />
               </button>
 
-              {isOpen && (
-                <div
-                  id={answerId}
-                  role="region"
-                  aria-labelledby={questionId}
-                  className="px-5 sm:px-6 pb-5 pt-1 text-xs sm:text-sm text-muted leading-relaxed border-t border-line/50"
-                >
-                  <p>{item.answer}</p>
+              <div
+                id={answerId}
+                role="region"
+                aria-labelledby={questionId}
+                className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="px-5 sm:px-6 pb-5 pt-1 text-xs sm:text-sm text-muted leading-relaxed border-t border-line/50">
+                    <p>{item.answer}</p>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           );
         })}

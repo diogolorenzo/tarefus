@@ -87,7 +87,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-[#0E1424] border border-slate-200/90 dark:border-white/[0.08] rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="bg-white dark:bg-[#0E1424] border border-slate-200/90 dark:border-white/[0.08] rounded-3xl w-full max-w-4xl h-[85vh] max-h-[720px] min-h-[520px] flex flex-col shadow-2xl overflow-hidden animate-modal-pop"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -206,7 +206,10 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                     <button
                       key={cat.id}
                       type="button"
-                      onClick={() => setSelectedCategory(cat.id)}
+                      onClick={() => {
+                        setSelectedCategory(cat.id);
+                        setExpandedFaqId(null);
+                      }}
                       className={`px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                         selectedCategory === cat.id
                           ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-2xs'
@@ -220,7 +223,7 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
               </div>
 
               {/* FAQ Accordion List */}
-              <div className="space-y-2.5">
+              <div key={selectedCategory} className="space-y-2.5 animate-fade-in">
                 {filteredFaqItems.length === 0 ? (
                   <div className="text-center py-10 px-4 bg-slate-50 dark:bg-white/[0.02] border border-dashed border-line rounded-2xl">
                     <HelpCircle className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-60" />
@@ -267,29 +270,35 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({
                             </span>
                           </div>
                           <ChevronDown
-                            className={`w-4 h-4 text-subtle shrink-0 transition-transform duration-200 ${
-                              isExpanded ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : ''
+                            className={`w-4 h-4 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                              isExpanded ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : 'text-subtle'
                             }`}
                           />
                         </button>
 
-                        {isExpanded && (
-                          <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/[0.04] space-y-2 whitespace-pre-line animate-fade-in">
-                            <p>{item.answer}</p>
-                            {item.tags.length > 0 && (
-                              <div className="flex items-center gap-1.5 flex-wrap pt-2">
-                                {item.tags.map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="text-[10px] text-subtle bg-slate-100 dark:bg-white/[0.04] px-2 py-0.5 rounded-full"
-                                  >
-                                    #{tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
+                        <div
+                          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                            isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                          }`}
+                        >
+                          <div className="overflow-hidden">
+                            <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/[0.04] space-y-2 whitespace-pre-line">
+                              <p>{item.answer}</p>
+                              {item.tags.length > 0 && (
+                                <div className="flex items-center gap-1.5 flex-wrap pt-2">
+                                  {item.tags.map((tag) => (
+                                    <span
+                                      key={tag}
+                                      className="text-[10px] text-subtle bg-slate-100 dark:bg-white/[0.04] px-2 py-0.5 rounded-full"
+                                    >
+                                      #{tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })

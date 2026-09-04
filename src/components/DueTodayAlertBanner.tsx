@@ -38,7 +38,7 @@ export const DueTodayAlertBanner: React.FC = () => {
 
   return (
     <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 pt-3 pb-1">
-      <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/15 dark:from-amber-500/15 dark:via-amber-500/10 dark:to-orange-500/15 border border-amber-300/80 dark:border-amber-500/30 rounded-2xl p-3 sm:px-4 flex items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-2 duration-300">
+      <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/15 dark:from-amber-500/15 dark:via-amber-500/10 dark:to-orange-500/15 border border-amber-300/80 dark:border-amber-500/30 rounded-2xl p-3 sm:px-4 flex items-center justify-between gap-3 shadow-xs animate-slide-up">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
             <Flame className="w-4 h-4" />

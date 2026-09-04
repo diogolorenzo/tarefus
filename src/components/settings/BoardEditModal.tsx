@@ -91,7 +91,7 @@ export const BoardEditModal: React.FC<BoardEditModalProps> = ({ isOpen, onClose,
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in">
       <div
-        className="bg-surface rounded-3xl shadow-2xl max-w-lg w-full border border-slate-200/80 dark:border-white/[0.08] overflow-hidden transition-all"
+        className="bg-surface rounded-3xl shadow-2xl max-w-lg w-full border border-slate-200/80 dark:border-white/[0.08] overflow-hidden transition-all animate-modal-pop"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
