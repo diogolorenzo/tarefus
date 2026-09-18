@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTaskContext } from '../../context/TaskContext';
 import type { PermissionRole } from '../../types';
 import {
@@ -64,7 +64,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     }
   };
 
-  const handleNavigate = (path: string) => {
+  const handleNavigate = useCallback((path: string) => {
     if (onNavigate) {
       onNavigate(path);
     } else if (contextNavigateTo) {
@@ -73,13 +73,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       window.history.pushState({}, '', path);
       window.dispatchEvent(new PopStateEvent('popstate'));
     }
-  };
+  }, [contextNavigateTo, onNavigate]);
 
   React.useEffect(() => {
     if (isAuthenticated) {
       handleNavigate('/');
     }
-  }, [isAuthenticated]);
+  }, [handleNavigate, isAuthenticated]);
 
   // Form State - Login
   const [loginEmail, setLoginEmail] = useState('');

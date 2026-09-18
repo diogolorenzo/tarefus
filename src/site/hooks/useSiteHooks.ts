@@ -37,11 +37,12 @@ export function useInViewOnce<T extends HTMLElement>(
 
 /** Respeita a preferência do sistema por menos movimento (critério de acessibilidade 9.1). */
 export function usePrefersReducedMotion(): boolean {
-  const [prefers, setPrefers] = useState(false);
+  const [prefers, setPrefers] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefers(query.matches);
 
     const onChange = (event: MediaQueryListEvent) => setPrefers(event.matches);
     query.addEventListener('change', onChange);
