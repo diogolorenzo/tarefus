@@ -265,6 +265,12 @@ async function runExperienceHygieneTests() {
       const files = fs.readdirSync(siteDir);
       assert(files.length > 0, 'src/site/ must contain marketing site files');
     });
+
+    await test('6.3 Public pricing and guide pages are lazy-loaded with a fallback', () => {
+      assert(appContent.includes('React.lazy'), 'App.tsx must define lazy public page imports');
+      assert(appContent.includes('<React.Suspense'), 'App.tsx must render a Suspense boundary');
+      assert(appContent.includes('Carregando conteúdo público'), 'Suspense fallback must be accessible and localized');
+    });
   });
 
   // Suite 7: UI Static Rendering & Markup Verification

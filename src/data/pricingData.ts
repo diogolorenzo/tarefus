@@ -420,8 +420,12 @@ export const PRICING_TESTIMONIALS: PricingTestimonial[] = [
  */
 export const COMPETITOR_BENCHMARK_SEAT_PRICE_BRL = 75;
 
+function normalizeSeatCount(seats: number): number {
+  return Number.isFinite(seats) ? Math.max(1, Math.round(seats)) : 1;
+}
+
 export function getRecommendedPlan(seats: number): PricingPlan {
-  const normalizedSeats = Math.max(1, Math.round(seats));
+  const normalizedSeats = normalizeSeatCount(seats);
   if (normalizedSeats <= 5) {
     return PRICING_PLANS[0]; // Equipe
   }
@@ -432,7 +436,7 @@ export function getRecommendedPlan(seats: number): PricingPlan {
 }
 
 export function calculateSavings(seats: number): SavingsCalculation {
-  const normalizedSeats = Math.max(1, Math.round(seats));
+  const normalizedSeats = normalizeSeatCount(seats);
   const plan = getRecommendedPlan(normalizedSeats);
 
   // Custo base do Tarefus
