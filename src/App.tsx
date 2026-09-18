@@ -13,9 +13,15 @@ import { AuthPage } from './components/auth/AuthPage';
 import { ToastContainer } from './components/ToastContainer';
 import { PublicNavbar } from './components/public/PublicNavbar';
 import { PublicFooter } from './components/public/PublicFooter';
-import { PricingPage } from './components/pricing/PricingPage';
-import { GuideLandingPage } from './components/guide/GuideLandingPage';
-import { GuideArticlePage } from './components/guide/GuideArticlePage';
+const PricingPage = React.lazy(() =>
+  import('./components/pricing/PricingPage').then(({ PricingPage }) => ({ default: PricingPage }))
+);
+const GuideLandingPage = React.lazy(() =>
+  import('./components/guide/GuideLandingPage').then(({ GuideLandingPage }) => ({ default: GuideLandingPage }))
+);
+const GuideArticlePage = React.lazy(() =>
+  import('./components/guide/GuideArticlePage').then(({ GuideArticlePage }) => ({ default: GuideArticlePage }))
+);
 import { FileQuestion, ArrowLeft } from 'lucide-react';
 import { PHASE } from './content/home';
 
@@ -56,6 +62,12 @@ const MainContent: React.FC = () => {
     }
   };
 
+  const publicFallback = (
+    <div className="flex min-h-[50vh] items-center justify-center bg-app px-6 text-sm text-muted" role="status">
+      Carregando conteúdo público…
+    </div>
+  );
+
   // 1. PUBLIC ROUTE: Pricing Page (/planos ou /pricing)
   if (currentRoute.type === 'pricing') {
     return (
@@ -67,11 +79,13 @@ const MainContent: React.FC = () => {
           onLogin={handleLogin}
         />
         <main className="flex-1 flex flex-col">
-          <PricingPage
-            onNavigate={navigateTo}
-            onStartTrial={handleStartTrial}
-            onSelectPlan={() => handleStartTrial()}
-          />
+          <React.Suspense fallback={publicFallback}>
+            <PricingPage
+              onNavigate={navigateTo}
+              onStartTrial={handleStartTrial}
+              onSelectPlan={() => handleStartTrial()}
+            />
+          </React.Suspense>
         </main>
         <PublicFooter onNavigate={navigateTo} onStartTrial={handleStartTrial} />
 
@@ -94,13 +108,15 @@ const MainContent: React.FC = () => {
           onLogin={handleLogin}
         />
         <main className="flex-1 flex flex-col">
-          <GuideLandingPage
-            currentPath={currentPath}
-            onArticleClick={(slug) => navigateTo(`/guia/${slug}`)}
-            onNavigate={navigateTo}
-            onStartTrial={handleStartTrial}
-            onNavigatePricing={() => navigateTo('/planos')}
-          />
+          <React.Suspense fallback={publicFallback}>
+            <GuideLandingPage
+              currentPath={currentPath}
+              onArticleClick={(slug) => navigateTo(`/guia/${slug}`)}
+              onNavigate={navigateTo}
+              onStartTrial={handleStartTrial}
+              onNavigatePricing={() => navigateTo('/planos')}
+            />
+          </React.Suspense>
         </main>
         <PublicFooter onNavigate={navigateTo} onStartTrial={handleStartTrial} />
 
@@ -123,14 +139,16 @@ const MainContent: React.FC = () => {
           onLogin={handleLogin}
         />
         <main className="flex-1 flex flex-col">
-          <GuideArticlePage
-            slug={currentRoute.slug}
-            onNavigate={navigateTo}
-            onArticleClick={(slug) => navigateTo(`/guia/${slug}`)}
-            onBack={() => navigateTo('/guia')}
-            onStartTrial={handleStartTrial}
-            onNavigatePricing={() => navigateTo('/planos')}
-          />
+          <React.Suspense fallback={publicFallback}>
+            <GuideArticlePage
+              slug={currentRoute.slug}
+              onNavigate={navigateTo}
+              onArticleClick={(slug) => navigateTo(`/guia/${slug}`)}
+              onBack={() => navigateTo('/guia')}
+              onStartTrial={handleStartTrial}
+              onNavigatePricing={() => navigateTo('/planos')}
+            />
+          </React.Suspense>
         </main>
         <PublicFooter onNavigate={navigateTo} onStartTrial={handleStartTrial} />
 
